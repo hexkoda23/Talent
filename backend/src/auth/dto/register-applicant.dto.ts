@@ -1,12 +1,10 @@
 import {
   IsBoolean,
-  IsEmail,
   IsIn,
   IsNotEmpty,
   IsOptional,
   IsString,
   Length,
-  MinLength,
   ValidateNested,
 } from 'class-validator';
 import { plainToInstance, Transform, Type } from 'class-transformer';
@@ -30,9 +28,6 @@ export class RegisterApplicantDto {
   @IsString()
   @IsNotEmpty()
   last_name!: string;
-
-  @IsEmail()
-  email!: string;
 
   @IsString()
   @IsNotEmpty()
@@ -94,9 +89,4 @@ export class RegisterApplicantDto {
   })
   @Type(() => ConsentsDto)
   consents!: ConsentsDto;
-
-  @IsOptional()
-  @IsString()
-  @MinLength(8)
-  password?: string;
 }

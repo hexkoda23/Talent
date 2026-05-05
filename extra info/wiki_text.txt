@@ -64,7 +64,7 @@ A student's journey through the platform is divided into two major acts: the app
   Learning→
   Graduation
 Stage 1 — Registration
-A prospective student registers on the platform and an Application record is created, along with a personal dashboard. At this stage, the dashboard shows only an "application payment" status and a countdown to the selection game. The student also selects a physical campus during or shortly after registration, because SIWES requires physical document interactions regardless of the program's online nature.
+A prospective student first signs up with a normal email and password, creating their account and signing in immediately. They are then taken to registration to complete profile/identity details, where the Application record is created along with a personal dashboard. At this stage, the dashboard shows only an "application payment" status and a countdown to the selection game. The student also selects a physical campus during or shortly after registration, because SIWES requires physical document interactions regardless of the program's online nature.
 Stage 2 — Selection Game
 At a scheduled time, the student accesses the Selection Game directly from their dashboard — no separate link is sent. The game is a timed, gamified aptitude assessment. After all attempts are processed, the system automatically identifies who has passed the score cutoff and advances them to the review stage. Students below the cutoff are eventually rejected when the ApplicationCohort is closed.
 Stage 3 — Institutional Verification
@@ -134,7 +134,7 @@ An admin Record (e.g., "block this student") documents the decision and reason. 
   ],
   body: `
 ApplicationCohort Lifecycle
-An ApplicationCohort represents one intake cycle — e.g., "October 2026 Intake." Admins open it at a defined date, applicants register during the window, and the cohort is eventually closed either at a scheduled closes_at datetime or manually by an admin. A cohort holds the game_cutoff_score (the minimum game score for automatic advancement), the max_applicants cap, and the purge_rejected_data flag that governs whether rejected applicants' accounts are deleted on close.
+An ApplicationCohort represents one intake cycle — e.g., "October 2026 Intake." Admins open it at a defined date, applicants sign up and then complete registration during the window, and the cohort is eventually closed either at a scheduled closes_at datetime or manually by an admin. A cohort holds the game_cutoff_score (the minimum game score for automatic advancement), the max_applicants cap, and the purge_rejected_data flag that governs whether rejected applicants' accounts are deleted on close.
   ApplicationCohort — Key Fields
   statusenumopen → in_review → closed
   game_cutoff_scoreintegerMinimum game score to advance to the review stage

@@ -77,21 +77,14 @@ const Register = () => {
   const prev = () => setStep((s) => Math.max(1, s - 1));
 
   useEffect(() => {
-    // Check if user came from signup page
-    const signupDataString = sessionStorage.getItem("signupData");
-    if (signupDataString) {
-      try {
-        const signupData = JSON.parse(signupDataString);
+    authApi.session()
+      .then((session) =>
         setData((d) => ({
           ...d,
-          email: signupData.email || "",
-        }));
-        // Clear the signup data so it's not reused
-        sessionStorage.removeItem("signupData");
-      } catch (e) {
-        // Ignore parsing errors
-      }
-    }
+          email: session.user.email || "",
+        })),
+      )
+      .catch(() => undefined);
 
     setLoadingCampuses(true);
     registrationApi.campuses()
@@ -113,7 +106,6 @@ const Register = () => {
     const formData = new FormData();
     formData.append("first_name", data.firstName.trim());
     formData.append("last_name", data.lastName.trim());
-    formData.append("email", data.email.trim());
     formData.append("phone", data.phone.trim());
     formData.append("address", data.address.trim());
     formData.append("nin", data.nin);
@@ -203,7 +195,7 @@ const Register = () => {
                   <Input value={data.phone} onChange={(e) => update("phone", e.target.value)} placeholder="+234 801 234 5678" />
                 </Field>
                 <Field label="School email address">
-                  <Input type="email" value={data.email} onChange={(e) => update("email", e.target.value)} placeholder="you@school.edu.ng" />
+                  <Input type="email" value={data.email} readOnly disabled placeholder="you@school.edu.ng" />
                 </Field>
                 <Field label="School name">
                   <Input value={data.school} onChange={(e) => update("school", e.target.value)} placeholder="University of Lagos" />

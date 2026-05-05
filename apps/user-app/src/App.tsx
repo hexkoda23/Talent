@@ -49,7 +49,7 @@ const App = () => (
           <Route path="/learn-more" element={<LearnMore />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
-          <Route path="/register" element={<Register />} />
+          <Route path="/register" element={<RequireToken><Register /></RequireToken>} />
           <Route path="/assessment" element={<RequireToken><Assessment /></RequireToken>} />
           <Route path="/assessment/play" element={<RequireToken><GamePlay /></RequireToken>} />
           <Route path="/assessment/result" element={<RequireToken><Result /></RequireToken>} />

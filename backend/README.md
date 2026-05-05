@@ -4,6 +4,7 @@ NestJS backend scaffold for user account creation and authentication.
 
 ## Implemented endpoints
 
+- `POST /api/v1/auth/signup`
 - `POST /api/v1/auth/register-applicant`
 - `POST /api/v1/auth/login`
 - `POST /api/v1/auth/logout`
@@ -26,9 +27,10 @@ Swagger docs: `http://localhost:4000/api/docs`
 
 ## Notes
 
-- Access token and refresh token are both returned on register/login.
+- Access token and refresh token are returned on signup/login/register.
 - Registration supports multipart with required files:
   - `school_id_card_file`
   - `profile_picture_file`
   - `government_id_file`
+- `POST /api/v1/auth/register-applicant` requires Bearer auth and creates the application for the signed-in user.
 - Local file storage currently writes under `backend/uploads/`.
