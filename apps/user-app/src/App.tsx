@@ -7,6 +7,7 @@ import Index from "./pages/Index.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import LearnMore from "./pages/LearnMore.tsx";
 import Login from "./pages/Login.tsx";
+import Signup from "./pages/Signup.tsx";
 import Register from "./pages/Register.tsx";
 import Assessment from "./pages/Assessment.tsx";
 import GamePlay from "./pages/GamePlay.tsx";
@@ -47,6 +48,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/learn-more" element={<LearnMore />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
           <Route path="/register" element={<Register />} />
           <Route path="/assessment" element={<RequireToken><Assessment /></RequireToken>} />
           <Route path="/assessment/play" element={<RequireToken><GamePlay /></RequireToken>} />

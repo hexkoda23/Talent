@@ -13,7 +13,7 @@ export default defineConfig(({ mode }) => ({
     },
     proxy: {
       "/api": {
-        target: process.env.VITE_BACKEND_URL || "http://localhost:4000",
+        target: "http://localhost:4000",
         changeOrigin: true,
         secure: false,
       },

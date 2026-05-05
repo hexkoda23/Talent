@@ -15,6 +15,7 @@ import { AuthService } from './auth.service';
 import { RegisterApplicantDto } from './dto/register-applicant.dto';
 import { LoginDto } from './dto/login.dto';
 import { LogoutDto } from './dto/logout.dto';
+import { SignupDto } from './dto/signup.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CurrentUser } from './current-user.decorator';
 import { AuthUser } from '../common/dto/auth-user.type';
@@ -67,6 +68,11 @@ export class AuthController {
   @Post('login')
   login(@Body() body: LoginDto) {
     return this.authService.login(body);
+  }
+
+  @Post('signup')
+  signup(@Body() body: SignupDto) {
+    return this.authService.signup(body);
   }
 
   @ApiBearerAuth()

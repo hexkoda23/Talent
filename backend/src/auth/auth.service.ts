@@ -245,6 +245,18 @@ export class AuthService {
     };
   }
 
+  async signup(dto: { email: string; password: string }) {
+    const existingByEmail = await this.prisma.user.findUnique({ where: { email: dto.email } });
+    if (existingByEmail) {
+      throw new ConflictException({ error: { code: 'duplicate_email', message: 'Email already exists' } });
+    }
+
+    return {
+      message: 'Email is available. Proceed to complete registration.',
+      email: dto.email,
+    };
+  }
+
   async logout(user: AuthUser, refreshToken: string, accessToken?: string) {
     const hashed = this.hashToken(refreshToken);
     await this.prisma.refreshToken.updateMany({

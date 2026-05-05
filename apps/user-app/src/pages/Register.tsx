@@ -77,6 +77,22 @@ const Register = () => {
   const prev = () => setStep((s) => Math.max(1, s - 1));
 
   useEffect(() => {
+    // Check if user came from signup page
+    const signupDataString = sessionStorage.getItem("signupData");
+    if (signupDataString) {
+      try {
+        const signupData = JSON.parse(signupDataString);
+        setData((d) => ({
+          ...d,
+          email: signupData.email || "",
+        }));
+        // Clear the signup data so it's not reused
+        sessionStorage.removeItem("signupData");
+      } catch (e) {
+        // Ignore parsing errors
+      }
+    }
+
     setLoadingCampuses(true);
     registrationApi.campuses()
       .then((response) => setCampuses(response.data))
