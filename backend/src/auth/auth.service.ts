@@ -63,6 +63,16 @@ export class AuthService {
       throw new ConflictException({ error: { code: 'duplicate_matric', message: 'Matric number already exists' } });
     }
 
+    const existingInstitutionEmail = await this.prisma.studentProfile.findFirst({
+      where: {
+        institutionEmail: { equals: dto.institution_email.trim(), mode: 'insensitive' },
+        userId: { not: user.id },
+      },
+    });
+    if (existingInstitutionEmail) {
+      throw new ConflictException({ error: { code: 'duplicate_institution_email', message: 'School email already exists' } });
+    }
+
     const activeCohort = await this.prisma.applicationCohort.findFirst({
       where: { status: 'open' },
       orderBy: { opensAt: 'asc' },
@@ -104,7 +114,7 @@ export class AuthService {
         data: {
           userId: updatedUser.id,
           institutionName: dto.institution_name,
-          institutionEmail: updatedUser.email,
+          institutionEmail: dto.institution_email.trim(),
           matricNumber: dto.matric_number,
           department: dto.department ?? '',
           level: dto.level,

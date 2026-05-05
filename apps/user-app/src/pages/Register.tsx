@@ -45,7 +45,8 @@ const Register = () => {
     firstName: "",
     lastName: "",
     phone: "",
-    email: "",
+    accountEmail: "",
+    schoolEmail: "",
     school: "",
     department: "",
     address: "",
@@ -67,7 +68,7 @@ const Register = () => {
   const ninValid = /^\d{11}$/.test(data.nin);
   const phoneValid = data.phone.replace(/\D/g, "").length >= 11;
   const canContinue = useMemo(() => {
-    if (step === 1) return data.firstName.trim() && data.lastName.trim() && phoneValid && data.email.includes("@") && data.school.trim() && data.department.trim() && data.address.trim().length > 8;
+    if (step === 1) return data.firstName.trim() && data.lastName.trim() && phoneValid && data.schoolEmail.includes("@") && data.school.trim() && data.department.trim() && data.address.trim().length > 8;
     if (step === 2) return data.matric.trim() && data.level && ninValid && data.schoolId && data.profilePhoto && data.governmentId;
     if (step === 3) return data.phoneLinkedToNin && data.duplicateConsent && data.truthConsent;
     return !!data.codeZone;
@@ -81,7 +82,8 @@ const Register = () => {
       .then((session) =>
         setData((d) => ({
           ...d,
-          email: session.user.email || "",
+          accountEmail: session.user.email || "",
+          schoolEmail: d.schoolEmail || session.user.email || "",
         })),
       )
       .catch(() => undefined);
@@ -110,6 +112,7 @@ const Register = () => {
     formData.append("address", data.address.trim());
     formData.append("nin", data.nin);
     formData.append("institution_name", data.school.trim());
+    formData.append("institution_email", data.schoolEmail.trim());
     formData.append("matric_number", data.matric.trim());
     formData.append("department", data.department.trim());
     formData.append("level", data.level);
@@ -195,7 +198,12 @@ const Register = () => {
                   <Input value={data.phone} onChange={(e) => update("phone", e.target.value)} placeholder="+234 801 234 5678" />
                 </Field>
                 <Field label="School email address">
-                  <Input type="email" value={data.email} readOnly disabled placeholder="you@school.edu.ng" />
+                  <div className="space-y-1.5">
+                    <Input type="email" value={data.schoolEmail} onChange={(e) => update("schoolEmail", e.target.value)} placeholder="you@school.edu.ng" />
+                    <p className="text-xs text-muted-foreground">
+                      Account email: {data.accountEmail || "not available"}
+                    </p>
+                  </div>
                 </Field>
                 <Field label="School name">
                   <Input value={data.school} onChange={(e) => update("school", e.target.value)} placeholder="University of Lagos" />

@@ -1,4 +1,5 @@
 import {
+  IsEmail,
   IsBoolean,
   IsIn,
   IsNotEmpty,
@@ -48,6 +49,9 @@ export class RegisterApplicantDto {
   @IsString()
   @IsNotEmpty()
   institution_name!: string;
+
+  @IsEmail()
+  institution_email!: string;
 
   @IsString()
   @IsNotEmpty()
