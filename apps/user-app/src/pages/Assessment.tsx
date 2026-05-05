@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ArrowRight, Brain, Clock, Grid3X3, Lock, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/Logo";
@@ -20,10 +20,27 @@ const Assessment = () => {
   const games = getGames();
   const [selectionGame, setSelectionGame] = useState<SelectionGame | null>(null);
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     selectionGameApi.current()
-      .then((response) => setSelectionGame(response.selection_game))
+      .then((response) => {
+        const sg = response.selection_game;
+        setSelectionGame(sg);
+        try {
+          // If the game is upcoming or has a scheduled_at in the future, send user to countdown
+          if (sg) {
+            const now = Date.now();
+            const scheduled = sg.scheduled_at ? new Date(sg.scheduled_at).getTime() : null;
+            if (sg.status === "upcoming" || (scheduled && scheduled > now)) {
+              navigate("/countdown", { replace: true });
+              return;
+            }
+          }
+        } catch (e) {
+          // ignore navigation errors
+        }
+      })
       .catch((err) => setError(toErrorMessage(err)));
   }, []);
 

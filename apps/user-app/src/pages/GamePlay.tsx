@@ -37,7 +37,7 @@ const GamePlay = () => {
       .catch((err) => setError(toErrorMessage(err)));
   }, []);
 
-  const onComplete = async (key: GameKey, score: number) => {
+  const onComplete = async (key: GameKey, score: number, meta: Record<string, unknown> = {}) => {
     const nextScores = { ...scores, [key]: score };
     setScores(nextScores);
 
@@ -50,14 +50,16 @@ const GamePlay = () => {
     setSubmitting(true);
     setError("");
     try {
-      const response = await selectionGameApi.completeAttempt(attemptId, {
+      const attemptPayload: Record<string, unknown> = {
         score: total,
         breakdown: nextScores,
         attempt_data: {
-          memory: { score: nextScores.memory },
-          zzle: { score: nextScores.zzle },
+          memory: { score: nextScores.memory, ...(meta.memory || {}) },
+          zzle: { score: nextScores.zzle, ...(meta.zzle || {}) },
         },
-      });
+      };
+
+      const response = await selectionGameApi.completeAttempt(attemptId, attemptPayload);
       navigate("/assessment/result", { state: response });
     } catch (err) {
       setError(toErrorMessage(err));
@@ -89,20 +91,25 @@ const GamePlay = () => {
       <main className="flex-1 px-5 py-8 lg:py-10 max-w-5xl w-full mx-auto">
         {error && <p className="mb-4 border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}
         {submitting && <p className="mb-4 border border-primary/40 bg-primary/10 p-3 text-sm text-primary">Submitting attempt to backend...</p>}
-        {active === "memory" && <MemoryGrid settings={settings} onComplete={(score) => onComplete("memory", score)} />}
-        {active === "zzle" && <ZzleGame settings={settings} onComplete={(score) => onComplete("zzle", score)} />}
+        {active === "memory" && <MemoryGrid settings={settings} onComplete={(score, meta) => onComplete("memory", score, meta)} />}
+        {active === "zzle" && <ZzleGame settings={settings} onComplete={(score, meta) => onComplete("zzle", score, meta)} />}
       </main>
     </div>
   );
 };
 
 const memoryProfiles = {
-  standard: { rounds: 4, baseLength: 4, revealMs: 420, gapMs: 240, mistakes: 2 },
-  hard: { rounds: 5, baseLength: 5, revealMs: 320, gapMs: 170, mistakes: 2 },
-  boss: { rounds: 5, baseLength: 6, revealMs: 240, gapMs: 120, mistakes: 1 },
+  standard: { rounds: 10, baseLength: 2, revealMs: 800, gapMs: 400, mistakes: Infinity },
+  hard: { rounds: 10, baseLength: 3, revealMs: 600, gapMs: 300, mistakes: Infinity },
+  boss: { rounds: 10, baseLength: 4, revealMs: 400, gapMs: 200, mistakes: Infinity },
 };
 
-const MemoryGrid = ({ settings, onComplete }: { settings: ReturnType<typeof getGameSettings>; onComplete: (score: number) => void }) => {
+const calcMemoryScore = (r: number) => {
+  // Each memory round = 10 points, up to 10 rounds => max 100
+  return Math.max(0, Math.min(100, r * 10));
+};
+
+const MemoryGrid = ({ settings, onComplete }: { settings: ReturnType<typeof getGameSettings>; onComplete: (score: number, meta?: Record<string, unknown>) => void }) => {
   const profile = memoryProfiles[settings.difficulty];
   const [round, setRound] = useState(1);
   const [sequence, setSequence] = useState<number[]>([]);
@@ -115,7 +122,7 @@ const MemoryGrid = ({ settings, onComplete }: { settings: ReturnType<typeof getG
 
   useEffect(() => {
     if (timeLeft <= 0) {
-      onComplete(Math.min(100, score));
+      onComplete(calcMemoryScore(round - 1), { memory: { rounds_completed: Math.max(0, round - 1) } });
       return;
     }
 
@@ -152,7 +159,7 @@ const MemoryGrid = ({ settings, onComplete }: { settings: ReturnType<typeof getG
       setPhase("wrong");
 
       window.setTimeout(() => {
-        if (nextMistakes >= profile.mistakes) onComplete(score);
+        if (nextMistakes >= profile.mistakes) onComplete(calcMemoryScore(round - 1), { memory: { rounds_completed: Math.max(0, round - 1) } });
         else {
           setUserInput([]);
           setPhase("input");
@@ -162,9 +169,9 @@ const MemoryGrid = ({ settings, onComplete }: { settings: ReturnType<typeof getG
     }
 
     if (next.length === sequence.length) {
-      const newScore = score + 14 + round * 6;
+      const newScore = calcMemoryScore(round);
       setScore(newScore);
-      if (round >= profile.rounds) onComplete(Math.min(100, newScore + Math.max(0, Math.floor(timeLeft / 5))));
+      if (round >= profile.rounds) onComplete(100, { memory: { rounds_completed: profile.rounds } });
       else window.setTimeout(() => setRound((value) => value + 1), 550);
     }
   };
@@ -194,7 +201,7 @@ const MemoryGrid = ({ settings, onComplete }: { settings: ReturnType<typeof getG
       </div>
       <div className="mt-8 flex items-center justify-center gap-6 text-xs text-muted-foreground">
         <span>Sequence: {sequence.length}</span>
-        <span>Mistakes: {mistakes} / {profile.mistakes}</span>
+        <span>Mistakes: {mistakes} / {profile.mistakes === Infinity ? "∞" : profile.mistakes}</span>
         <span>{phase === "show" ? "Watch" : phase === "input" ? "Repeat" : "Broken"}</span>
       </div>
     </div>
@@ -233,7 +240,28 @@ const levels: ZzleLevel[] = [
     ],
     decoys: [{ r: 4, c: 5 }, { r: 5, c: 7 }, { r: 6, c: 8 }, { r: 8, c: 9 }, { r: 9, c: 10 }, { r: 6, c: 10 }],
   },
+  {
+    title: "Level 4",
+    color: "primary",
+    path: [
+      { r: 1, c: 1 }, { r: 1, c: 2 }, { r: 1, c: 3 }, { r: 2, c: 3 }, { r: 3, c: 3 }, { r: 4, c: 3 }, { r: 4, c: 4 }, { r: 5, c: 4 }, { r: 6, c: 4 }, { r: 6, c: 5 }, { r: 7, c: 5 }, { r: 8, c: 5 }, { r: 9, c: 5 }, { r: 9, c: 6 }, { r: 9, c: 7 }, { r: 9, c: 8 }, { r: 9, c: 9 }, { r: 10, c: 9 }
+    ],
+    decoys: [{ r: 3, c: 4 }, { r: 5, c: 5 }, { r: 7, c: 6 }, { r: 8, c: 9 }],
+  },
+  {
+    title: "Level 5",
+    color: "secondary",
+    path: [
+      { r: 10, c: 2 }, { r: 9, c: 2 }, { r: 8, c: 2 }, { r: 7, c: 2 }, { r: 6, c: 2 }, { r: 5, c: 2 }, { r: 4, c: 2 }, { r: 3, c: 2 }, { r: 2, c: 2 }, { r: 2, c: 3 }, { r: 2, c: 4 }, { r: 2, c: 5 }, { r: 3, c: 5 }, { r: 4, c: 5 }, { r: 5, c: 5 }, { r: 6, c: 5 }, { r: 7, c: 5 }, { r: 8, c: 5 }, { r: 8, c: 6 }, { r: 8, c: 7 }, { r: 8, c: 8 }, { r: 7, c: 8 }, { r: 6, c: 8 }, { r: 5, c: 8 }, { r: 4, c: 8 }, { r: 3, c: 8 }, { r: 2, c: 8 }, { r: 2, c: 9 }
+    ],
+    decoys: [{ r: 4, c: 3 }, { r: 6, c: 4 }, { r: 7, c: 6 }, { r: 4, c: 7 }],
+  },
 ];
+
+const calcZzleScore = (l: number) => {
+  // Each zzle level = 20 points, up to 5 levels => max 100
+  return Math.max(0, Math.min(100, l * 20));
+};
 
 const zzleProfiles = {
   standard: { visiblePreview: 5, wrongPenalty: 2 },
@@ -241,7 +269,7 @@ const zzleProfiles = {
   boss: { visiblePreview: 0, wrongPenalty: 6 },
 };
 
-const ZzleGame = ({ settings, onComplete }: { settings: ReturnType<typeof getGameSettings>; onComplete: (score: number) => void }) => {
+const ZzleGame = ({ settings, onComplete }: { settings: ReturnType<typeof getGameSettings>; onComplete: (score: number, meta?: Record<string, unknown>) => void }) => {
   const profile = zzleProfiles[settings.difficulty];
   const [levelIndex, setLevelIndex] = useState(0);
   const [placed, setPlaced] = useState<Point[]>([]);
@@ -256,7 +284,7 @@ const ZzleGame = ({ settings, onComplete }: { settings: ReturnType<typeof getGam
 
   useEffect(() => {
     if (timeLeft <= 0) {
-      onComplete(Math.min(100, score));
+      onComplete(calcZzleScore(levelIndex), { zzle: { levels_completed: Math.max(0, levelIndex) } });
       return;
     }
 
@@ -269,11 +297,10 @@ const ZzleGame = ({ settings, onComplete }: { settings: ReturnType<typeof getGam
 
   useEffect(() => {
     if (!solved) return;
-    const earned = Math.max(12, 42 - failures * profile.wrongPenalty - levelIndex * 3);
-    const nextScore = Math.min(100, score + earned);
+    const nextScore = calcZzleScore(levelIndex);
     const timer = window.setTimeout(() => {
       setScore(nextScore);
-      if (levelIndex + 1 >= levels.length) onComplete(nextScore);
+      if (levelIndex + 1 >= levels.length) onComplete(100, { zzle: { levels_completed: levels.length } });
       else setLevelIndex((value) => value + 1);
     }, 700);
 
@@ -310,7 +337,7 @@ const ZzleGame = ({ settings, onComplete }: { settings: ReturnType<typeof getGam
 
   return (
     <div className="animate-fade-up">
-      <GameHeader title="Game #2 - Zzle" subtitle={`${level.title} / 3`} score={score} time={`Time Left: ${formatGameTime(timeLeft)}`} />
+      <GameHeader title="Game #2 - Zzle" subtitle={`${level.title} / 5`} score={score} time={`Time Left: ${formatGameTime(timeLeft)}`} />
 
       <div className="mt-8 flex flex-col lg:flex-row items-center justify-center gap-5">
         <div>

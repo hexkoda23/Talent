@@ -28,8 +28,8 @@ const Signup = () => {
       return;
     }
 
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters.");
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters.");
       setSubmitting(false);
       return;
     }
@@ -42,8 +42,6 @@ const Signup = () => {
 
     try {
       await authApi.signup({ email, password });
-      // Store signup data in sessionStorage for the registration page
-      sessionStorage.setItem("signupData", JSON.stringify({ email, password }));
       navigate("/register", { replace: true });
     } catch (err) {
       setError(toErrorMessage(err));
