@@ -171,7 +171,6 @@ The gamified assessment used to filter applicants. Each cohort has one game even
 A user's play-through of the selection game.
 
 - `id`
-- `game_id`
 - `user_id`
 - `application_id`
 - `started_at`

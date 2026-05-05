@@ -23,21 +23,20 @@ export const authApi = {
   },
 
   async signup(payload: { email: string; password: string }) {
-    return apiRequest<{ message: string; email: string }>("/auth/signup", {
+    const response = await apiRequest<AuthResponse>("/auth/signup", {
       method: "POST",
       body: payload,
       auth: false,
     });
+    authToken.set(response.token);
+    return response;
   },
 
   async registerApplicant(formData: FormData) {
-    const response = await apiRequest<AuthResponse>("/auth/register-applicant", {
+    return apiRequest<AuthResponse>("/auth/register-applicant", {
       method: "POST",
       body: formData,
-      auth: false,
     });
-    authToken.set(response.token);
-    return response;
   },
 
   async logout() {

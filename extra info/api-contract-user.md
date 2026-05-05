@@ -23,17 +23,45 @@
 
 ## 0. Authentication & Session
 
+### Update (May 2026): Account-First Registration
+
+The active flow is now:
+1. `POST /auth/signup` creates the user account from email/password and returns `token + refresh_token`.
+2. The user is already signed in and is redirected to `/register`.
+3. `POST /auth/register-applicant` is called with Bearer auth and creates the `StudentProfile + Application` for that signed-in user.
+
+### `POST /auth/signup`
+Used by **Signup page**. Creates a user account and signs the user in immediately.
+
+Request:
+```jsonc
+{
+  "email": "ao@example.com",
+  "password": "Password123!"
+}
+```
+
+Response `201`:
+```jsonc
+{
+  "token": "jwt...",
+  "refresh_token": "jwt...",
+  "user": { "id": "uuid", "first_name": "Pending", "last_name": "Applicant", "email": "ao@example.com" },
+  "application": null,
+  "selection_game": null
+}
+```
+
 The frontend currently bounces from `/register` → `/assessment/play` → `/assessment/result` → `/dashboard` without explicit login screens, but every real call needs a token. The contract below assumes the registration response **issues** a JWT, and a subsequent login endpoint exists for return visits.
 
 ### `POST /auth/register-applicant`
-Used by **Register page**, after the 4-step wizard collects everything. Creates `User`, `StudentProfile`, `Application` (status `registered`), and uploads the three `RegistrationDocument` rows. Returns a JWT scoped to the applicant role.
+Used by **Register page**, after the 4-step wizard collects everything. Requires Bearer auth, updates the signed-in user profile, creates `StudentProfile`, creates `Application` (status `registered`), and uploads the three `RegistrationDocument` rows.
 
 Request (multipart, since file uploads are bundled):
 ```jsonc
 {
   "first_name": "Adaeze",
   "last_name": "Okonkwo",
-  "email": "ao@unilag.edu.ng",
   "phone": "+2348012345678",
   "address": "12 Akoka Road, Yaba, Lagos",
   "date_of_birth": "2003-05-12",          // optional in current FE; reserved
@@ -78,7 +106,7 @@ Response `201`:
 }
 ```
 
-Errors: `409 duplicate_nin | duplicate_email | duplicate_matric`, `422 validation_failed`.
+Errors: `401 unauthorized`, `409 application_exists | profile_exists | duplicate_nin | duplicate_matric`, `422 validation_failed`.
 
 ### `POST /auth/login`
 For returning users. Email + password (or magic link — TBD). Returns same shape as register response, minus document uploads.
@@ -155,9 +183,6 @@ Drives the **Code Zone** picker (step 4). Returns campuses for the active cohort
       "id": "uuid",
       "name": "Lagos (Ikeja)",
       "location": { "city": "Ikeja", "state": "Lagos", "address": "..." },
-      "capacity": 60,
-      "seats_remaining": 42,
-      "demand_label": "Recommended"        // Recommended | High demand | Open — derivable from seats_remaining ratios
     }
   ]
 }
@@ -264,10 +289,11 @@ Final submit. Sends per-game breakdown and overall computed score. The BE re-val
 // request
 {
   "score": 78,
+  "timeElapsed": 3040, //in seconds
   "breakdown": { "memory": 70, "logic": 80, "speed": 84 },
   "attempt_data": {
-    "memory":  { "rounds_played": 5, "max_round_reached": 5 },
-    "logic":   { "answers": ["32","I","▲","8"], "correct_count": 4 },
+    "game1":  { "rounds_played": 5, "max_round_reached": 5 },
+    "game2":   { "answers": ["32","I","▲","8"], "correct_count": 4 },
     "speed":   { "answers": [2,2,1,2,1], "timed_out_count": 0 }
   }
 }
@@ -1551,11 +1577,11 @@ Event payloads:
 | Page                          | Endpoint                                                            | Method | Backing entities                                              |
 |-------------------------------|---------------------------------------------------------------------|--------|---------------------------------------------------------------|
 | Landing                       | `/public/active-cohort`                                             | GET    | ApplicationCohort, Program                                    |
-| Register                      | `/auth/register-applicant`                                          | POST   | User, StudentProfile, Application, RegistrationDocument       |
+| Register                      | `/auth/register-applicant` (Bearer auth)                            | POST   | User, StudentProfile, Application, RegistrationDocument       |
 | Register                      | `/campuses`                                                         | GET    | Campus                                                        |
 | Register                      | `/uploads/presign`                                                  | POST   | (S3)                                                          |
 | Register                      | `/applications/{id}/registration-documents`                         | POST   | RegistrationDocument                                          |
-| Auth (shared)                 | `/auth/login`, `/auth/logout`, `/auth/session`                      | POST/GET | User, Application, Enrollment, ProgressionStage             |
+| Auth (shared)                 | `/auth/signup`, `/auth/login`, `/auth/logout`, `/auth/session`      | POST/GET | User, Application, Enrollment, ProgressionStage             |
 | Assessment                    | `/me/selection-game`                                                | GET    | SelectionGame, GameAttempt                                    |
 | GamePlay                      | `/me/selection-game/attempts/start`                                 | POST   | GameAttempt                                                   |
 | GamePlay                      | `/me/selection-game/attempts/{id}/complete`                         | POST   | GameAttempt, Application                                      |
@@ -1626,7 +1652,7 @@ Event payloads:
 
 ## Open questions / FE-BE alignment notes
 
-1. **Authentication boundary.** The current FE never shows a login screen — the registration response should issue a JWT and the Status / Dashboard pages should silently re-auth via `/auth/session`. If we expect returning applicants/students, add a `/login` route on the FE.
+1. **Authentication boundary.** Updated flow is account-first: `/auth/signup` issues JWTs immediately, then authenticated `/auth/register-applicant` creates the application profile.
 2. **Selection game shape.** The FE today renders fixed mini-games (memory/logic/speed) entirely client-side. The contract treats this as `attempt_data: JSON`. If admins start authoring real game content, the BE will need to serve questions per round — expand `SelectionGame.configuration` and add `GET /me/selection-game/attempts/{id}/next-round`.
 3. **Checkpoint reflection.** The system-design doc has no `Reflection` entity. Two options: (a) store on `Submission.response_data` for the checkpoint's first task, (b) add a `reflection_text` JSON key on `Enrollment.metadata`. I picked (a) implicitly above — confirm with BE.
 4. **Notification entity.** `NotificationTemplate` is in the data model but a per-user `Notification` row isn't. The BE will need to add it (or we can compute it on the fly from event logs — likely too expensive). Treat the table as required.
@@ -1634,3 +1660,4 @@ Event payloads:
 6. **GitHub handle on Profile.** The FE shows `@adaeze-dev` — the data model has `GiteaAccount.gitea_username`, not GitHub. Likely a UI label drift; surface `gitea_username` as `workspace_handle` and let the FE relabel.
 7. **DM between any two users.** The data model allows this, but the community wiki implies "no group DMs — multi-person convos happen in groups." That's fine; the contract above only documents 1:1 DMs.
 8. **File upload flow.** The contract assumes presigned S3. If BE prefers multipart-direct, swap `POST /me/onboarding-documents` and `POST /applications/{id}/registration-documents` to accept `multipart/form-data` and drop `/uploads/presign`.
+

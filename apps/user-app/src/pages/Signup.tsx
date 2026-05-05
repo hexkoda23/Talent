@@ -42,8 +42,6 @@ const Signup = () => {
 
     try {
       await authApi.signup({ email, password });
-      // Store signup data in sessionStorage for the registration page
-      sessionStorage.setItem("signupData", JSON.stringify({ email, password }));
       navigate("/register", { replace: true });
     } catch (err) {
       setError(toErrorMessage(err));

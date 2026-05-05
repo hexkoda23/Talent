@@ -33,6 +33,8 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register-applicant')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(
     FileFieldsInterceptor([
@@ -42,6 +44,7 @@ export class AuthController {
     ]),
   )
   async registerApplicant(
+    @CurrentUser() user: AuthUser,
     @Body() body: RegisterApplicantDto,
     @UploadedFiles() files: RegisterFiles,
   ) {
@@ -58,7 +61,7 @@ export class AuthController {
       });
     }
 
-    return this.authService.registerApplicant(body, {
+    return this.authService.registerApplicant(user, body, {
       schoolId,
       profilePicture,
       governmentId,

@@ -32,20 +32,45 @@ export class AuthService {
     private readonly storageService: LocalStorageService,
   ) {}
 
-  async registerApplicant(dto: RegisterApplicantDto, files: RegisterInputFiles) {
-    const existingByNin = await this.prisma.user.findUnique({ where: { nin: dto.nin } });
-    if (existingByNin) {
-      throw new ConflictException({ error: { code: 'duplicate_nin', message: 'NIN already exists' } });
+  async registerApplicant(currentUser: AuthUser, dto: RegisterApplicantDto, files: RegisterInputFiles) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: currentUser.sub },
+      include: { userRoles: { include: { role: true } } },
+    });
+    if (!user) {
+      throw new UnauthorizedException({ error: { code: 'unauthorized', message: 'User not found' } });
     }
 
-    const existingByEmail = await this.prisma.user.findUnique({ where: { email: dto.email } });
-    if (existingByEmail) {
-      throw new ConflictException({ error: { code: 'duplicate_email', message: 'Email already exists' } });
+    const existingApplication = await this.prisma.application.findFirst({
+      where: { userId: user.id },
+    });
+    if (existingApplication) {
+      throw new ConflictException({ error: { code: 'application_exists', message: 'Application already exists for this account' } });
+    }
+
+    const existingProfile = await this.prisma.studentProfile.findUnique({ where: { userId: user.id } });
+    if (existingProfile) {
+      throw new ConflictException({ error: { code: 'profile_exists', message: 'Student profile already exists for this account' } });
+    }
+
+    const existingByNin = await this.prisma.user.findUnique({ where: { nin: dto.nin } });
+    if (existingByNin && existingByNin.id !== user.id) {
+      throw new ConflictException({ error: { code: 'duplicate_nin', message: 'NIN already exists' } });
     }
 
     const existingMatric = await this.prisma.studentProfile.findUnique({ where: { matricNumber: dto.matric_number } });
     if (existingMatric) {
       throw new ConflictException({ error: { code: 'duplicate_matric', message: 'Matric number already exists' } });
+    }
+
+    const existingInstitutionEmail = await this.prisma.studentProfile.findFirst({
+      where: {
+        institutionEmail: { equals: dto.institution_email.trim(), mode: 'insensitive' },
+        userId: { not: user.id },
+      },
+    });
+    if (existingInstitutionEmail) {
+      throw new ConflictException({ error: { code: 'duplicate_institution_email', message: 'School email already exists' } });
     }
 
     const activeCohort = await this.prisma.applicationCohort.findFirst({
@@ -69,37 +94,27 @@ export class AuthService {
       throw new NotFoundException({ error: { code: 'campus_not_found', message: 'Campus not found' } });
     }
 
-    const passwordHash = await bcrypt.hash(dto.password ?? dto.nin, 10);
-
     const created = await this.prisma.$transaction(async (tx) => {
-      const existingOrg = await tx.organization.findFirst({ orderBy: { createdAt: 'asc' } });
-      const org =
-        existingOrg ??
-        (await tx.organization.create({
-          data: {
-            name: 'TalentNation',
-            slug: 'talent-nation',
-          },
-        }));
-      const user = await tx.user.create({
+      const updatedUser = await tx.user.update({
+        where: { id: user.id },
         data: {
-          organizationId: org.id,
           firstName: dto.first_name,
           lastName: dto.last_name,
-          email: dto.email,
           phone: dto.phone,
           nin: dto.nin,
-          passwordHash,
         },
       });
 
-      await tx.userRole.create({ data: { userId: user.id, roleId: candidateRole.id } });
+      const hasCandidateRole = user.userRoles.some((item) => item.role.name === 'candidate');
+      if (!hasCandidateRole) {
+        await tx.userRole.create({ data: { userId: user.id, roleId: candidateRole.id } });
+      }
 
       await tx.studentProfile.create({
         data: {
-          userId: user.id,
+          userId: updatedUser.id,
           institutionName: dto.institution_name,
-          institutionEmail: dto.email,
+          institutionEmail: dto.institution_email.trim(),
           matricNumber: dto.matric_number,
           department: dto.department ?? '',
           level: dto.level,
@@ -109,7 +124,7 @@ export class AuthService {
 
       const application = await tx.application.create({
         data: {
-          userId: user.id,
+          userId: updatedUser.id,
           cohortId: activeCohort.id,
           campusId: dto.campus_id,
           status: 'registered',
@@ -144,10 +159,10 @@ export class AuthService {
         })),
       });
 
-      return { user, application };
+      return { user: updatedUser, application };
     });
 
-    const roles = ['candidate'];
+    const roles = Array.from(new Set([...user.userRoles.map((item) => item.role.name), 'candidate']));
     const tokens = await this.issueTokens({
       sub: created.user.id,
       email: created.user.email,
@@ -251,9 +266,65 @@ export class AuthService {
       throw new ConflictException({ error: { code: 'duplicate_email', message: 'Email already exists' } });
     }
 
+    const existingOrg = await this.prisma.organization.findFirst({ orderBy: { createdAt: 'asc' } });
+    const org =
+      existingOrg ??
+      (await this.prisma.organization.create({
+        data: {
+          name: 'TalentNation',
+          slug: 'talent-nation',
+        },
+      }));
+
+    const passwordHash = await bcrypt.hash(dto.password, 10);
+    const placeholderNin = this.generatePlaceholderNin();
+
+    const createdUser = await this.prisma.user.create({
+      data: {
+        organizationId: org.id,
+        firstName: 'Pending',
+        lastName: 'Applicant',
+        email: dto.email,
+        phone: 'pending',
+        nin: placeholderNin,
+        passwordHash,
+      },
+      include: { userRoles: { include: { role: true } } },
+    });
+
+    const roles = createdUser.userRoles.map((item) => item.role.name);
+    const tokens = await this.issueTokens({
+      sub: createdUser.id,
+      email: createdUser.email,
+      organizationId: createdUser.organizationId,
+      roles,
+    });
+
+    const latestApplication = await this.prisma.application.findFirst({
+      where: { userId: createdUser.id },
+      orderBy: { registeredAt: 'desc' },
+    });
+
     return {
-      message: 'Email is available. Proceed to complete registration.',
-      email: dto.email,
+      token: tokens.accessToken,
+      refresh_token: tokens.refreshToken,
+      user: {
+        id: createdUser.id,
+        first_name: createdUser.firstName,
+        last_name: createdUser.lastName,
+        email: createdUser.email,
+      },
+      application: latestApplication
+        ? {
+            id: latestApplication.id,
+            cohort_id: latestApplication.cohortId,
+            campus_id: latestApplication.campusId,
+            status: latestApplication.status,
+            dashboard_state: latestApplication.dashboardState,
+            registered_at: latestApplication.registeredAt,
+          }
+        : null,
+      selection_game: null,
     };
   }
 
@@ -343,5 +414,11 @@ export class AuthService {
 
   private hashToken(token: string): string {
     return createHash('sha256').update(token).digest('hex');
+  }
+
+  private generatePlaceholderNin(): string {
+    const base = Date.now().toString().slice(-10);
+    const suffix = Math.floor(Math.random() * 10).toString();
+    return `${base}${suffix}`;
   }
 }

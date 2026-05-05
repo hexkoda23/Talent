@@ -116,6 +116,7 @@ Frontend configuration is in `apps/user-app/vite.config.ts` and connects to `htt
 - Session management
 
 ### Endpoints
+- `POST /api/v1/auth/signup` - Create account and sign in
 - `POST /api/v1/auth/register-applicant` - Register new user
 - `POST /api/v1/auth/login` - User login
 - `POST /api/v1/auth/logout` - User logout
@@ -171,5 +172,5 @@ See [backend/prisma/schema.prisma](backend/prisma/schema.prisma) for the complet
 ## Notes
 
 - File uploads are stored locally in `backend/uploads/`
-- Access and refresh tokens are returned on login/register
-- User registration requires: `school_id_card_file`, `profile_picture_file`, `government_id_file`
+- Access and refresh tokens are returned on signup/login/register
+- Applicant registration (`/auth/register-applicant`) now requires auth and these files: `school_id_card_file`, `profile_picture_file`, `government_id_file`
