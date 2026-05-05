@@ -89,14 +89,7 @@ const Assessment = () => {
         </section>
       </div>
 
-      <div className="mt-12 flex flex-wrap justify-end gap-3">
-        <Button variant="soft" size="lg" asChild>
-          <Link to="/register"><ShieldCheck className="h-5 w-5" /> Verify identity</Link>
-        </Button>
-        <Button variant="hero" size="lg" asChild>
-          <Link to="/assessment/play">Begin trail <ArrowRight className="h-5 w-5" /></Link>
-        </Button>
-      </div>
+     
 
       <div className="mt-6 flex items-center justify-end gap-2 text-xs text-muted-foreground">
         <Lock className="h-3.5 w-3.5" />

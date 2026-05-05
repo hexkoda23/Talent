@@ -51,7 +51,7 @@ const LearnMore = () => {
           <p className="text-muted-foreground text-sm mb-5">Program signal</p>
           <div className="space-y-4">
             <Metric label="Assessment" value="Private" />
-            <Metric label="Tracks" value="3 / 4 / 6 months" />
+            <Metric label="Tracks" value="3 / 6 months" />
             <Metric label="Admission" value="Admin verified" />
             <Metric label="Outcome" value="Portfolio + SIWES evidence" />
           </div>
@@ -129,8 +129,7 @@ const LearnMore = () => {
       <section className="py-16 border-b border-border">
         <p className="text-sm text-primary mb-8">// track durations</p>
         <div className="grid md:grid-cols-3 gap-6">
-          <TrackDetail title="3 months" label="Sprint" text="Best for students with a shorter SIWES window or stronger starting skills. It focuses on high-intensity execution and fast project output." />
-          <TrackDetail title="4 months" label="Standard" text="A balanced option for most students. It gives enough time for learning, quests, raids, checkpoints, and portfolio-building." />
+          <TrackDetail title="3 months" label="Standard" text="Best for students with a shorter SIWES window or stronger starting skills. It focuses on high-intensity execution and fast project output." />
           <TrackDetail title="6 months" label="Deep dive" text="Best for students with a longer placement period. It supports deeper projects, more reviews, and stronger graduation evidence." />
         </div>
       </section>
@@ -150,7 +149,7 @@ const LearnMore = () => {
             <MapPin className="h-6 w-6 text-primary mb-5" />
             <h2 className="text-3xl mb-4">Why Code Zones matter</h2>
             <p className="text-sm text-muted-foreground leading-7">
-              Code Zones help Talent Nation organize future physical verification, meetups, campus supervision,
+              Code Zones help Talent Nation organize future physical verification, log book signing, meetups,
               SIWES document handling, and local cohort support. The backend uses zones for operations and admin routing.
             </p>
           </div>
