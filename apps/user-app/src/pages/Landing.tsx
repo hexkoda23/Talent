@@ -7,7 +7,7 @@ import { publicApi } from "@/api/endpoints";
 import type { ActiveCohortResponse } from "@/api/types";
 
 const Landing = () => {
-  const registerTarget = "/register";
+  const registerTarget = "/signup";
   const [activeCohort, setActiveCohort] = useState<ActiveCohortResponse | null>(null);
 
   useEffect(() => {

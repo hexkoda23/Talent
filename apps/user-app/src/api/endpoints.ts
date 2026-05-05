@@ -22,6 +22,14 @@ export const authApi = {
     return response;
   },
 
+  async signup(payload: { email: string; password: string }) {
+    return apiRequest<{ message: string; email: string }>("/auth/signup", {
+      method: "POST",
+      body: payload,
+      auth: false,
+    });
+  },
+
   async registerApplicant(formData: FormData) {
     const response = await apiRequest<AuthResponse>("/auth/register-applicant", {
       method: "POST",
