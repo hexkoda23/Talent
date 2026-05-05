@@ -292,6 +292,9 @@ Final submit. Sends per-game breakdown and overall computed score. The BE re-val
   "timeElapsed": 3040, //in seconds
   "breakdown": { "memory": 70, "logic": 80, "speed": 84 },
   "attempt_data": {
+    "memory":  { "score": 70, "rounds_completed": 5, "rounds_attempted": 5 },
+    "zzle":    { "score": 80, "levels_completed": 4, "levels_attempted": 4 },
+    "meta":    { "memory_raw": { "rounds_sequence": [2,3,4,5,6] }, "zzle_raw": { "per_level_time_ms": [12000,15000,9000,8000] } }
     "game1":  { "rounds_played": 5, "max_round_reached": 5 },
     "game2":   { "answers": ["32","I","▲","8"], "correct_count": 4 },
     "speed":   { "answers": [2,2,1,2,1], "timed_out_count": 0 }

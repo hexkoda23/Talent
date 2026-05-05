@@ -1,5 +1,6 @@
 import { Trophy, Github, MapPin, Calendar, Star, Award, Code2, Flame, Target, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import CurriculumRoadmap from "./CurriculumRoadmap";
 
 const submissions = [
   { name: "rag-pipeline-quest", type: "Quest repo", status: "passed" },
@@ -97,6 +98,20 @@ const Profile = () => {
           </div>
         </div>
       </div>
+
+      {/* ── AI Engineering Curriculum Roadmap ── */}
+      {/*
+        BACKEND INTEGRATION:
+        Replace the props below once the backend engineer exposes the endpoint.
+        - trackId: from user profile (which track they enrolled in)
+        - progress: from GET /users/me/curriculum-progress
+        - onSegmentClick: navigate to /dashboard/learn?segment=<segmentId>
+      */}
+      <CurriculumRoadmap
+        // trackId={user?.curriculumTrackId}
+        // progress={curriculumProgress}
+        // onSegmentClick={(segId) => navigate(`/dashboard/learn?segment=${segId}`)}
+      />
     </div>
   );
 };

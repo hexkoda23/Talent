@@ -12,9 +12,9 @@ export const MAX_GAME_ATTEMPTS = 3;
 export const PASS_MARK = 70;
 
 export const defaultGameSettings: GameSettings = {
-  difficulty: "boss",
-  memorySeconds: 45,
-  zzleSeconds: 90,
+  difficulty: "standard",
+  memorySeconds: 300,
+  zzleSeconds: 1200,
 };
 
 export const getGameSettings = (): GameSettings => {

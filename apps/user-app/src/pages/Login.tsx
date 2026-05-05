@@ -12,7 +12,7 @@ const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const params = new URLSearchParams(location.search);
-  const redirect = params.get("redirect") || "/register";
+  const redirect = params.get("redirect") || undefined;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -30,7 +30,22 @@ const Login = () => {
     setSubmitting(true);
     try {
       await authApi.login({ email: email.trim(), password });
-      navigate(redirect, { replace: true });
+
+      if (redirect) {
+        navigate(redirect, { replace: true });
+      } else {
+        try {
+          const session = await authApi.session();
+          if (session?.application) {
+            navigate("/countdown", { replace: true });
+          } else {
+            navigate("/register", { replace: true });
+          }
+        } catch (err) {
+          // If session fetch fails, fallback to register route
+          navigate("/register", { replace: true });
+        }
+      }
     } catch (err) {
       setError(toErrorMessage(err));
     } finally {

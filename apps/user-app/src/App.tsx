@@ -10,6 +10,7 @@ import Login from "./pages/Login.tsx";
 import Signup from "./pages/Signup.tsx";
 import Register from "./pages/Register.tsx";
 import Assessment from "./pages/Assessment.tsx";
+import Countdown from "./pages/Countdown.tsx";
 import GamePlay from "./pages/GamePlay.tsx";
 import Result from "./pages/Result.tsx";
 import Status from "./pages/Status.tsx";
@@ -49,6 +50,8 @@ const App = () => (
           <Route path="/learn-more" element={<LearnMore />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/countdown" element={<RequireToken><Countdown /></RequireToken>} />
           <Route path="/register" element={<RequireToken><Register /></RequireToken>} />
           <Route path="/assessment" element={<RequireToken><Assessment /></RequireToken>} />
           <Route path="/assessment/play" element={<RequireToken><GamePlay /></RequireToken>} />

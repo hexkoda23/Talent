@@ -88,10 +88,9 @@ const Landing = () => {
         </section>
 
         <section id="tracks" className="py-16 border-t border-border">
-          <p className="text-sm text-primary mb-8">// choose your campus track</p>
+          <p className="text-sm text-primary mb-8">//campus track</p>
           <div className="grid md:grid-cols-3 gap-6">
-            <Track months="3" label="Sprint" />
-            <Track months="4" label="Standard" />
+            <Track months="3" label="Standard" />
             <Track months="6" label="Deep dive" />
           </div>
         </section>
