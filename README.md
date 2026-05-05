@@ -1,16 +1,16 @@
-# Talent Nation v0 
-# Talent Forge
+# Talent Nation v0
 
 A full-stack application with a React/Vite frontend and NestJS backend for user account creation, authentication, and talent management.
 
 ## Project Structure
 
 ```
-talent-forge/
-├── src/                    # React frontend
+talent-nation-v0/
+├── apps/
+│   └── user-app/          # React frontend
 ├── backend/               # NestJS API
-├── package.json          # Root dependencies
-└── vite.config.ts        # Frontend build config
+├── extra info/            # Additional documentation
+└── README.md
 ```
 
 ## Prerequisites
@@ -26,7 +26,7 @@ talent-forge/
 
 ```bash
 git clone <repository-url>
-cd talent-forge
+cd talent-nation-v0
 ```
 
 ### 2. Setup Backend
@@ -62,7 +62,7 @@ Swagger docs: `http://localhost:4000/api/docs`
 ### 3. Setup Frontend
 
 ```bash
-cd .. # Back to root
+cd apps/user-app
 
 # Install dependencies
 npm install
@@ -88,7 +88,7 @@ Required variables (copy from `.env.example`):
 
 ### Frontend
 
-Frontend configuration is in `vite.config.ts` and connects to `http://localhost:4000/api/v1`
+Frontend configuration is in `apps/user-app/vite.config.ts` and connects to `http://localhost:4000/api/v1` via proxy.
 
 ## Available Scripts
 
