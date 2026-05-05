@@ -9,7 +9,7 @@ import {
   MinLength,
   ValidateNested,
 } from 'class-validator';
-import { Transform, Type } from 'class-transformer';
+import { plainToInstance, Transform, Type } from 'class-transformer';
 
 class ConsentsDto {
   @IsBoolean()
@@ -76,14 +76,21 @@ export class RegisterApplicantDto {
 
   @ValidateNested()
   @Transform(({ value }) => {
+    let parsed = value;
+
     if (typeof value === 'string') {
       try {
-        return JSON.parse(value) as unknown;
+        parsed = JSON.parse(value) as unknown;
       } catch {
         return value;
       }
     }
-    return value;
+
+    if (parsed && typeof parsed === 'object') {
+      return plainToInstance(ConsentsDto, parsed);
+    }
+
+    return parsed;
   })
   @Type(() => ConsentsDto)
   consents!: ConsentsDto;
