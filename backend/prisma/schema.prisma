@@ -1,0 +1,205 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ApplicationStatus {
+  registered
+  game_pending
+  game_completed
+  review
+  verification_pending
+  verified
+  onboarding
+  accepted
+  rejected
+}
+
+enum CohortStatus {
+  open
+  in_review
+  closed
+}
+
+enum SelectionGameStatus {
+  upcoming
+  active
+  completed
+}
+
+enum RegistrationDocumentType {
+  school_id_card
+  nin_scan
+  profile_picture
+  government_id
+  other
+}
+
+enum RegistrationDocumentStatus {
+  pending_review
+  approved
+  rejected
+  needs_reupload
+}
+
+enum ProgressionDashboardState {
+  status_only
+  countdown
+  game_access
+  onboarding_form
+  full_learning
+}
+
+model Organization {
+  id        String   @id @default(uuid())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+
+  campuses  Campus[]
+  users     User[]
+}
+
+model Campus {
+  id                String   @id @default(uuid())
+  organizationId    String
+  name              String
+  locationCity      String
+  locationState     String
+  locationAddress   String
+  capacity          Int
+  createdAt         DateTime @default(now())
+
+  organization      Organization      @relation(fields: [organizationId], references: [id])
+  studentProfiles   StudentProfile[]
+  applications      Application[]
+}
+
+model User {
+  id              String    @id @default(uuid())
+  organizationId  String
+  firstName       String
+  lastName        String
+  email           String    @unique
+  phone           String
+  passwordHash    String
+  nin             String    @unique
+  avatarUrl       String?
+  createdAt       DateTime  @default(now())
+  isActive        Boolean   @default(true)
+
+  organization    Organization   @relation(fields: [organizationId], references: [id])
+  studentProfile  StudentProfile?
+  applications    Application[]
+  refreshTokens   RefreshToken[]
+  userRoles       UserRole[]
+}
+
+model StudentProfile {
+  id               String   @id @default(uuid())
+  userId           String   @unique
+  institutionName  String
+  institutionEmail String?
+  matricNumber     String   @unique
+  department       String
+  level            String
+  campusId         String
+  createdAt        DateTime @default(now())
+
+  user             User   @relation(fields: [userId], references: [id])
+  campus           Campus @relation(fields: [campusId], references: [id])
+}
+
+model ApplicationCohort {
+  id               String       @id @default(uuid())
+  name             String
+  status           CohortStatus @default(open)
+  opensAt          DateTime
+  closesAt         DateTime
+  gameCutoffScore  Int
+  maxApplicants    Int?
+  createdAt        DateTime     @default(now())
+
+  applications     Application[]
+  selectionGame    SelectionGame?
+}
+
+model Application {
+  id                      String                   @id @default(uuid())
+  userId                  String
+  cohortId                String
+  campusId                String
+  status                  ApplicationStatus        @default(registered)
+  dashboardState          ProgressionDashboardState @default(status_only)
+  registeredAt            DateTime                 @default(now())
+  gameScore               Int?
+  passedGame              Boolean?
+  metadata                Json?
+
+  user                    User              @relation(fields: [userId], references: [id])
+  cohort                  ApplicationCohort @relation(fields: [cohortId], references: [id])
+  campus                  Campus            @relation(fields: [campusId], references: [id])
+  registrationDocuments   RegistrationDocument[]
+
+  @@index([userId, registeredAt])
+}
+
+model SelectionGame {
+  id               String              @id @default(uuid())
+  cohortId         String              @unique
+  name             String
+  scheduledAt      DateTime
+  durationMinutes  Int
+  status           SelectionGameStatus @default(upcoming)
+
+  cohort           ApplicationCohort   @relation(fields: [cohortId], references: [id])
+}
+
+model RegistrationDocument {
+  id                String                     @id @default(uuid())
+  applicationId     String
+  documentType      RegistrationDocumentType
+  fileUrl           String
+  originalFilename  String
+  status            RegistrationDocumentStatus @default(pending_review)
+  uploadedAt        DateTime                   @default(now())
+
+  application       Application @relation(fields: [applicationId], references: [id])
+}
+
+model Role {
+  id          String @id @default(uuid())
+  name        String @unique
+  description String?
+
+  userRoles   UserRole[]
+}
+
+model UserRole {
+  id          String   @id @default(uuid())
+  userId      String
+  roleId      String
+  createdAt   DateTime @default(now())
+
+  user        User @relation(fields: [userId], references: [id])
+  role        Role @relation(fields: [roleId], references: [id])
+
+  @@unique([userId, roleId])
+}
+
+model RefreshToken {
+  id         String   @id @default(uuid())
+  userId      String
+  tokenHash   String
+  expiresAt   DateTime
+  revokedAt   DateTime?
+  createdAt   DateTime @default(now())
+
+  user        User @relation(fields: [userId], references: [id])
+
+  @@index([userId, revokedAt])
+}

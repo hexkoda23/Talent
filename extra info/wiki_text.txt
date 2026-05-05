@@ -1,0 +1,997 @@
+  TalentNation Platform Wiki
+  
+    
+    Go
+    
+  
+  
+    Overview
+    Application
+    Curriculum
+    Gitea
+    SIWES
+    XP & Ranks
+    Community
+  
+  
+  
+  
+  
+  
+// ──────────────────────────────────────────────
+// PAGE DEFINITIONS
+// ──────────────────────────────────────────────
+const PAGES = {
+// ═══════════════════════════════════════════
+'home': {
+  title: 'TalentNation SIWES Learning Platform',
+  subtitle: 'A 6-month, predominantly online technical training program for Nigerian engineering students',
+  breadcrumb: [],
+  infobox: {
+    title: 'Project At a Glance',
+    subtitle: 'TalentNation SIWES Platform',
+    rows: [
+      { label: 'Type', value: 'Learning Management Platform' },
+      { label: 'Target users', value: 'Nigerian SIWES engineering students' },
+      { label: 'Program length', value: '6 months per cohort' },
+      { label: 'Mode', value: 'Primarily online; physical sign-offs required' },
+      { label: 'Git backend', value: 'Gitea (self-hosted)' },
+      { label: 'Content rendering', value: 'Rich HTML (TinyMCE on admin side)' },
+      { label: 'Selection method', value: 'Gamified aptitude assessment' },
+      { label: 'Curriculum style', value: 'XP-based, gamified, sequential' },
+      { label: 'Assessment types', value: 'Quests, Checkpoints, Raids' },
+      { label: 'Data entities', value: '54 across 15 domains' },
+    ]
+  },
+  lead: `The TalentNation SIWES Learning Platform is a bespoke, configurable online training system designed to manage the full lifecycle of Nigerian SIWES (Students Industrial Work Experience Scheme) participants — from initial application through a gamified selection process, institutional verification, structured online learning, and ultimately graduation. Every major aspect of the platform, from progression rules and notification copy to group sizes and evaluation criteria, is configurable at multiple levels without code changes.`,
+  toc: [
+    { id: 'overview', title: 'Overview' },
+    { id: 'user-lifecycle', title: 'The User Lifecycle' },
+    { id: 'platform-domains', title: 'Platform Domains' },
+    { id: 'key-design-decisions', title: 'Key Design Decisions' },
+    { id: 'entity-count', title: 'Entity Summary' },
+  ],
+  body: `
+Overview
+The platform was designed to serve as the primary digital infrastructure for a company that trains Nigerian engineering students during their mandatory SIWES industrial attachment period and then places them with partner companies. Prior to this platform, the company operated using 01Edu's existing curriculum and infrastructure. The new platform replicates and extends 01Edu's core ideas — including peer auditing, Git-integrated code submission, XP-based gamification, and granular admin controls — while being purpose-built for the Nigerian SIWES context, adding institutional verification workflows, physical document handling, and a complete application pipeline.
+The program is structured around a hierarchical curriculum (Subject → Course → Topic → Module) with three distinct assessment mechanics: individual Quests, gatekeeper Checkpoints, and collaborative Raids. All code submissions flow through a self-hosted Gitea instance. Students build XP through a tracked ledger, compete on leaderboards, and interact with peers through a built-in community layer.
+The User Lifecycle
+A student's journey through the platform is divided into two major acts: the application pipeline and active learning. These are separated by an institutional verification step that is specific to the SIWES context.
+  Registration→
+  Selection Game→
+  Verification→
+  Onboarding→
+  Learning→
+  Graduation
+Stage 1 — Registration
+A prospective student registers on the platform and an Application record is created, along with a personal dashboard. At this stage, the dashboard shows only an "application payment" status and a countdown to the selection game. The student also selects a physical campus during or shortly after registration, because SIWES requires physical document interactions regardless of the program's online nature.
+Stage 2 — Selection Game
+At a scheduled time, the student accesses the Selection Game directly from their dashboard — no separate link is sent. The game is a timed, gamified aptitude assessment. After all attempts are processed, the system automatically identifies who has passed the score cutoff and advances them to the review stage. Students below the cutoff are eventually rejected when the ApplicationCohort is closed.
+Stage 3 — Institutional Verification
+Passing the game does not yet mean acceptance. The admin team must verify each student's identity against their institution. The process is currently manual: bulk emails are sent to schools using the student's matric number and name. The school responds to confirm or deny enrollment. This is modelled as a VerificationRequest entity, with follow-up tracking. Rejected students receive a rejection email; the exact reason is withheld to avoid disputes.
+Stage 4 — Onboarding
+After verification passes, the student's dashboard signals that they should complete onboarding. This involves uploading scanned SIWES documents — primarily the CYS (Company Year Schedule) form and the logbook. Some documents can be electronically signed and stamped; others (particularly the logbook) require physical signatures from campus supervisors. Campus selection earlier in the flow determines which supervisor handles the physical elements.
+Stage 5 — Active Learning
+Once onboarding is complete, the student's dashboard transforms from a status page into the full learning interface. The home tab shows the next actionable module as a card. Students progress through a curriculum of Subjects, Courses, Topics, and Modules, completing Quests for XP, passing Checkpoints to unlock the next phase, and collaborating on Raids with assigned groups. A community layer provides group chat, direct messages, and a social graph.
+Cohort Closing
+When an intake cycle ends, an admin triggers a "close cohort" action (styled as a red confirmation button to prevent accidental use). All remaining unaccepted applicants are rejected, rejection emails are dispatched, and — per the default configuration — rejected applicants' accounts and data are purged from the database. Accepted students continue into an active Cohort record that is separate from the application cohort.
+Platform Domains
+  DomainKey EntitiesPurpose
+  Application PipelineApplicationCohort, Application, SelectionGame, GameAttempt, VerificationRequest, OnboardingDocumentFull pre-enrolment lifecycle
+  CurriculumProgram, Subject, Course, Topic, Module, Quest, QuestTask, Checkpoint, Raid, CurriculumDependencyAll learning content and assessment
+  Enrollment & ProgressionCohort, Enrollment, ProgressionStage, Event, StudentProgressSnapshotCohort management and progress tracking
+  Submissions & AuditingSubmission, Audit, AuditQuestion, PeerBetCode submission, peer and mentor review
+  GroupsGroup, GroupMemberRaid teams, audit pairs, community groups
+  CommunityPost, DirectMessage, FriendshipSocial layer: group chats, DMs, friends
+  Records & RestrictionsRecord, RecordEffectAdmin discipline and status management
+  Git IntegrationGiteaAccount, GiteaRepository, GiteaWebhookSelf-hosted Gitea as code backend
+  XP & ScoringXPTransaction, LeaderboardGamified progression and ranking
+  SIWES DocumentationLogbook, LogbookEntry, OnboardingDocumentPhysical SIWES compliance layer
+  Platform ConfigConfigurationSetting, NotificationTemplate, AuditLogCascading configuration and admin audit trail
+Key Design Decisions
+Distinct curriculum entities instead of a polymorphic type
+Rather than having a single CurriculumItem with a type enum, the platform uses seven separate entities — Subject, Course, Topic, Module, Quest, Checkpoint, and Raid — each with its own fields, relationships, and extension points. This avoids nullable field sprawl and allows each entity to evolve independently as the curriculum design matures.
+Content as HTML
+Module content, quest learning materials, and task prompts are stored as rich HTML, produced by a backend TinyMCE editor. The frontend simply renders whatever HTML it receives, without needing specialized components for videos, code blocks, images, or other media types. This keeps frontend complexity minimal and gives content authors maximum flexibility.
+XP as an immutable ledger
+Rather than a mutable xp_total field on the enrollment record, every XP change is recorded as an XPTransaction row. The current balance is derived. This provides a full audit trail and makes it trivial to explain where any student's points came from.
+Gitea as the Git backend
+The platform delegates all Git operations to a self-hosted Gitea instance rather than building its own Git infrastructure. The platform maintains thin mapping tables (GiteaAccount, GiteaRepository) to link platform concepts to Gitea entities, and listens to Gitea's push webhooks to trigger automated test runs.
+Cascading configuration
+All configurable behaviors — group sizes, XP cooldowns, notification content, submission rules — are stored in a ConfigurationSetting table with a scope hierarchy: Organization → Campus → Program → Cohort. Any level can override the one above it. This means a specific cohort can have different cooldown rules without touching the program defaults.
+Separation of Record and RecordEffect
+An admin Record (e.g., "block this student") documents the decision and reason. A RecordEffect row documents the system action taken (e.g., revoke platform access). The same record type can produce different effects in different programs, and effects can be toggled or extended without changing the record itself.
+`,
+  related: ['application-pipeline','curriculum','gitea','siwes','gamification','community','audit-system','records','campus']
+},
+// ═══════════════════════════════════════════
+'application-pipeline': {
+  title: 'Application Pipeline',
+  subtitle: 'Pre-enrolment lifecycle from registration through verified acceptance',
+  breadcrumb: ['home'],
+  infobox: {
+    title: 'Key Entities',
+    rows: [
+      { label: 'ApplicationCohort', value: 'A timed application cycle' },
+      { label: 'Application', value: 'One applicant\'s journey' },
+      { label: 'SelectionGame', value: 'Gamified aptitude test' },
+      { label: 'GameAttempt', value: 'A student\'s play-through' },
+      { label: 'VerificationRequest', value: 'School confirmation record' },
+      { label: 'OnboardingDocument', value: 'CYS form, logbook, etc.' },
+      { label: 'StudentProfile', value: 'SIWES-specific student data' },
+    ]
+  },
+  lead: `The application pipeline covers everything that happens before a student reaches the main learning platform. It is a multi-stage funnel — registration, game, cutoff review, institutional verification, and document onboarding — managed through six core entities. Each stage has its own admin controls, automated transitions, and notification hooks.`,
+  toc: [
+    { id: 'cohort-lifecycle', title: 'ApplicationCohort Lifecycle' },
+    { id: 'application-entity', title: 'The Application Entity' },
+    { id: 'dashboard-from-day-one', title: 'Dashboard from Day One' },
+    { id: 'game-stage', title: 'Game Stage' },
+    { id: 'review-and-cutoff', title: 'Review & Cutoff' },
+    { id: 'institutional-verification', title: 'Institutional Verification' },
+    { id: 'onboarding-stage', title: 'Onboarding Stage' },
+    { id: 'closing-a-cohort', title: 'Closing a Cohort' },
+  ],
+  body: `
+ApplicationCohort Lifecycle
+An ApplicationCohort represents one intake cycle — e.g., "October 2026 Intake." Admins open it at a defined date, applicants register during the window, and the cohort is eventually closed either at a scheduled closes_at datetime or manually by an admin. A cohort holds the game_cutoff_score (the minimum game score for automatic advancement), the max_applicants cap, and the purge_rejected_data flag that governs whether rejected applicants' accounts are deleted on close.
+  ApplicationCohort — Key Fields
+  statusenumopen → in_review → closed
+  game_cutoff_scoreintegerMinimum game score to advance to the review stage
+  purge_rejected_databooleanIf true, delete rejected applicants' accounts on cohort close (default: true)
+  closed_byuser_idAdmin who triggered the cohort close action
+The Application Entity
+Each applicant's journey is tracked in a single Application row, whose status field moves through the pipeline:
+  registered→
+  game_pending→
+  game_completed→
+  review→
+  verification_pending→
+  verified→
+  onboarding→
+  accepted / rejected
+The Application also carries campus_id (the physical campus the student selected), game_score, passed_game, and payment_status. The payment_status is the only thing visible to the student on their dashboard before the game — specifically, it shows as "application payment."
+Dashboard from Day One
+A dashboard is created automatically at the moment a student registers. Before the game, it shows a countdown and the payment status. After the game, it shows results. During verification and onboarding, it shows the relevant status/forms. Only after accepted status does the dashboard transition into the full learning interface. The ProgressionStage.dashboard_state enum drives this: status_only → countdown → game_access → onboarding_form → full_learning.
+Game Stage
+The SelectionGame is a time-bound assessment accessed directly from the student's dashboard. No separate link is distributed. Each attempt is recorded as a GameAttempt, which stores the score, timing data, and whether the student passed the cutoff. See the Selection Game page for full details.
+Review & Cutoff
+After the game window closes, the system automatically identifies applicants whose game_score ≥ game_cutoff_score and advances them to review status. This is not a manual selection — it is automatic acceptance into the review stage. On the admin side, the team sees only the applicants who cleared the cutoff, enabling them to begin verification without wading through the full applicant pool.
+Note: From the student's perspective, the dashboard may still show "application payment" during the review stage, because the application is still pending from their side. The cutoff calculation is an internal admin-side event.
+Institutional Verification
+See the dedicated Verification page for full details. In brief: the admin team sends bulk emails to each student's institution (using matric_number and institution_email from the student's StudentProfile) and records the outcome in a VerificationRequest entity. The platform tracks follow-up emails sent, response status, and which admin processed the response.
+Onboarding Stage
+After verification passes, the student receives an email instructing them to go to their dashboard and complete onboarding. Onboarding involves uploading one or more OnboardingDocument records. The primary documents are the CYS form and the SIWES logbook. Some can be electronically processed; others require physical signatures. See the Onboarding page for details.
+Closing a Cohort
+When the intake cycle ends, an admin presses the close button (styled as a destructive red confirmation action to prevent accidental triggering). The platform then:
+  Sets ApplicationCohort.status = 'closed'
+  Marks all Applications not in accepted status as rejected
+  Dispatches rejection emails to all newly-rejected applicants
+  If purge_rejected_data = true, deletes rejected applicants' User records, StudentProfiles, Applications, and related data
+  Creates a Cohort entity for the accepted group to begin the learning program
+Re-registration is prevented by NIN uniqueness — a student whose NIN is in the system cannot re-register within the same cycle. After purge, a fresh application in the next cohort would be possible.
+`,
+  related: ['selection-game','verification','onboarding','campus','siwes','curriculum']
+},
+// ═══════════════════════════════════════════
+'selection-game': {
+  title: 'Selection Game',
+  subtitle: 'The gamified aptitude assessment used to filter applicants into the program',
+  breadcrumb: ['home','application-pipeline'],
+  infobox: {
+    title: 'SelectionGame Entity',
+    rows: [
+      { label: 'scheduled_at', value: 'When the game opens' },
+      { label: 'duration_minutes', value: 'Time limit once started' },
+      { label: 'access_method', value: 'dashboard_link (no email link sent)' },
+      { label: 'status', value: 'upcoming → active → completed' },
+      { label: 'configuration', value: 'JSON: question count, scoring rules, penalties' },
+      { label: 'GameAttempt.score', value: 'Raw score from this play-through' },
+      { label: 'GameAttempt.passed', value: 'Derived from cohort cutoff score' },
+    ]
+  },
+  lead: `The Selection Game is a timed, gamified aptitude assessment that serves as the primary filtering mechanism for the SIWES program. Every applicant in an ApplicationCohort takes the same game at a scheduled time, and those who exceed the configured cutoff score are automatically advanced to the verification stage.`,
+  toc: [
+    { id: 'access', title: 'How Students Access It' },
+    { id: 'game-structure', title: 'Game Structure' },
+    { id: 'scoring', title: 'Scoring & Cutoff' },
+    { id: 'entities', title: 'Entities: SelectionGame & GameAttempt' },
+  ],
+  body: `
+How Students Access It
+There is no separate link distributed for the game. Once a student has registered and their Application status is game_pending, their dashboard shows a countdown to the scheduled game time. When the time arrives, a "Play" button appears on the dashboard itself — accessed via access_method: dashboard_link. This avoids link-distribution logistics and ensures only registered applicants with an active Application can enter.
+Game Structure
+The game's internal structure — number of questions, question types, time penalties for wrong answers, any inter-round progression — is stored in the configuration JSON field on SelectionGame. This keeps the entity schema stable while allowing the game design to evolve across cohorts. The exact mechanics (whether it involves puzzles, timed questions, or interactive challenges) are defined per cohort by admins.
+Scoring & Cutoff
+Each GameAttempt records the student's raw score. After all attempts are submitted, the system compares each score against ApplicationCohort.game_cutoff_score and sets passed = true/false on each attempt. The Application status is then automatically advanced for passing students. The admin dashboard surfaces only the passing group for verification, reducing noise.
+Entities
+  SelectionGame
+  cohort_idFKEach cohort has one game
+  scheduled_atdatetimeWhen the game becomes accessible from the dashboard
+  duration_minutesintegerTime limit from when the student starts
+  access_methodenumdashboard_link | direct_url
+  statusenumupcoming | active | completed
+  configurationJSONQuestion count, scoring rules, time penalties, etc.
+  GameAttempt
+  game_idFKWhich SelectionGame this attempt belongs to
+  user_idFKThe applicant
+  application_idFKTies attempt back to the pipeline
+  started_at / completed_atdatetimeTiming of the attempt
+  scoreintegerRaw score from this play-through
+  passedbooleanscore ≥ ApplicationCohort.game_cutoff_score
+  attempt_dataJSONAnswers, timings, per-question breakdown
+`,
+  related: ['application-pipeline','verification','gamification']
+},
+// ═══════════════════════════════════════════
+'verification': {
+  title: 'Institutional Verification',
+  subtitle: 'Manual confirmation of a student\'s enrollment status with their institution',
+  breadcrumb: ['home','application-pipeline'],
+  infobox: {
+    title: 'VerificationRequest Entity',
+    rows: [
+      { label: 'institution_email', value: 'Where the verification email was sent' },
+      { label: 'status', value: 'pending → confirmed / denied / no_response' },
+      { label: 'follow_up_count', value: 'How many reminder emails sent' },
+      { label: 'StudentProfile fields', value: 'matric_number, institution_name, department' },
+    ]
+  },
+  lead: `Because SIWES is an institutionally-regulated scheme, the platform must confirm that each selected applicant is genuinely enrolled at the university they claim. This verification is currently a manual process: the admin team contacts schools directly using each student's matric number, and the school's response determines whether the student advances to onboarding.`,
+  toc: [
+    { id: 'why-manual', title: 'Why Manual Verification' },
+    { id: 'verification-flow', title: 'Verification Flow' },
+    { id: 'student-profile', title: 'StudentProfile Data' },
+    { id: 'outcome', title: 'Outcomes' },
+  ],
+  body: `
+Why Manual Verification
+Automated verification against Nigerian university databases is not currently feasible — there is no standard API or centralized registry. The platform therefore models the manual process faithfully: admin sends bulk emails to institutions, schools respond (sometimes requiring the student to physically remind school authorities to reply, as is common with scholarship processes), and the admin records the result. The system is designed so that verification can become more automated later without architectural changes — the VerificationRequest entity just acquires a new verified_by_api field.
+Verification Flow
+  After a student passes the game, their Application enters verification_pending status
+  The admin sends a bulk verification email to StudentProfile.institution_email with the student's name and matric number
+  A VerificationRequest record is created with status = pending
+  If no response is received, the admin can send follow-ups; follow_up_count tracks these
+  When the school responds, the admin updates status to confirmed or denied
+  A confirmed request advances the Application to verified → onboarding and triggers a notification to the student
+  A denied request marks the Application as rejected and sends a rejection email (reason withheld)
+StudentProfile Data
+The StudentProfile entity holds all SIWES-specific information about a student. It is separate from the base User entity because not all users are students (mentors, admins, and campus supervisors do not have student profiles), and because this data is collected only after game selection — the student submits it as part of the process that enables verification to begin.
+  StudentProfile — Key Fields
+  institution_namestringThe student's university or polytechnic
+  institution_emailstringSchool contact email for verification outreach
+  matric_numberstringUsed to identify the student to the institution
+  departmentstringEngineering discipline (varies by school)
+  verification_statusenumpending | verified | rejected
+  verified_byuser_idAdmin who processed the verification response
+Outcomes
+Confirmed: The student is notified by email to visit their dashboard and begin onboarding. Their Application status becomes onboarding.
+Denied: A rejection email is sent. The exact reason is not shared with the student — only that their application was unsuccessful. Their data will be purged when the cohort closes.
+No Response: Remains in pending until the cohort is closed, at which point they are treated as rejected.
+`,
+  related: ['application-pipeline','onboarding','siwes','campus']
+},
+// ═══════════════════════════════════════════
+'onboarding': {
+  title: 'Onboarding',
+  subtitle: 'Document submission and physical sign-off stage before learning begins',
+  breadcrumb: ['home','application-pipeline'],
+  infobox: {
+    title: 'OnboardingDocument Entity',
+    rows: [
+      { label: 'document_type', value: 'cys_form | logbook | acceptance_letter | id_card | other' },
+      { label: 'status', value: 'pending_review → approved / rejected / needs_reupload' },
+      { label: 'requires_physical_signature', value: 'boolean' },
+      { label: 'physical_signature_status', value: 'not_required | pending | signed' },
+      { label: 'signed_by', value: 'Campus supervisor name/ID' },
+    ]
+  },
+  lead: `Onboarding is the stage between institutional verification and active learning. It involves the student uploading official SIWES documents — primarily the CYS (Company Year Schedule) form and logbook — and having them reviewed and signed. Some documents can be processed entirely online; others require physical signatures from a campus supervisor.`,
+  toc: [
+    { id: 'required-docs', title: 'Required Documents' },
+    { id: 'digital-vs-physical', title: 'Digital vs. Physical Processing' },
+    { id: 'campus-role', title: 'Role of the Campus' },
+    { id: 'completion', title: 'Completion & Transition' },
+  ],
+  body: `
+Required Documents
+The primary SIWES documents are the CYS form (Company Year Schedule — the formal agreement between the student, institution, and placement company) and the logbook. Additional items such as an acceptance letter or ID card copy may also be required, and exact requirements can vary by institution. Each uploaded file is stored as an OnboardingDocument record with its own status and review workflow.
+Digital vs. Physical Processing
+Where possible, documents are scanned, electronically signed, and electronically stamped. The platform supports this through the OnboardingDocument record's review/approval workflow. However, some documents — particularly the logbook — carry signature requirements that cannot be fully digitised under current SIWES regulations. These are flagged with requires_physical_signature = true, and their physical_signature_status tracks whether the campus supervisor has signed.
+Institution variation: Different schools have different logbook formats — different page layouts, different places for signatures, and different signing frequencies (some weekly, some monthly). The OnboardingDocument.metadata JSON field accommodates school-specific notes and format details.
+Role of the Campus
+The campus a student selected during registration becomes the physical hub for their onboarding. The campus supervisor listed on the campus record is responsible for physically signing logbooks and stamping documents. This is why campus selection happens early in the pipeline — even before the game — so that physical signing logistics are tied to the student's record from the start.
+Completion & Transition
+Once all required OnboardingDocument records reach approved status (and any physical signatures are confirmed), the platform marks the Application as accepted and creates an Enrollment record in the learning Cohort. The student's dashboard then transitions from the onboarding form view (dashboard_state: onboarding_form) to the full learning interface (dashboard_state: full_learning). The student also receives a Gitea account at this point, provisioned automatically by the platform.
+`,
+  related: ['application-pipeline','siwes','campus','curriculum','gitea']
+},
+// ═══════════════════════════════════════════
+'curriculum': {
+  title: 'Curriculum',
+  subtitle: 'The full content hierarchy: Subject → Course → Topic → Module, with Quest, Checkpoint, and Raid assessments',
+  breadcrumb: ['home'],
+  infobox: {
+    title: 'Curriculum Hierarchy',
+    rows: [
+      { label: 'Level 1', value: 'Program (6-month program)' },
+      { label: 'Level 2', value: 'Subject (e.g. "Web Dev")' },
+      { label: 'Level 3', value: 'Course (e.g. "Golang Fundamentals")' },
+      { label: 'Level 4', value: 'Topic (e.g. "Goroutines")' },
+      { label: 'Level 5', value: 'Module (readable content unit)' },
+      { label: 'Assessment', value: 'Quest · Checkpoint · Raid' },
+      { label: 'Dependencies', value: 'CurriculumDependency (cross-entity)' },
+    ]
+  },
+  lead: `The curriculum is organized as a strict five-level hierarchy — Program, Subject, Course, Topic, Module — with three distinct assessment types hanging off this tree: Quests (individual challenges), Checkpoints (gatekeeper exams), and Raids (group projects). Each level is a separate entity with its own fields, allowing it to evolve independently. A separate CurriculumDependency entity handles prerequisite relationships between any two nodes in the tree.`,
+  toc: [
+    { id: 'hierarchy', title: 'The Hierarchy' },
+    { id: 'content-delivery', title: 'Content Delivery' },
+    { id: 'assessment-types', title: 'Assessment Types' },
+    { id: 'dependencies', title: 'Dependencies & Unlocking' },
+    { id: 'progression', title: 'Student Progression' },
+  ],
+  body: `
+The Hierarchy
+  Program— The 6-month SIWES engineering program
+  └─Subject— Broad discipline, e.g. "Backend Development", "DevOps"
+  └─Course— Structured unit students "take", e.g. "Golang Fundamentals"
+  └─Topic— Conceptual grouping, e.g. "Goroutines & Channels"
+  └─Module— Atomic content unit: what the student reads/watches
+  ├─Quest— Individual challenge attached to module/topic/course
+  ├─Checkpoint— Gatekeeper exam at course or subject boundary
+  └─Raid— Group challenge, typically at course or subject level
+Each entity in the hierarchy has an order integer for sequencing within its parent, an is_required boolean (required items are "starred"; optional items are for skill finessing), and an is_sequential boolean that gates access to the next item until the current one is complete.
+Content Delivery
+The Module is the leaf node of the content tree — the actual thing a student reads or watches. Module content is stored as content_html: rich HTML authored in the admin's TinyMCE editor. This means modules can contain any combination of text, embedded YouTube videos, code blocks, images, or downloadable resources, without the frontend needing specialized components for each media type. The frontend simply renders the HTML.
+Quests also carry a learning_materials_html field for targeted explanations tied directly to that quest's tasks — not full lectures, but concise "what you need to solve this" resources.
+Assessment Types
+  TypeWho completes itGate behaviorXPGit required
+  QuestIndividual studentSequential; must pass to unlock next questYes, with timed deadlineOften yes
+  CheckpointIndividual studentHard gate; must pass to advance phaseYes on passNo (exam format)
+  RaidAssigned groupRequired for course/subject completionYes, per member on group passTypically yes
+Dependencies & Unlocking
+Simple sequential ordering within a parent is handled by the is_sequential flag and the order field. Complex prerequisites — e.g., "you can only access Quest 5 after passing Checkpoint 1, which is in a different course" — are modelled as CurriculumDependency rows:
+  CurriculumDependency
+  item_type / item_idpolyThe entity that is locked (any curriculum type)
+  depends_on_type / depends_on_idpolyThe entity that must be satisfied first
+  dependency_typeenumcompletion | pass | min_score
+  min_scoreinteger?Required if dependency_type is min_score
+Student Progression
+A student's position in the curriculum is tracked on their Enrollment record via current_subject_id and current_course_id. Their daily activity — commits, quest solves, module reads — is aggregated nightly into StudentProgressSnapshot rows, which power the activity map graph and the roadmap tab on the dashboard. The home tab shows the "next module" as an actionable card, alongside upcoming quest deadlines and raid assignments.
+`,
+  related: ['quest','checkpoint','raid','gamification','gitea','audit-system','groups']
+},
+// ═══════════════════════════════════════════
+'quest': {
+  title: 'Quest',
+  subtitle: 'Individual coding challenges — the primary engagement and XP mechanic',
+  breadcrumb: ['home','curriculum'],
+  infobox: {
+    title: 'Quest Entity',
+    rows: [
+      { label: 'parent_type', value: 'module | topic | course' },
+      { label: 'xp_reward', value: 'Base XP on completion' },
+      { label: 'xp_deadline', value: 'Deadline for full XP earn' },
+      { label: 'xp_after_deadline', value: 'Reduced XP after deadline' },
+      { label: 'cooldown_minutes', value: 'Wait after failed attempt' },
+      { label: 'submission_type', value: 'git_repository | file_upload | auto_graded' },
+      { label: 'allows_peer_audit', value: 'boolean' },
+      { label: 'allows_betting', value: 'boolean' },
+      { label: 'language_required', value: 'e.g. golang, javascript' },
+    ]
+  },
+  lead: `Quests are the core engagement mechanic of the learning platform. Each quest is a bundle of related tasks (QuestTasks) that a student must solve, typically by writing code and submitting it to a Gitea repository. Quests are strictly sequential — a student cannot access Quest N+1 until Quest N is passed. They carry XP rewards, timed deadlines, cooldown periods after failure, and optional peer auditing and betting mechanics.`,
+  toc: [
+    { id: 'quest-structure', title: 'Quest Structure' },
+    { id: 'quest-tasks', title: 'QuestTasks' },
+    { id: 'xp-timing', title: 'XP & Timing Windows' },
+    { id: 'submission-flow', title: 'Submission Flow' },
+    { id: 'peer-betting', title: 'Peer Betting' },
+    { id: 'learning-materials', title: 'Learning Materials' },
+  ],
+  body: `
+Quest Structure
+A Quest entity is attached to a parent — a Module, Topic, or Course — and carries its own evaluation criteria, required programming language, list of allowed packages, and submission instructions. The repository_naming_convention field specifies exactly what the student's Gitea repository and file must be named (e.g., printnmvrbs.go). This naming is enforced at repository creation time by the platform's Gitea integration.
+QuestTasks
+A QuestTask is an individual question or sub-challenge within a quest. Tasks have a task_type (code, multiple_choice, short_answer, file_submission, free_response) and carry their own test_cases JSON for auto-graded code tasks. The sum of task points values determines the quest's total possible score. Each task can also carry its own learning_material_html — a targeted explanation for that specific problem, not a general lecture.
+XP & Timing Windows
+Quests can have a timed XP mechanic. The xp_deadline field marks a point in time after which completing the quest earns reduced XP (xp_after_deadline) rather than the full xp_reward. This creates urgency and rewards students who engage promptly. After the deadline, retrying still earns the reduced amount — further attempts do not earn zero, but the incentive to complete early is real.
+Submission Flow
+  Student writes their solution locally and pushes it to their Gitea repository
+  The platform's Gitea webhook receiver detects the push and triggers an automated system check
+  The system check clones the repo, runs the test_cases, and populates Submission.system_check_result
+  If system check passes and allows_peer_audit is true, the submission enters awaiting_audit status and is paired with a peer auditor
+  If the audit passes, the submission is marked passed and XP is awarded
+  If the submission fails (system check or audit), a cooldown is applied and the student must wait cooldown_minutes before retrying
+Anti-hardcoding check: Mentors and peer auditors are instructed to test code with multiple different inputs, not just the sample from the task. The audit checklist explicitly includes a no_hardcoded_answers compliance check to catch students who print a fixed output rather than computing the correct answer.
+Peer Betting
+When allows_betting = true on a quest, students in the quest phase can place a PeerBet on another student's submission. After reviewing the source code in Gitea, the bettor predicts whether the code will pass or fail. Correct predictions earn XP; incorrect predictions may cost XP. This mechanic encourages code review skills and adds a social layer to the assessment process. All bets are recorded in the PeerBet entity and resolved once the audit completes.
+Learning Materials
+Each Quest carries an optional learning_materials_html field — concise explanatory content to help the student understand and solve the quest. This is not a full lecture; it is targeted material tied directly to the quest's problem domain. Individual QuestTasks can carry their own hint and learning_material_html fields for even more granular support. All content is admin-authored HTML.
+`,
+  related: ['curriculum','checkpoint','raid','audit-system','gamification','gitea']
+},
+// ═══════════════════════════════════════════
+'checkpoint': {
+  title: 'Checkpoint',
+  subtitle: 'Gatekeeper timed exams that control access to subsequent curriculum phases',
+  breadcrumb: ['home','curriculum'],
+  infobox: {
+    title: 'Checkpoint Entity',
+    rows: [
+      { label: 'parent_type', value: 'course | subject | program' },
+      { label: 'is_required', value: 'Almost always true; gates progression' },
+      { label: 'duration_minutes', value: 'e.g. 240 standard, 480 final' },
+      { label: 'is_final', value: 'boolean; final checkpoint has no required work after' },
+      { label: 'format', value: 'online | in_person | hybrid' },
+      { label: 'passing_score', value: 'Minimum to pass (% or points)' },
+      { label: 'requires_device', value: 'laptop | phone | either | none' },
+    ]
+  },
+  lead: `Checkpoints are timed exams that act as hard gates in the curriculum. A student cannot progress to the next major phase unless they pass the checkpoint that separates it from the current phase. They can be entirely online or involve periodic physical gatherings (with laptops), and may draw questions from a configurable question bank.`,
+  toc: [
+    { id: 'role', title: 'Role in Curriculum' },
+    { id: 'formats', title: 'Online vs. Physical Formats' },
+    { id: 'question-banks', title: 'Question Banks' },
+    { id: 'schema', title: 'Entity Schema' },
+  ],
+  body: `
+Role in Curriculum
+Checkpoints sit at course or subject boundaries. Students must pass a checkpoint before gaining access to the next course or subject. The final checkpoint in the program has an extended duration (e.g., 8 hours vs. the standard 4 hours) and no required work follows it. All other checkpoints may be retaken up to max_attempts times. If a student fails and retakes, the system may also require them to re-validate previously passed quests — reinforcing understanding rather than just rote memorization.
+Online vs. Physical Formats
+The format field on a Checkpoint allows it to be marked online, in_person, or hybrid. In-person checkpoints require students to gather at a physical location with their devices. The requires_device field flags whether a laptop, phone, or either is acceptable — a logistical flag that surfaces in admin planning and student reminders. The tension between digital convenience and SIWES's physical requirements means some checkpoints will always have an in-person component.
+Question Banks
+Checkpoint questions can be drawn from a question bank rather than a fixed set, enabling different students to receive different questions from the same pool. The question_pool_size field on Checkpoint specifies how many questions are drawn per attempt. CheckpointQuestion rows can either be assigned directly to a checkpoint or left unassigned (belonging to a bank), with difficulty tags enabling stratified random selection.
+  CheckpointQuestion — Key Fields
+  checkpoint_idFK?Null if part of a question bank rather than a specific checkpoint
+  question_typeenummultiple_choice | code | short_answer | free_response
+  test_casesJSON?For code questions: input/output pairs for auto-grading
+  difficultyenumeasy | medium | hard — used for stratified bank selection
+  pointsintegerWeight of this question in the checkpoint total
+`,
+  related: ['curriculum','quest','raid','gamification']
+},
+// ═══════════════════════════════════════════
+'raid': {
+  title: 'Raid',
+  subtitle: 'Group challenges that test collaboration, code delivery, and verbal explanation',
+  breadcrumb: ['home','curriculum'],
+  infobox: {
+    title: 'Raid Entity',
+    rows: [
+      { label: 'parent_type', value: 'course | subject | program' },
+      { label: 'group_size_min/max', value: 'Configurable per raid' },
+      { label: 'distribution_method', value: 'automatic | manual | student_formed' },
+      { label: 'duration_days', value: 'Time window for group completion' },
+      { label: 'requires_code_explanation', value: 'boolean — members must explain their code' },
+      { label: 'peer_audit_required', value: 'boolean' },
+      { label: 'xp_reward', value: 'Awarded per member on group pass' },
+    ]
+  },
+  lead: `Raids are group challenges where an assigned team of students must jointly deliver a project. Unlike Quests (individual) and Checkpoints (individual exams), Raids test the ability to collaborate, divide work, and — critically — explain each other's code. If any group member cannot explain what the code does, the entire group fails.`,
+  toc: [
+    { id: 'group-formation', title: 'Group Formation' },
+    { id: 'code-explanation', title: 'The Code Explanation Requirement' },
+    { id: 'xp-sharing', title: 'XP Sharing & Inactive Members' },
+    { id: 'submission', title: 'Submission & Audit' },
+  ],
+  body: `
+Group Formation
+When a Raid becomes active, the platform creates Group records for the enrolled students using the Raid's distribution_method:
+  automatic — the system distributes students into groups within the configured size range
+  manual — a mentor arranges the groups and can add/remove members
+  student_formed — students create and join groups themselves, up to group_size_max
+A student who is marked away in their Record is excluded from automatic distribution — they retain platform access but will not be placed in a group. Mentors can manually add floating students to groups if the distribution leaves someone without a team.
+The Code Explanation Requirement
+When requires_code_explanation = true, the audit of a Raid submission includes a code explanation component. During the audit, each group member must be able to explain the portions of code they authored. If any member cannot explain their code to the auditor's satisfaction, the group fails — even if the code itself runs correctly. This rule is derived directly from real failures observed in the 01Edu system, where groups passed technical checks but had members who contributed nothing and could not explain the submission.
+XP Sharing & Inactive Members
+When a group passes a Raid, every active GroupMember receives the xp_reward automatically. This creates a risk: if an inactive student is left in a group, they receive points without contributing. Mentors are expected to remove consistently absent members from groups using the GroupMember.removed_at mechanism before the Raid completes. This is an intentional design — the platform gives mentors the tools to manage this, rather than trying to automatically detect inactivity.
+Submission & Audit
+Groups submit Raid work via a shared Gitea repository. The platform creates one GiteaRepository for the group, adds all group members as collaborators via the Gitea API, and stores the mapping in the GiteaRepository.group_id field. The audit follows the same flow as a Quest audit: clone → functional check → compliance checks → bonus questions, but the auditor evaluates the group collectively, testing each member's understanding.
+`,
+  related: ['curriculum','quest','groups','audit-system','gitea','gamification']
+},
+// ═══════════════════════════════════════════
+'gitea': {
+  title: 'Gitea Integration',
+  subtitle: 'How a self-hosted Gitea instance serves as the platform\'s Git backend',
+  breadcrumb: ['home'],
+  infobox: {
+    title: 'Gitea in This Platform',
+    rows: [
+      { label: 'Gitea role', value: 'Self-hosted Git backend' },
+      { label: 'Account provisioning', value: 'Platform calls Gitea admin API on enrollment' },
+      { label: 'Repo creation', value: 'Platform creates repos via API, enforces naming' },
+      { label: 'Push detection', value: 'Gitea webhooks → platform webhook receiver' },
+      { label: 'Automated checks', value: 'Triggered on push; results in Submission entity' },
+      { label: 'Audit cloning', value: 'Auditors clone from GiteaRepository.gitea_clone_url' },
+      { label: 'Platform entities', value: 'GiteaAccount, GiteaRepository, GiteaWebhook' },
+    ]
+  },
+  lead: `Rather than building a Git infrastructure from scratch, the platform delegates all version control operations to a self-hosted Gitea instance. Gitea handles user accounts, repositories, access control, tokens, and webhooks natively. The platform maintains thin mapping tables to link its own entities to Gitea's, and uses Gitea's REST API and webhook system to automate the code-submission pipeline.`,
+  toc: [
+    { id: 'why-gitea', title: 'Why Gitea' },
+    { id: 'account-provisioning', title: 'Account Provisioning' },
+    { id: 'repo-creation', title: 'Repository Creation & Naming' },
+    { id: 'webhooks', title: 'Webhooks & Automated Checks' },
+    { id: 'audit-flow', title: 'The Audit Clone Flow' },
+    { id: 'mapping-entities', title: 'Mapping Entities' },
+  ],
+  body: `
+Why Gitea
+Gitea is a self-hosted, open-source Git service with a full REST API, support for organizations and teams, webhook configuration, and a UI similar to GitHub — making it familiar to students who have used GitHub before. Running it self-hosted means the platform has full control over data, can enforce its own access policies, and avoids rate limits or dependency on third-party SLAs. Gitea's API supports all the operations the platform needs: creating users, creating repositories, adding collaborators, generating access tokens, and configuring webhooks.
+Account Provisioning
+When a student's onboarding is complete and their Enrollment is created, the platform automatically calls Gitea's admin API to create a user account. The Gitea username follows a naming convention (e.g., siwes-{matric_number}) to keep accounts identifiable. The platform stores the mapping in a GiteaAccount row, including the hashed API token used for programmatic operations on behalf of the student. When a student is expelled or withdrawn, the platform calls Gitea to deactivate their account.
+Repository Creation & Naming
+When a student begins a Quest or a Raid group is formed, the platform creates a repository in Gitea via the API. The repository name must match the repository_naming_convention specified on the Quest or Raid entity (e.g., the platform would enforce that the repo is named exactly ascii-art or that it contains a file named printnmvrbs.go). The clone URL and Gitea-internal repo ID are stored in a GiteaRepository row, alongside the quest/raid/group it belongs to.
+For Raid submissions, the platform adds all group members as collaborators to the shared repository using Gitea's collaborator API.
+Webhooks & Automated Checks
+When a student pushes code to their Gitea repository, Gitea fires a push webhook to the platform's webhook receiver endpoint. The platform uses this event to:
+  Update GiteaRepository.last_push_detected_at
+  Record a daily activity point in StudentProgressSnapshot.activity_data
+  Trigger the automated system check: clone the repo, run the configured test_cases from the Quest's QuestTasks, and write the result to Submission.system_check_result
+  Update Submission.status to reflect the outcome (passed, failed, or awaiting_audit)
+Webhook configuration is tracked per-repository in the optional GiteaWebhook entity (or managed as platform infrastructure config, depending on implementation preference).
+The Audit Clone Flow
+When a mentor or peer auditor is assigned to review a submission, they receive the Gitea clone URL from the GiteaRepository record. The auditor runs the clone command in their terminal (git clone {url}), verifies that the clone succeeds (a failed clone is itself a fail condition), and then manually evaluates the code. The audit checklist in Audit.compliance_checks includes a clone_successful field — if cloning fails, the audit stops there and the submission is marked failed.
+Mapping Entities
+  GiteaAccount
+  user_idFKPlatform user this Gitea account belongs to
+  gitea_user_idintegerGitea's internal user ID
+  gitea_usernamestringe.g. siwes-2021001234
+  access_token_hashstringHashed API token for programmatic access
+  is_activebooleanSet false on expulsion; platform calls Gitea to deactivate
+  GiteaRepository
+  gitea_repo_idintegerGitea's internal repo ID
+  gitea_repo_namestringEnforced at creation to match Quest/Raid naming convention
+  gitea_clone_urlstringFull URL used by students and auditors to clone
+  quest_id / raid_id / group_idFK?What this repo belongs to (at most one should be set)
+  last_push_detected_atdatetime?Updated by webhook on every push
+`,
+  related: ['quest','raid','audit-system','application-pipeline','curriculum']
+},
+// ═══════════════════════════════════════════
+'siwes': {
+  title: 'SIWES Documentation',
+  subtitle: 'How the platform handles Nigeria\'s Students Industrial Work Experience Scheme requirements',
+  breadcrumb: ['home'],
+  infobox: {
+    title: 'SIWES Layer',
+    rows: [
+      { label: 'Full name', value: 'Students Industrial Work Experience Scheme' },
+      { label: 'Regulator', value: 'ITF (Industrial Training Fund), Nigeria' },
+      { label: 'Key documents', value: 'CYS form, Logbook' },
+      { label: 'Physical requirement', value: 'Logbook must be signed by supervisor' },
+      { label: 'Entities', value: 'Logbook, LogbookEntry, OnboardingDocument' },
+      { label: 'Institution variation', value: 'Logbook formats differ by school' },
+    ]
+  },
+  lead: `SIWES is a mandatory scheme for Nigerian engineering students, requiring them to undergo supervised industrial attachment and maintain documented evidence of their work through logbooks and official forms. The platform is built around SIWES compliance — from the campus selection that ties students to physical supervisors, to the document onboarding flow, to the logbook entities that track weekly entries and signatures.`,
+  toc: [
+    { id: 'what-is-siwes', title: 'What is SIWES' },
+    { id: 'logbook', title: 'The Logbook' },
+    { id: 'cys-form', title: 'The CYS Form' },
+    { id: 'institution-variation', title: 'Institution Variation' },
+  ],
+  body: `
+What is SIWES
+The Students Industrial Work Experience Scheme (SIWES) is a skills training programme established by the Industrial Training Fund (ITF) to expose Nigerian university and polytechnic students to industrial work situations related to their courses of study. Most Nigerian engineering programmes require a minimum of 6 months of SIWES before graduation. Students must be placed with an approved company, maintain a logbook of daily/weekly work, and have the logbook signed by their industrial supervisor.
+This platform serves as the industrial placement — the company students are attached to — providing structured software engineering training as the SIWES experience. The program's online nature is accommodated by SIWES regulations, but physical documentation (logbook signatures, CYS form stamping) still applies.
+The Logbook
+The SIWES logbook is a physical or digital record of a student's daily and weekly industrial activities. Ideally, entries should be written daily and signed weekly by the industrial supervisor. The platform models this through two entities:
+  Logbook
+  enrollment_idFKThe student's active enrollment
+  campus_idFKDetermines which supervisor handles physical signing
+  institution_formattext?Notes on the student's school's specific logbook format
+  statusenumnot_started | in_progress | pending_signature | signed | completed
+  LogbookEntry
+  entry_datedateThe date this entry covers
+  week_numberintegerWhich week of the program
+  contenttextWhat the student did/learned that day or week
+  supervisor_signedbooleanWhether the campus supervisor has physically signed this entry
+  supervisor_commentstext?Optional comments from the supervisor at signing
+The CYS Form
+The Company Year Schedule (CYS) form is the formal agreement document between the student, their institution, and the placement organization. It must be completed and submitted during onboarding. The platform accepts it as a scanned upload (OnboardingDocument.document_type = 'cys_form'), and the campus office can apply an electronic stamp where regulations allow. Where a physical stamp is required, requires_physical_signature = true and the campus supervisor handles it.
+Institution Variation
+A significant practical challenge is that Nigerian universities and polytechnics use different logbook formats — different page layouts, different column structures, different places for signatures, and different schedules for when entries must be made. The Logbook.institution_format text field and OnboardingDocument.metadata JSON field exist to capture these variations. The platform cannot standardize what the institutions have not standardized; instead, it accommodates variation and surfaces it to campus staff who handle the physical elements.
+`,
+  related: ['campus','onboarding','application-pipeline','verification']
+},
+// ═══════════════════════════════════════════
+'community': {
+  title: 'Community & Social Layer',
+  subtitle: 'Group discussions, direct messaging, and friendships within the learning platform',
+  breadcrumb: ['home'],
+  infobox: {
+    title: 'Community Entities',
+    rows: [
+      { label: 'Post', value: 'Message in a group or global feed' },
+      { label: 'DirectMessage', value: 'Private message between two users' },
+      { label: 'Friendship', value: 'Bidirectional social relationship' },
+      { label: 'Group (community)', value: 'System-created chat group, time-limited' },
+      { label: 'Group lifespan_weeks', value: 'Configurable; group dissolves after period ends' },
+    ]
+  },
+  lead: `The platform includes a built-in social layer to support peer learning and cohort cohesion. Community groups are system-created (not user-created), dissolve after a configured period, and function like channels in Discord or Telegram. A global or program-wide feed, direct messaging, and a friend/relationship graph round out the social features.`,
+  toc: [
+    { id: 'village-square', title: 'The Village Square' },
+    { id: 'groups', title: 'Community Groups' },
+    { id: 'posts', title: 'Posts & Threading' },
+    { id: 'dms', title: 'Direct Messages' },
+    { id: 'friendships', title: 'Friendships' },
+    { id: 'dashboard', title: 'Dashboard Placement' },
+  ],
+  body: `
+The Village Square
+The community section of the student dashboard is conceptualized as a "village square" — a central gathering place where cohort members interact, ask questions, share discoveries, and support each other. The design metaphor evokes a national assembly or town hall, with the home view showing the roadmap prominently alongside community activity. The community tab is always accessible but is secondary to the actionable learning content on the home tab.
+Community Groups
+Community groups are created by the system, not by students. This distinguishes them from Discord or WhatsApp where anyone can create groups, which can fragment a cohort's communication into unmonitored channels. Each group has a lifespan_weeks — typically 24 weeks — after which it is dissolved (dissolved_at is set, all members' access to the group chat ends). Students are assigned to groups during cohort setup. This creates a sense of temporary but meaningful belonging, similar to a study group for a semester.
+Note: Community groups are distinct from Raid teams and audit pairs. All three types are modelled under the same Group entity with a type field (community_group, raid_team, audit_pair), but they have different lifecycles and behaviors.
+Posts & Threading
+A Post is a message in a community group's feed or the program-wide feed (when group_id is null). Posts support threading through the parent_post_id self-reference — replies nest under the original post. Admins and mentors can pin posts (is_pinned = true). Deleted posts are soft-deleted (is_deleted = true) to preserve thread structure. Content is plain text or light HTML.
+Direct Messages
+The DirectMessage entity enables private one-to-one communication between any two users on the platform — students, mentors, or admins. Messages track read_at for read receipt functionality. Like posts, DMs are soft-deleted. There is no group DM mechanic in the current design; multi-person conversations happen in community groups.
+Friendships
+Students can add each other as friends through a bidirectional Friendship entity. The requesting user is recorded in requested_by, and the relationship moves through pending → accepted (or declined). Friends may receive preferential visibility into each other's activity, or the friendship may simply be used as a contact list for DM discovery. The exact UI behavior is a frontend concern; the entity provides the data primitive.
+Dashboard Placement
+The community features live on a dedicated "Community" tab in the student dashboard. The home tab shows the next actionable module, XP, and rank. The roadmap tab shows curriculum progress. The community tab is the social hub. Within it, students see their assigned community group's chat, the program-wide feed, their DM inbox, and their friend list. The design goal is to make the platform feel like a "talent nation" — a social environment with shared purpose, not just a course viewer.
+`,
+  related: ['groups','gamification','curriculum','home']
+},
+// ═══════════════════════════════════════════
+'gamification': {
+  title: 'XP, Rankings & Gamification',
+  subtitle: 'Experience points, leaderboards, and progress metrics on the student dashboard',
+  breadcrumb: ['home'],
+  infobox: {
+    title: 'Gamification Entities',
+    rows: [
+      { label: 'XPTransaction', value: 'Immutable ledger of every XP change' },
+      { label: 'Leaderboard', value: 'Configurable ranking view per scope' },
+      { label: 'Enrollment.rank', value: 'e.g. "51 out of 150"' },
+      { label: 'Enrollment.level', value: 'Derived from XP thresholds' },
+      { label: 'PeerBet', value: 'Betting on peer code outcomes for XP' },
+    ]
+  },
+  lead: `Gamification is central to the platform's engagement model. Students accumulate XP through completing modules, passing quests, clearing checkpoints, and winning peer bets. XP is tracked as an immutable ledger of transactions, and students can see their rank among cohort peers on the dashboard. These mechanics create urgency, competition, and a sense of progression.`,
+  toc: [
+    { id: 'xp-ledger', title: 'XP as an Immutable Ledger' },
+    { id: 'xp-sources', title: 'XP Sources' },
+    { id: 'timed-xp', title: 'Timed XP Windows' },
+    { id: 'leaderboard', title: 'Leaderboard & Rank' },
+    { id: 'dashboard-display', title: 'Dashboard Display' },
+  ],
+  body: `
+XP as an Immutable Ledger
+Rather than storing a single mutable xp_total field on the Enrollment record, every XP event is recorded as an XPTransaction row. The current balance is always derived by summing the amounts. This approach provides a complete audit trail (admins can see exactly where every point came from), makes it easy to reverse erroneous awards (add a negative transaction), and avoids race conditions that could corrupt a single balance field under concurrent events.
+  XPTransaction
+  enrollment_idFKThe student who earned/lost the XP
+  amountintegerPositive (earn) or negative (penalty/reversal)
+  source_typeenummodule_completion | quest_completion | quest_bonus | checkpoint_pass | raid_pass | peer_bet | penalty | manual_adjustment
+  source_idpoly FKThe specific Submission, Audit, PeerBet, or Record that caused this transaction
+  descriptiontextHuman-readable explanation, shown in XP history
+  awarded_byuser_id?Set only for manual_adjustment; identifies the admin
+XP Sources
+  SourceTriggerXP field
+  Module completionStudent marks module as readModule.xp_reward
+  Quest passSubmission marked passed after auditQuest.xp_reward
+  Quest bonusBonus criteria met during auditAudit.xp_modifier
+  Checkpoint passCheckpoint exam scored above passing_scoreCheckpoint configuration
+  Raid passGroup's submission passes; all active members rewardedRaid.xp_reward (per member)
+  Peer bet wonPeerBet.bet_correct = truePeerBet.xp_reward
+  Manual adjustmentAdmin actionXPTransaction directly
+Timed XP Windows
+Quests can have an xp_deadline. Completing the quest before the deadline awards the full Quest.xp_reward; completing it after awards the reduced Quest.xp_after_deadline. This creates urgency and rewards active, timely engagement. The same mechanic can express itself differently per cohort by adjusting the deadline configuration without changing the quest itself.
+Leaderboard & Rank
+The Leaderboard entity defines configurable ranking views. A leaderboard has a scope_type (cohort, program, campus, or course) and a ranking_metric (xp_total, quests_completed, raids_passed, or custom). The student's current rank — e.g., "51 out of 150" — is computed from the leaderboard and stored as a derived field on their Enrollment. Leaderboards can be anonymized (showing only the student's own rank without others' names) or fully public, depending on the program's configuration.
+Dashboard Display
+The student home tab prominently displays their XP total, rank, and level/title (derived from XP thresholds). The roadmap tab shows the StudentProgressSnapshot activity map — a grid of daily activity squares, similar to GitHub's contribution graph — alongside a progress graph through the curriculum stages. The community tab shows the leaderboard in context. Settings allow students to change password and theme preferences.
+`,
+  related: ['quest','raid','checkpoint','community','curriculum','audit-system']
+},
+// ═══════════════════════════════════════════
+'groups': {
+  title: 'Groups',
+  subtitle: 'Student groupings for Raids, peer auditing, and community chat',
+  breadcrumb: ['home'],
+  infobox: {
+    title: 'Group Entity',
+    rows: [
+      { label: 'type', value: 'raid_team | audit_pair | community_group' },
+      { label: 'max_size', value: 'Configurable per type (3 for pairs, up to 10 for community)' },
+      { label: 'distribution_method', value: 'automatic | manual | student_formed' },
+      { label: 'lifespan_weeks', value: 'Community groups dissolve after this period' },
+      { label: 'status', value: 'active | completed | disbanded' },
+    ]
+  },
+  lead: `The Group entity serves three distinct purposes in the platform: forming teams for Raid challenges, pairing students for peer auditing, and housing community chat groups. All three are modelled under the same entity with a type discriminator, but they have different size limits, distribution methods, and lifecycles.`,
+  toc: [
+    { id: 'group-types', title: 'Group Types' },
+    { id: 'distribution', title: 'Distribution Methods' },
+    { id: 'mentor-management', title: 'Mentor Management' },
+    { id: 'xp-risk', title: 'XP Risk & Inactive Members' },
+    { id: 'lifecycle', title: 'Group Lifecycle' },
+  ],
+  body: `
+Group Types
+  TypePurposeTypical sizeLifespan
+  raid_teamComplete a Raid challenge together3–10 (per Raid config)Duration of the Raid
+  audit_pairReview each other's Quest submissions2Duration of the quest audit
+  community_groupOngoing social chat and discussionUp to 10lifespan_weeks (e.g. 24 weeks)
+Distribution Methods
+automatic: The system distributes enrolled students into groups within the configured size range. For community groups, this is done once at the start of the cohort. For raids, it is done when the raid becomes active. Students marked away in their Record are excluded from automatic distribution.
+manual: A mentor explicitly arranges the groups. Useful when specific pairings are needed (e.g., balancing skill levels or accommodating campus constraints).
+student_formed: Students create groups and invite each other, subject to the size limit. Mentors retain the ability to add/remove members.
+Mentor Management
+Regardless of how a group was formed, mentors can always add or remove members from a group using the GroupMember entity. Removals record removed_at, removed_by, and removal_reason. Mentors can also shuffle group composition after automatic distribution — e.g., if a student's attendance changes or a group is unbalanced. If a student is removed from a Raid group after the group has been formed but before the Raid completes, they lose access to the group's Gitea repository collaborator role.
+XP Risk & Inactive Members
+When a Raid group passes, every active GroupMember (where is_active = true and removed_at is null) automatically receives the Raid.xp_reward via an XPTransaction. This means an inactive student who has not been removed from the group would receive points they did not earn. Mentors are expected to proactively remove non-participating students from groups, which is why the GroupMember.removal_reason field exists — to provide a documented rationale for the removal.
+Group Lifecycle
+A group's status moves from active → completed (Raid passed) or disbanded (dissolved administratively or at the end of a community group's lifespan). When a community group reaches its dissolved_at datetime, members lose access to the group chat. Historical messages are retained for the platform's records but are no longer accessible to students.
+`,
+  related: ['raid','audit-system','community','gamification','records']
+},
+// ═══════════════════════════════════════════
+'records': {
+  title: 'Records & Restrictions',
+  subtitle: 'How mentors document student behavior and impose system-level consequences',
+  breadcrumb: ['home'],
+  infobox: {
+    title: 'Record Consequences',
+    rows: [
+      { label: 'observation', value: 'No consequence; just a note on the profile' },
+      { label: 'notice', value: 'Banner shown on student\'s dashboard' },
+      { label: 'away', value: 'Excluded from distribution; keeps platform access' },
+      { label: 'restrict', value: 'Temporary access limitation (minutes to weeks)' },
+      { label: 'block', value: 'Long-period access limitation' },
+      { label: 'expel', value: 'Permanent platform removal; not reversible' },
+    ]
+  },
+  lead: `The Record system gives mentors and admins a structured way to document student activity and apply consequences. Records range from pure observations with no effects to permanent expulsions. The system separates the record (the documented decision and reason) from its effects (the actual system actions), allowing the same record type to produce different consequences in different program configurations.`,
+  toc: [
+    { id: 'record-types', title: 'Record Types & Consequences' },
+    { id: 'effects', title: 'RecordEffect Separation' },
+    { id: 'timing', title: 'Timing: Immediate vs. Scheduled' },
+    { id: 'ending', title: 'Ending a Record' },
+    { id: 'dashboard-notice', title: 'Dashboard Notices' },
+    { id: 'away-status', title: 'The Away Status' },
+  ],
+  body: `
+Record Types & Consequences
+A Record is created by a mentor or admin on a student's profile. The type field describes what the record is; the consequence field describes what happens as a result. These can differ — a record of type: observation always has consequence: none, but a type: restriction record can have varying effect durations depending on its configuration.
+  TypeReversibleCommon use
+  observationN/AMentor notes: attendance concerns, positive feedback, context for later records
+  noticeYes (auto or manual)Temporary warning banner on student's dashboard
+  awayYes (manual)Student is temporarily unavailable; excluded from group distribution but keeps access
+  restrictionYes (auto or manual)Temporary access limitation — e.g., 2 weeks, 30 minutes
+  blockYes (manual)Long-period access limitation for serious or repeated violations
+  expulsionNoPermanent platform removal; student loses all access immediately
+RecordEffect Separation
+A RecordEffect row describes one concrete system action triggered by a Record. A single Record can spawn multiple RecordEffect rows — for example, a restrict record might produce both a revoke_platform_access effect and a dashboard_banner effect. This separation means:
+  Effects can be individually toggled without changing the Record
+  Different programs can configure different effects for the same record type
+  The system can end individual effects (e.g., restore access while keeping the banner) without ending the Record itself
+Available effect types: revoke_platform_access, exclude_from_distribution, revoke_audit_access, dashboard_banner, restrict_submissions.
+Timing: Immediate vs. Scheduled
+When creating a Record, the admin configures whether it takes effect immediately (effective_immediately = true) or at a scheduled effective_at datetime. They also choose whether it ends automatically (end_type: automatic, with auto_end_at set) or must be manually ended (end_type: manual). A restriction might be set for exactly 2 weeks with automatic expiry, or it might be left open-ended for the mentor to resolve after meeting with the student.
+Ending a Record
+Active Records (except expulsions, which are permanent) can be ended by an admin. When a Record is ended, the platform sets ended_at and ended_by on the Record, and marks all associated RecordEffect rows as is_active = false. The student's access is restored and any dashboard notice is removed. The Record itself remains in the database permanently as a documented history of the event.
+Dashboard Notices
+The dashboard_notice field on a Record contains text that is displayed directly on the student's dashboard while the Record is active. This is distinct from system-generated notifications — it is a persistent, visible notice that the student sees every time they log in. It is used for warnings, temporary notices, or context that the student needs to see immediately.
+The Away Status
+The away record type is a soft status for students who are temporarily unavailable (illness, family emergency, etc.). It is the only status that explicitly preserves platform access while modifying group behaviour. Students marked away retain full learning access but the system's group distribution algorithm excludes them — they will not be automatically assigned to Raid teams or audit pairs while the away record is active.
+`,
+  related: ['groups','audit-system','gamification','home']
+},
+// ═══════════════════════════════════════════
+'audit-system': {
+  title: 'Audit System',
+  subtitle: 'How quest and raid submissions are evaluated by mentors and peers',
+  breadcrumb: ['home'],
+  infobox: {
+    title: 'Audit Entities',
+    rows: [
+      { label: 'Audit', value: 'An evaluation of a specific Submission' },
+      { label: 'auditor_type', value: 'coding_mentor | peer | system' },
+      { label: 'verification_code', value: 'Both parties confirm identity before starting' },
+      { label: 'AuditQuestion.category', value: 'requirement | functional | compliance | bonus | social' },
+      { label: 'has_consequence', value: 'Only requirement/functional questions affect pass/fail' },
+      { label: 'PeerBet', value: 'XP wager on a peer\'s submission outcome' },
+    ]
+  },
+  lead: `After a student pushes code and the automated system check passes, submissions enter a human audit phase. Audits are structured evaluations following a configurable checklist — covering repository cloning, functional correctness, compliance checks (correct language, no hardcoded answers), and optional bonus questions. Audits can be performed by coding mentors or by peer students, and can be reassigned between mentors.`,
+  toc: [
+    { id: 'audit-flow', title: 'Audit Flow' },
+    { id: 'verification-codes', title: 'Verification Codes' },
+    { id: 'checklist', title: 'The Audit Checklist' },
+    { id: 'bonus-questions', title: 'Bonus Questions' },
+    { id: 'peer-auditing', title: 'Peer Auditing' },
+    { id: 'reassignment', title: 'Reassignment' },
+  ],
+  body: `
+Audit Flow
+  Student's Submission passes automated system check → status becomes awaiting_audit
+  An Audit record is created and assigned to a coding mentor (or a peer, if Quest.allows_peer_audit = true)
+  Both the auditor and the student enter a verification code to confirm identities
+  The auditor clones the student's Gitea repository locally
+  The auditor works through the checklist questions, recording answers in Audit.compliance_checks
+  The auditor submits the audit with a final result: pass | fail and written feedback
+  On pass: XP is awarded via XPTransaction; Submission status → passed
+  On fail: student is notified; a cooldown is applied to the Submission before retry is allowed
+Verification Codes
+Before an audit can begin, both parties must enter a generated verification code into the platform. This confirms that the correct student is present and the correct auditor is conducting the review — preventing one student from submitting work that was written by someone else, or an audit being conducted without the student's knowledge. The code is generated by the platform and displayed to both parties once the audit session is opened.
+The Audit Checklist
+The checklist is driven by AuditQuestion records attached to the quest or raid being audited. Questions are categorized:
+  CategoryAffects pass/fail?Examples
+  requirementYesDid the repo clone successfully? Is the project functional?
+  functionalYesDoes it handle multiple inputs correctly? Are there 500 errors?
+  complianceYesIs it written in the required language (e.g., Golang)? Are only allowed packages used? Are answers computed rather than hardcoded?
+  bonusNoIs the code efficient? Does it follow best practices? What did the student learn?
+  socialNoDid the student explain their approach clearly?
+Bonus and social questions are explicitly non-consequential — answering them well earns additional XP, but failing them does not cause the audit to fail. This is important: a student who passes all requirement/functional/compliance checks is considered to have passed the audit, regardless of bonus answers.
+Bonus Questions
+Bonus questions reward depth of understanding and good engineering practices without punishing students who simply met the requirements. The auditor records responses in Audit.bonus_responses (JSON). If the student's answers meet the bonus criteria, the platform awards additional XP via Audit.xp_modifier on top of the base quest XP.
+Peer Auditing
+When a Quest has allows_peer_audit = true, the auditor can be a fellow student rather than a coding mentor. Peer auditors are paired by the system or assigned by a mentor. The same checklist and verification code system applies. In the quest betting mechanic, peers who review source code before the audit can place a PeerBet on whether the submission will pass or fail, earning or losing XP on their prediction.
+Reassignment
+A coding mentor can reassign any audit to themselves or to another mentor in the same campus. The Audit.assigned_by field tracks who made the assignment. Reassignment is useful when the original auditor is unavailable, has a conflict of interest, or when a second opinion is needed. The reassignment resets the audit to assigned status for the new auditor.
+`,
+  related: ['quest','raid','groups','gamification','gitea','records']
+},
+// ═══════════════════════════════════════════
+'campus': {
+  title: 'Campus',
+  subtitle: 'Physical locations that anchor students to a SIWES supervisor and signing facility',
+  breadcrumb: ['home'],
+  infobox: {
+    title: 'Campus Entity',
+    rows: [
+      { label: 'location', value: 'City, state, address' },
+      { label: 'supervisor_contact', value: 'JSON: name, email, phone of the signing supervisor' },
+      { label: 'capacity', value: 'Max students that can be assigned' },
+      { label: 'settings_overrides', value: 'JSON: campus-level config overrides' },
+      { label: 'Role', value: 'Physical signing, logbook management, in-person checkpoints' },
+    ]
+  },
+  lead: `Although the program is primarily online, every student must be affiliated with a physical campus. The campus is the student's SIWES physical anchor — it determines who signs their logbook, who stamps their CYS form, and where any in-person checkpoint sessions take place. Campus selection happens early in the application pipeline, before the selection game.`,
+  toc: [
+    { id: 'why-campus', title: 'Why Campus Exists in an Online Program' },
+    { id: 'selection', title: 'Campus Selection' },
+    { id: 'signing', title: 'Signing Responsibilities' },
+    { id: 'config', title: 'Campus-Level Configuration' },
+  ],
+  body: `
+Why Campus Exists in an Online Program
+SIWES regulations require that students' logbooks be physically signed by an industrial supervisor, and that CYS forms carry an official stamp. These requirements cannot be entirely digitised under current regulations. The campus entity represents a physical office or center where the organization has a presence, staffed by at least one supervisor who can perform these physical duties. Even though day-to-day learning is online, the campus is a mandatory administrative anchor for each student's SIWES record.
+Campus Selection
+Students select their campus during or immediately after registration — before the selection game. This early placement matters because campus selection affects physical document logistics from the start of the process. The selected campus is stored on the Application record and carried through to the Enrollment when the student is accepted.
+Location may optionally be inferred from the student's IP address to suggest a nearby campus, but the student explicitly confirms their selection. This avoids the situation where a student is assigned to a campus that is geographically inconvenient for the rare physical interactions required.
+Signing Responsibilities
+The Campus.supervisor_contact JSON field stores the name, email, and phone of the campus supervisor responsible for physical document handling. This supervisor:
+  Signs LogbookEntry records weekly (updating supervisor_signed = true)
+  Stamps OnboardingDocument records that require physical stamping
+  Hosts any in-person Checkpoint sessions assigned to their campus
+  Is the student's point of contact for any physical SIWES matters
+Campus-Level Configuration
+Campuses can override organization-level configuration through settings_overrides. This is particularly relevant for notification templates (a campus may want to add local contact details to emails), group distribution rules (a campus may have a smaller student pool requiring different size limits), or physical checkpoint scheduling. The cascading configuration system resolves settings in order: Organization → Campus → Program → Cohort, with each level able to override the one above.
+`,
+  related: ['siwes','onboarding','application-pipeline','verification','records']
+},
+}; // END PAGES
+// ──────────────────────────────────────────
+// ROUTER & RENDERER
+// ──────────────────────────────────────────
+const ALL_PAGE_REFS = Object.keys(PAGES).map(id => ({
+  id,
+  title: PAGES[id].title,
+  subtitle: PAGES[id].subtitle || ''
+}));
+function navigate(pageId) {
+  window.location.hash = pageId;
+}
+function renderPage(pageId) {
+  const page = PAGES[pageId] || PAGES['home'];
+  // breadcrumb
+  const bc = document.getElementById('breadcrumb');
+  let breadHTML = 'Main page';
+  if (page.breadcrumb && page.breadcrumb.length) {
+    page.breadcrumb.forEach(crumb => {
+      const crumbPage = PAGES[crumb];
+      if (crumbPage) breadHTML += ` › ${crumbPage.title.split('—')[0].trim()}`;
+    });
+  }
+  if (pageId !== 'home') breadHTML += ` › ${page.title}`;
+  bc.innerHTML = breadHTML;
+  document.getElementById('page-title').textContent = page.title;
+  document.getElementById('page-subtitle').textContent = page.subtitle || '';
+  document.getElementById('page-lead').innerHTML = page.lead || '';
+  // update nav active state
+  document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+  // build body
+  const body = document.getElementById('page-body');
+  let html = '';
+  // infobox
+  if (page.infobox) {
+    html += `
+      ${page.infobox.title}`;
+    if (page.infobox.subtitle) html += `${page.infobox.subtitle}`;
+    html += ``;
+    page.infobox.rows.forEach(row => {
+      html += `${row.label}${row.value}`;
+    });
+    html += ``;
+  }
+  // TOC
+  if (page.toc && page.toc.length > 0) {
+    html += `Contents`;
+    page.toc.forEach((item, i) => {
+      html += `${item.title}`;
+    });
+    html += ``;
+  }
+  html += page.body || '';
+  // related pages
+  if (page.related && page.related.length) {
+    html += `See also`;
+    page.related.forEach(relId => {
+      const relPage = PAGES[relId];
+      if (relPage) {
+        html += `${relPage.title.split('—')[0].trim()}`;
+      }
+    });
+    html += ``;
+  }
+  body.innerHTML = html;
+  // make all internal #hash links work through router
+  body.querySelectorAll('a[href^="#"]').forEach(link => {
+    const target = link.getAttribute('href').slice(1);
+    if (PAGES[target]) {
+      link.removeAttribute('href');
+      link.style.cursor = 'pointer';
+      link.onclick = () => navigate(target);
+    }
+  });
+  window.scrollTo(0, 0);
+  document.title = `${page.title} — TalentNation Platform Wiki`;
+}
+// ──────────────────────────────────────────
+// SEARCH
+// ──────────────────────────────────────────
+const searchInput = document.getElementById('search-input');
+const searchResults = document.getElementById('search-results');
+searchInput.addEventListener('input', () => {
+  const q = searchInput.value.trim().toLowerCase();
+  if (!q) { searchResults.style.display = 'none'; return; }
+  const matches = ALL_PAGE_REFS.filter(p =>
+    p.title.toLowerCase().includes(q) || p.subtitle.toLowerCase().includes(q)
+  ).slice(0, 8);
+  if (!matches.length) { searchResults.style.display = 'none'; return; }
+  searchResults.innerHTML = matches.map(p =>
+    `
+      ${p.title}
+      ${p.subtitle}
+    `
+  ).join('');
+  searchResults.style.display = 'block';
+});
+document.getElementById('search-btn').onclick = () => {
+  const q = searchInput.value.trim().toLowerCase();
+  const match = ALL_PAGE_REFS.find(p => p.title.toLowerCase().includes(q));
+  if (match) { navigate(match.id); searchInput.value = ''; searchResults.style.display = 'none'; }
+};
+searchInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('search-btn').click();
+  if (e.key === 'Escape') { searchResults.style.display = 'none'; }
+});
+document.addEventListener('click', e => {
+  if (!e.target.closest('#site-search')) searchResults.style.display = 'none';
+});
+// ──────────────────────────────────────────
+// INIT
+// ──────────────────────────────────────────
+window.addEventListener('hashchange', () => {
+  const pageId = window.location.hash.slice(1) || 'home';
+  renderPage(pageId);
+});
+renderPage(window.location.hash.slice(1) || 'home');
