@@ -83,8 +83,8 @@ const Login = () => {
           </div>
 
           <Button variant="soft" size="lg" asChild className="mt-4 w-full gap-2">
-            <Link to="/register">
-              <UserPlus className="h-4 w-4" /> New applicant registration
+            <Link to="/signup">
+              <UserPlus className="h-4 w-4" /> New applicant 
             </Link>
           </Button>
         </section>
