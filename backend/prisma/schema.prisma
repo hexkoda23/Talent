@@ -54,6 +54,20 @@ enum ProgressionDashboardState {
   full_learning
 }
 
+enum OnboardingDocumentType {
+  cys_form
+  logbook
+  acceptance_letter
+  other
+}
+
+enum OnboardingDocumentStatus {
+  pending_review
+  approved
+  rejected
+  needs_reupload
+}
+
 model Organization {
   id        String   @id @default(uuid())
   name      String
@@ -97,6 +111,7 @@ model User {
   applications    Application[]
   refreshTokens   RefreshToken[]
   userRoles       UserRole[]
+  gameAttempts    GameAttempt[]
 }
 
 model StudentProfile {
@@ -144,6 +159,8 @@ model Application {
   cohort                  ApplicationCohort @relation(fields: [cohortId], references: [id])
   campus                  Campus            @relation(fields: [campusId], references: [id])
   registrationDocuments   RegistrationDocument[]
+  gameAttempts            GameAttempt[]
+  onboardingDocuments     OnboardingDocument[]
 
   @@index([userId, registeredAt])
 }
@@ -152,11 +169,52 @@ model SelectionGame {
   id               String              @id @default(uuid())
   cohortId         String              @unique
   name             String
+  description      String?
   scheduledAt      DateTime
   durationMinutes  Int
+  accessMethod     String?
+  configuration    Json?
   status           SelectionGameStatus @default(upcoming)
 
   cohort           ApplicationCohort   @relation(fields: [cohortId], references: [id])
+  attempts         GameAttempt[]
+}
+
+model GameAttempt {
+  id              String    @id @default(uuid())
+  gameId          String
+  userId          String
+  applicationId   String
+  startedAt       DateTime  @default(now())
+  deadlineAt      DateTime
+  completedAt     DateTime?
+  score           Int?
+  passed          Boolean?
+  breakdown       Json?
+  attemptData     Json?
+  timeElapsedSeconds Int?
+
+  game            SelectionGame @relation(fields: [gameId], references: [id])
+  user            User          @relation(fields: [userId], references: [id])
+  application     Application   @relation(fields: [applicationId], references: [id])
+
+  @@index([userId, startedAt])
+  @@index([applicationId, startedAt])
+}
+
+model OnboardingDocument {
+  id                String                    @id @default(uuid())
+  applicationId     String
+  documentType      OnboardingDocumentType
+  fileUrl           String
+  originalFilename  String
+  status            OnboardingDocumentStatus  @default(pending_review)
+  metadata          Json?
+  uploadedAt        DateTime                  @default(now())
+
+  application       Application @relation(fields: [applicationId], references: [id])
+
+  @@index([applicationId, documentType])
 }
 
 model SelectionGameAttempt {

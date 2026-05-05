@@ -9,6 +9,9 @@ import { CampusesModule } from './campuses/campuses.module';
 import { StorageModule } from './storage/storage.module';
 import { UsersModule } from './users/users.module';
 import { ApplicationsModule } from './applications/applications.module';
+import { SelectionGameModule } from './selection-game/selection-game.module';
+import { OnboardingModule } from './onboarding/onboarding.module';
+import { UploadsModule } from './uploads/uploads.module';
 
 @Module({
   imports: [
@@ -18,6 +21,9 @@ import { ApplicationsModule } from './applications/applications.module';
     ApplicationsModule,
     AuthModule,
     CampusesModule,
+    SelectionGameModule,
+    OnboardingModule,
+    UploadsModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService, RedisService],
