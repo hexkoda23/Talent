@@ -1,0 +1,261 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Talent Nation demo design system
+   Stark monospace cognitive-game interface. All HSL. */
+
+@layer base {
+  :root {
+    --background: 240 4% 8%;
+    --foreground: 260 24% 91%;
+
+    --card: 270 4% 12%;
+    --card-foreground: 260 24% 91%;
+
+    --popover: 270 4% 12%;
+    --popover-foreground: 260 24% 91%;
+
+    --primary: 169 100% 44%;
+    --primary-foreground: 240 4% 8%;
+    --primary-glow: 169 100% 44%;
+
+    --secondary: 261 100% 72%;
+    --secondary-foreground: 240 4% 8%;
+    --secondary-glow: 261 100% 72%;
+
+    --accent: 36 100% 61%;
+    --accent-foreground: 240 4% 8%;
+
+    --muted: 240 3% 18%;
+    --muted-foreground: 260 8% 70%;
+
+    --destructive: 0 85% 60%;
+    --destructive-foreground: 260 24% 91%;
+
+    --warning: 36 100% 61%;
+    --warning-foreground: 240 4% 8%;
+
+    --border: 240 3% 28%;
+    --input: 240 3% 18%;
+    --ring: 169 100% 44%;
+
+    --radius: 0.125rem;
+
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary)));
+    --gradient-aurora: none;
+    --gradient-card: hsl(var(--card) / 0.94);
+    --gradient-text: linear-gradient(135deg, hsl(var(--foreground)), hsl(var(--foreground)));
+
+    --shadow-glow: none;
+    --shadow-violet: none;
+    --shadow-elevated: none;
+
+    --sidebar-background: 240 4% 8%;
+    --sidebar-foreground: 260 16% 78%;
+    --sidebar-primary: 169 100% 44%;
+    --sidebar-primary-foreground: 240 4% 8%;
+    --sidebar-accent: 240 3% 16%;
+    --sidebar-accent-foreground: 260 24% 91%;
+    --sidebar-border: 240 3% 28%;
+    --sidebar-ring: 169 100% 44%;
+
+    --transition-smooth: all 0.2s ease;
+  }
+
+  .dark {
+    --background: 240 4% 8%;
+    --foreground: 260 24% 91%;
+    --card: 270 4% 12%;
+    --card-foreground: 260 24% 91%;
+    --popover: 270 4% 12%;
+    --popover-foreground: 260 24% 91%;
+    --primary: 169 100% 44%;
+    --primary-foreground: 240 4% 8%;
+    --secondary: 261 100% 72%;
+    --secondary-foreground: 240 4% 8%;
+    --accent: 36 100% 61%;
+    --accent-foreground: 240 4% 8%;
+    --muted: 240 3% 18%;
+    --muted-foreground: 260 8% 70%;
+    --destructive: 0 85% 60%;
+    --destructive-foreground: 260 24% 91%;
+    --border: 240 3% 28%;
+    --input: 240 3% 18%;
+    --ring: 169 100% 44%;
+    --sidebar-background: 240 4% 8%;
+    --sidebar-foreground: 260 16% 78%;
+    --sidebar-primary: 169 100% 44%;
+    --sidebar-primary-foreground: 240 4% 8%;
+    --sidebar-accent: 240 3% 16%;
+    --sidebar-accent-foreground: 260 24% 91%;
+    --sidebar-border: 240 3% 28%;
+    --sidebar-ring: 169 100% 44%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    background-color: hsl(var(--background));
+    background-image:
+      radial-gradient(ellipse at 50% -10%, hsl(0 0% 100% / 0.05), transparent 45%),
+      repeating-radial-gradient(ellipse at 30% 10%, hsl(0 0% 100% / 0.10) 0 1px, transparent 1px 18px),
+      repeating-radial-gradient(ellipse at 82% 35%, hsl(0 0% 100% / 0.08) 0 1px, transparent 1px 22px);
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-weight: 400;
+    letter-spacing: 0;
+  }
+
+  ::selection {
+    background: hsl(var(--primary) / 0.35);
+    color: hsl(var(--foreground));
+  }
+}
+
+@layer components {
+  .text-gradient {
+    background: none;
+    color: hsl(var(--foreground));
+  }
+
+  .bg-gradient-primary {
+    background: hsl(var(--primary));
+  }
+
+  .glow-primary,
+  .glow-violet {
+    box-shadow: none;
+  }
+
+  .glass-panel {
+    background: var(--gradient-card);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border: 1px solid hsl(var(--border));
+  }
+
+  .grid-bg {
+    background-image:
+      linear-gradient(hsl(var(--border) / 0.55) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--border) / 0.55) 1px, transparent 1px);
+    background-size: 34px 34px;
+  }
+
+  .font-display,
+  .font-mono {
+    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+
+  .landing-pattern-bg {
+    background-color: #101113;
+    background-image:
+      linear-gradient(hsl(var(--background) / 0.34), hsl(var(--background) / 0.34)),
+      url('/landing-pattern.png');
+    background-position: center top;
+    background-size: cover;
+    background-attachment: fixed;
+  }
+}
+
+@layer utilities {
+  .animate-fade-in {
+    animation: fade-in 0.35s ease-out both;
+  }
+
+  .animate-fade-up {
+    animation: fade-up 0.35s ease-out both;
+  }
+
+  .animate-scale-in {
+    animation: scale-in 0.2s ease-out both;
+  }
+
+  .animate-pulse-glow {
+    animation: pulse-glow 2.4s ease-in-out infinite;
+  }
+
+  .animate-float {
+    animation: none;
+  }
+
+  .animate-shimmer {
+    background: linear-gradient(90deg, transparent, hsl(var(--primary) / 0.15), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 2s linear infinite;
+  }
+
+  .animate-orbit {
+    animation: orbit 18s linear infinite;
+  }
+
+  .rounded-3xl,
+  .rounded-2xl,
+  .rounded-xl,
+  .rounded-lg,
+  .rounded-md {
+    border-radius: 0.125rem;
+  }
+
+  .rounded-full {
+    border-radius: 9999px;
+  }
+
+  .shadow-sm,
+  .shadow,
+  .shadow-md,
+  .shadow-lg,
+  .shadow-xl,
+  .shadow-2xl {
+    box-shadow: none;
+  }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes orbit {
+  from { transform: rotate(0) translateX(80px) rotate(0); }
+  to { transform: rotate(360deg) translateX(80px) rotate(-360deg); }
+}
