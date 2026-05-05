@@ -1,0 +1,2830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Engineering Curriculum Plan</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg: #0a0c10;
+    --surface: #111318;
+    --surface2: #181c24;
+    --border: #252a35;
+    --border2: #2f3545;
+    --text: #e2e8f0;
+    --muted: #7c8a9e;
+    --accent: #f0a500;
+    --accent2: #3b82f6;
+    --green: #22c55e;
+    --purple: #a855f7;
+    --red: #ef4444;
+    --teal: #14b8a6;
+    --orange: #f97316;
+    --pink: #ec4899;
+
+    /* Assessment colors */
+    --quest-code: #3b82f6;
+    --quest-notebook: #8b5cf6;
+    --quest-mcq: #22c55e;
+    --quest-essay: #f59e0b;
+    --checkpoint: #ef4444;
+    --raid: #ec4899;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    background: linear-gradient(135deg, #0a0c10 0%, #111824 50%, #0d1117 100%);
+    border-bottom: 1px solid var(--border2);
+    padding: 40px 48px 32px;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 60% 80% at 80% 50%, rgba(240,165,0,0.06) 0%, transparent 70%);
+  }
+  .header-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+  .header h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 36px;
+    font-weight: 800;
+    line-height: 1.1;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+  .header h1 span { color: var(--accent); }
+  .header-sub {
+    color: var(--muted);
+    font-size: 15px;
+    max-width: 640px;
+  }
+  .header-meta {
+    display: flex;
+    gap: 24px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+  }
+  .meta-tag {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 4px 10px;
+    border-radius: 4px;
+  }
+  .meta-tag .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  .meta-tag .dot.blue { background: var(--accent2); }
+  .meta-tag .dot.green { background: var(--green); }
+
+  /* ── NAV ── */
+  .nav-wrap {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 48px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .nav-tabs {
+    display: flex;
+    gap: 2px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .nav-tabs::-webkit-scrollbar { display: none; }
+  .nav-tab {
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    padding: 14px 18px;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .nav-tab:hover { color: var(--text); }
+  .nav-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .nav-tab.active.blue-tab { color: var(--accent2); border-bottom-color: var(--accent2); }
+
+  /* ── CONTENT ── */
+  .content { display: none; padding: 40px 48px; max-width: 1200px; margin: 0 auto; }
+  .content.active { display: block; }
+
+  /* ── SECTION HEADERS ── */
+  .section-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .section-icon {
+    width: 48px; height: 48px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .section-icon.gold { background: rgba(240,165,0,0.15); }
+  .section-icon.blue { background: rgba(59,130,246,0.15); }
+  .section-title-wrap h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .section-title-wrap p { color: var(--muted); font-size: 14px; }
+
+  /* ── TRACK OVERVIEW CARDS ── */
+  .track-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 40px;
+  }
+  .track-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    border-left: 3px solid var(--accent);
+  }
+  .track-card.blue { border-left-color: var(--accent2); }
+  .track-card h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .track-card p { color: var(--muted); font-size: 13px; line-height: 1.5; }
+  .prereq-tag {
+    display: inline-block;
+    margin-top: 10px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 3px;
+    background: rgba(240,165,0,0.1);
+    color: var(--accent);
+    border: 1px solid rgba(240,165,0,0.2);
+  }
+  .prereq-tag.blue {
+    background: rgba(59,130,246,0.1);
+    color: var(--accent2);
+    border-color: rgba(59,130,246,0.2);
+  }
+
+  /* ── CURRICULUM LAYOUT ── */
+  .curriculum-layout {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 24px;
+    margin-bottom: 48px;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar-nav {
+    position: sticky;
+    top: 60px;
+    height: fit-content;
+  }
+  .sidebar-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+    padding-left: 12px;
+  }
+  .sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-bottom: 2px;
+    transition: all 0.15s;
+    border-left: 2px solid transparent;
+  }
+  .sidebar-item:hover { background: var(--surface2); }
+  .sidebar-item.active { background: var(--surface2); border-left-color: var(--accent); }
+  .sidebar-item.active.blue { border-left-color: var(--accent2); }
+  .sidebar-number {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    min-width: 20px;
+  }
+  .sidebar-text {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+    line-height: 1.3;
+  }
+  .sidebar-item.active .sidebar-text { color: var(--text); }
+  .sidebar-weeks {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    margin-left: auto;
+  }
+
+  /* ── SUBJECT CARDS ── */
+  .subject-block { margin-bottom: 40px; }
+  .subject-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+  .subject-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 24px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+  }
+  .subject-number {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    min-width: 30px;
+  }
+  .subject-number.blue { color: var(--accent2); }
+  .subject-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    flex: 1;
+  }
+  .subject-meta {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .weeks-badge {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 3px 8px;
+    border-radius: 4px;
+  }
+  .subject-body { padding: 20px 24px; }
+
+  /* ── COURSE ── */
+  .course-block {
+    margin-bottom: 20px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .course-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(255,255,255,0.02);
+  }
+  .course-icon { font-size: 14px; }
+  .course-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    flex: 1;
+  }
+  .course-body { padding: 14px 16px; }
+
+  /* ── TOPICS ── */
+  .topics-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  .topic-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--muted);
+    padding: 6px 8px;
+    background: var(--surface);
+    border-radius: 6px;
+  }
+  .topic-dot {
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--muted);
+    margin-top: 6px;
+    flex-shrink: 0;
+  }
+
+  /* ── MODULES ── */
+  .modules-note {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 6px 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+  }
+
+  /* ── ASSESSMENT BADGES ── */
+  .assessments-row {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+  }
+  .assess-badge {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-family: 'IBM Plex Mono', monospace;
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid;
+  }
+  .assess-badge.code {
+    color: #93c5fd;
+    border-color: rgba(59,130,246,0.3);
+    background: rgba(59,130,246,0.08);
+  }
+  .assess-badge.notebook {
+    color: #c4b5fd;
+    border-color: rgba(139,92,246,0.3);
+    background: rgba(139,92,246,0.08);
+  }
+  .assess-badge.mcq {
+    color: #86efac;
+    border-color: rgba(34,197,94,0.3);
+    background: rgba(34,197,94,0.08);
+  }
+  .assess-badge.essay {
+    color: #fcd34d;
+    border-color: rgba(245,158,11,0.3);
+    background: rgba(245,158,11,0.08);
+  }
+  .assess-badge.cp {
+    color: #fca5a5;
+    border-color: rgba(239,68,68,0.3);
+    background: rgba(239,68,68,0.08);
+    font-weight: 600;
+  }
+  .assess-badge.raid {
+    color: #f9a8d4;
+    border-color: rgba(236,72,153,0.3);
+    background: rgba(236,72,153,0.08);
+  }
+  .assess-badge .a-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+  .assess-count {
+    opacity: 0.7;
+  }
+
+  /* ── LEGEND ── */
+  .legend {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 32px;
+  }
+  .legend-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+  }
+  .legend-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  /* ── TABLES ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    font-size: 13px;
+  }
+  th {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    text-align: left;
+    padding: 10px 14px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    vertical-align: top;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+  .table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+
+  /* ── AUDIT SECTION ── */
+  .audit-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .audit-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    border-top: 3px solid;
+  }
+  .audit-card.code-card { border-top-color: var(--quest-code); }
+  .audit-card.notebook-card { border-top-color: var(--quest-notebook); }
+  .audit-card.mcq-card { border-top-color: var(--quest-mcq); }
+  .audit-card.essay-card { border-top-color: var(--quest-essay); }
+  .audit-card.cp-card { border-top-color: var(--checkpoint); }
+  .audit-card.raid-card { border-top-color: var(--raid); }
+  .audit-card h4 {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+  .audit-tier {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 8px;
+    align-items: flex-start;
+  }
+  .tier-number {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    min-width: 20px;
+    margin-top: 2px;
+    color: var(--accent);
+  }
+  .tier-content { flex: 1; }
+  .tier-label {
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 2px;
+  }
+  .tier-desc { font-size: 12px; color: var(--muted); }
+
+  /* ── PROGRAM SUMMARY ── */
+  .summary-bar {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    display: flex;
+    gap: 32px;
+    flex-wrap: wrap;
+    margin-bottom: 32px;
+  }
+  .summary-stat { text-align: center; }
+  .summary-stat .num {
+    font-family: 'Syne', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .summary-stat .num.blue { color: var(--accent2); }
+  .summary-stat .lbl {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .divider { width: 1px; background: var(--border); }
+
+  /* ── CALLOUT ── */
+  .callout {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .callout strong { color: var(--text); }
+  .callout.blue { border-left-color: var(--accent2); }
+  .callout.green { border-left-color: var(--green); }
+  .callout.red { border-left-color: var(--red); }
+
+  /* ── DIFF BADGE ── */
+  .diff { display: inline-block; }
+  .diff-badge {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 3px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    vertical-align: middle;
+    margin-left: 6px;
+  }
+  .diff-badge.new { background: rgba(34,197,94,0.15); color: var(--green); border: 1px solid rgba(34,197,94,0.25); }
+  .diff-badge.ext { background: rgba(59,130,246,0.15); color: #93c5fd; border: 1px solid rgba(59,130,246,0.25); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    .header, .nav-wrap, .content { padding-left: 20px; padding-right: 20px; }
+    .curriculum-layout { grid-template-columns: 1fr; }
+    .sidebar-nav { display: none; }
+    .track-grid, .topics-grid, .audit-grid { grid-template-columns: 1fr; }
+    .summary-bar { gap: 20px; }
+  }
+
+  /* ── PHASE SEPARATOR ── */
+  .phase-sep {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 24px 0 16px;
+  }
+  .phase-sep .line { flex: 1; height: 1px; background: var(--border); }
+  .phase-sep .label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* ── GATE indicator ── */
+  .gate-bar {
+    background: rgba(239,68,68,0.08);
+    border: 1px solid rgba(239,68,68,0.2);
+    border-radius: 6px;
+    padding: 8px 14px;
+    margin: 10px 0;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: #fca5a5;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .gate-bar.raid-gate {
+    background: rgba(236,72,153,0.08);
+    border-color: rgba(236,72,153,0.2);
+    color: #f9a8d4;
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-label">SIWES Platform · Curriculum Architecture</div>
+  <h1>AI <span>Engineering</span> Curriculum Plan</h1>
+  <p class="header-sub">4-track curriculum framework — 2 experience levels × 2 durations — with full assessment and auditing architecture mapped to the platform's Quest · Checkpoint · Raid system.</p>
+  <div class="header-meta">
+    <div class="meta-tag"><span class="dot"></span> Track A — With Experience (Backend/Fullstack)</div>
+    <div class="meta-tag"><span class="dot blue"></span> Track B — No Prior Experience</div>
+    <div class="meta-tag"><span class="dot green"></span> 3-Month & 6-Month variants each</div>
+  </div>
+</div>
+
+<!-- NAV -->
+<div class="nav-wrap">
+  <div class="nav-tabs">
+    <div class="nav-tab active" onclick="showTab('overview', this)">Overview</div>
+    <div class="nav-tab" onclick="showTab('a3', this)">Track A · 3 Months</div>
+    <div class="nav-tab" onclick="showTab('a6', this)">Track A · 6 Months</div>
+    <div class="nav-tab blue-tab" onclick="showTab('b3', this)">Track B · 3 Months</div>
+    <div class="nav-tab blue-tab" onclick="showTab('b6', this)">Track B · 6 Months</div>
+    <div class="nav-tab" onclick="showTab('assessment', this)">Assessment Framework</div>
+    <div class="nav-tab" onclick="showTab('auditing', this)">Auditing System</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ OVERVIEW ═══════════════════════ -->
+<div class="content active" id="tab-overview">
+  <div class="section-header">
+    <div class="section-icon gold">📐</div>
+    <div class="section-title-wrap">
+      <h2>Curriculum Architecture Overview</h2>
+      <p>Four tracks. Two experience levels. Two time horizons. One unified goal: competent AI engineers.</p>
+    </div>
+  </div>
+
+  <div class="track-grid">
+    <div class="track-card">
+      <h3>Track A — Experienced Engineers</h3>
+      <p>For students with backend or fullstack development experience. Proficiency in at least one language (Python, Node.js, Go, Java, etc.), experience with APIs, databases, and Git assumed. The programming fundamentals onboarding is condensed from weeks to days, freeing the entire track for deep AI content.</p>
+      <span class="prereq-tag">PREREQ: Backend or Fullstack experience</span>
+    </div>
+    <div class="track-card blue">
+      <h3>Track B — Zero Experience</h3>
+      <p>For students with no coding background. CS, math, or science students who've never written a line of code. The first quarter of the program is dedicated to Python from absolute scratch, command-line fluency, and tooling. The AI engineering content then builds on this foundation. Outcome is more applied/LLM-engineering focused than Track A.</p>
+      <span class="prereq-tag blue">PREREQ: Basic computer literacy only</span>
+    </div>
+  </div>
+
+  <div class="callout">
+    <strong>80/20 Principle Applied:</strong> Both tracks ruthlessly prioritize the skills that account for the majority of real AI engineering work — Python, LLM APIs, embeddings, RAG, agents, and deployment — over exhaustive coverage of classical ML theory. Classical ML (Weeks 3–4 in Track A) is taught for conceptual literacy and interview preparedness, not as the primary output of the program.
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Track</th>
+          <th>Duration</th>
+          <th>Subjects</th>
+          <th>Quests (est.)</th>
+          <th>Checkpoints</th>
+          <th>Raids</th>
+          <th>Primary Focus</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Track A</strong></td>
+          <td>3 months</td>
+          <td>8</td>
+          <td>~40–50</td>
+          <td>6</td>
+          <td>4</td>
+          <td>Full AI Engineering stack, rapid pace</td>
+        </tr>
+        <tr>
+          <td><strong>Track A</strong></td>
+          <td>6 months</td>
+          <td>10</td>
+          <td>~70–90</td>
+          <td>9</td>
+          <td>7</td>
+          <td>Full stack + CV + multimodal + deep MLOps</td>
+        </tr>
+        <tr>
+          <td><strong>Track B</strong></td>
+          <td>3 months</td>
+          <td>6</td>
+          <td>~30–40</td>
+          <td>5</td>
+          <td>3</td>
+          <td>Python foundations → LLM app engineering</td>
+        </tr>
+        <tr>
+          <td><strong>Track B</strong></td>
+          <td>6 months</td>
+          <td>9</td>
+          <td>~60–75</td>
+          <td>8</td>
+          <td>6</td>
+          <td>Full foundations + AI engineering complete</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="legend">
+    <div class="legend-title">Assessment Legend — Used across all tabs</div>
+    <div class="legend-row">
+      <span class="assess-badge code"><span class="a-dot"></span>Code Quest (Gitea)</span>
+      <span class="assess-badge notebook"><span class="a-dot"></span>Notebook Quest (Jupyter/Gitea)</span>
+      <span class="assess-badge mcq"><span class="a-dot"></span>MCQ Quest</span>
+      <span class="assess-badge essay"><span class="a-dot"></span>Essay/Design Quest</span>
+      <span class="assess-badge cp"><span class="a-dot"></span>Checkpoint (Hard Gate)</span>
+      <span class="assess-badge raid"><span class="a-dot"></span>Raid (Group Project)</span>
+    </div>
+  </div>
+
+  <div class="callout green">
+    <strong>Platform Mapping:</strong> Every assessment below maps directly to the platform's existing entity hierarchy. Quests attach at module/topic/course level. Checkpoints sit at subject boundaries as hard gates. Raids attach at course or subject level with shared Gitea repos. Quest types are mapped to <code>QuestTask.task_type</code>: code, multiple_choice, short_answer, free_response, file_submission.
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Subject Category</th><th>Primary Quest Types</th><th>Gate Assessment</th><th>Raid Timing</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Python / Programming</td><td>Code Quest (Gitea), MCQ Quest</td><td>MCQ + Code Checkpoint</td><td>Mini Raid — EDA pair project</td></tr>
+        <tr><td>Mathematics for ML</td><td>MCQ Quest, Essay Quest (intuition)</td><td>MCQ Checkpoint</td><td>None</td></tr>
+        <tr><td>Machine Learning</td><td>Notebook Quest, Code Quest</td><td>MCQ + Short Answer Checkpoint</td><td>Standard Raid — ML pipeline</td></tr>
+        <tr><td>Deep Learning</td><td>Code Quest (PyTorch), Notebook Quest</td><td>MCQ + Code Checkpoint</td><td>Optional Raid</td></tr>
+        <tr><td>NLP / LLMs</td><td>Code Quest, Essay Quest (prompt design)</td><td>MCQ + Essay Checkpoint</td><td>None (or mini-raid)</td></tr>
+        <tr><td>Generative AI Engineering</td><td>Code Quest (APIs, RAG, Agents)</td><td>Mixed Checkpoint</td><td>Standard Raid — RAG App</td></tr>
+        <tr><td>Deployment / MLOps</td><td>Code Quest, Essay Quest</td><td>MCQ + Design Checkpoint</td><td>Deployment Raid</td></tr>
+        <tr><td>Ethics / Capstone</td><td>Essay Quest, Design Quest</td><td>Final Checkpoint (oral+written)</td><td>Extended Raid — Capstone</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════════════ TRACK A · 3 MONTHS ═══════════════════════ -->
+<div class="content" id="tab-a3">
+  <div class="section-header">
+    <div class="section-icon gold">⚡</div>
+    <div class="section-title-wrap">
+      <h2>Track A — 3 Month Program</h2>
+      <p>Prerequisite: Backend or Fullstack experience. 12 weeks, intensive. ~20–30 hrs/week.</p>
+    </div>
+  </div>
+
+  <div class="summary-bar">
+    <div class="summary-stat"><div class="num">12</div><div class="lbl">Weeks</div></div>
+    <div class="divider"></div>
+    <div class="summary-stat"><div class="num">8</div><div class="lbl">Subjects</div></div>
+    <div class="divider"></div>
+    <div class="summary-stat"><div class="num">22</div><div class="lbl">Courses</div></div>
+    <div class="divider"></div>
+    <div class="summary-stat"><div class="num">~45</div><div class="lbl">Quests</div></div>
+    <div class="divider"></div>
+    <div class="summary-stat"><div class="num">6</div><div class="lbl">Checkpoints</div></div>
+    <div class="divider"></div>
+    <div class="summary-stat"><div class="num">4</div><div class="lbl">Raids</div></div>
+  </div>
+
+  <div class="callout">
+    <strong>Track A Advantage:</strong> Students skip programming fundamentals entirely. Python onboarding is a 4–5 day sprint reframing syntax for experienced devs (not a beginner Python course). The saved time is invested in ML depth and more advanced Generative AI engineering.
+  </div>
+
+  <!-- S1 -->
+  <div class="subject-card">
+    <div class="subject-header">
+      <span class="subject-number">S1</span>
+      <span class="subject-title">Python for AI Engineering</span>
+      <div class="subject-meta">
+        <span class="weeks-badge">Weeks 1–2</span>
+      </div>
+    </div>
+    <div class="subject-body">
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">📦</span><span class="course-title">Course 1 — Python Rapid Onboarding for Engineers</span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>Python syntax crash course for devs coming from other languages (type hints, list comprehensions, generators)</div>
+            <div class="topic-item"><span class="topic-dot"></span>Python OOP — classes, dunder methods, inheritance, dataclasses</div>
+            <div class="topic-item"><span class="topic-dot"></span>Functional patterns — map/filter/reduce, closures, decorators</div>
+            <div class="topic-item"><span class="topic-dot"></span>Tooling — venv, pip, pyproject.toml, Jupyter notebooks, VS Code / PyCharm setup</div>
+            <div class="topic-item"><span class="topic-dot"></span>Async Python — async/await, event loops, aiohttp basics</div>
+          </div>
+          <div class="modules-note">📄 Modules: 5 modules (readable content + code examples per topic)</div>
+          <div class="assessments-row">
+            <span class="assess-badge code"><span class="a-dot"></span>3× Code Quest <span class="assess-count">(Python algorithmic tasks)</span></span>
+            <span class="assess-badge mcq"><span class="a-dot"></span>1× MCQ Quest <span class="assess-count">(Python syntax & patterns)</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">🔬</span><span class="course-title">Course 2 — Scientific Python Stack</span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>NumPy — arrays, broadcasting, vectorized operations, linear algebra ops</div>
+            <div class="topic-item"><span class="topic-dot"></span>Pandas — DataFrames, Series, groupby, merging, data cleaning pipelines</div>
+            <div class="topic-item"><span class="topic-dot"></span>Matplotlib & Seaborn — visualization for data exploration and model evaluation</div>
+            <div class="topic-item"><span class="topic-dot"></span>Data pipelines — reading CSVs, JSONs, APIs; handling missing data</div>
+          </div>
+          <div class="modules-note">📄 Modules: 4 modules (NumPy, Pandas, Viz, Pipelines)</div>
+          <div class="assessments-row">
+            <span class="assess-badge notebook"><span class="a-dot"></span>2× Notebook Quest <span class="assess-count">(EDA tasks)</span></span>
+            <span class="assess-badge code"><span class="a-dot"></span>1× Code Quest <span class="assess-count">(data pipeline task)</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="gate-bar raid-gate">⚔ Mini Raid (Pair) — Exploratory Data Analysis: given a real dataset, produce insights + visualizations. 3 days.</div>
+      <div class="gate-bar">🔴 Checkpoint 1 — Python & Data Stack. 45 min. MCQ (30 q) + 1 code task. Online. Required to advance to S2.</div>
+    </div>
+  </div>
+
+  <!-- S2 -->
+  <div class="subject-card">
+    <div class="subject-header">
+      <span class="subject-number">S2</span>
+      <span class="subject-title">Mathematics for Machine Learning</span>
+      <div class="subject-meta"><span class="weeks-badge">Weeks 2–3</span></div>
+    </div>
+    <div class="subject-body">
+      <div class="callout" style="margin-bottom:14px;">This subject builds conceptual fluency, not exam-level proof ability. Students with strong math backgrounds may complete this faster via challenge-out options.</div>
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">📐</span><span class="course-title">Course 1 — Linear Algebra Essentials</span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>Scalars, vectors, matrices — notation & intuition</div>
+            <div class="topic-item"><span class="topic-dot"></span>Matrix operations — multiplication, transpose, inverse</div>
+            <div class="topic-item"><span class="topic-dot"></span>Dot products, norms, cosine similarity (critical for embeddings)</div>
+            <div class="topic-item"><span class="topic-dot"></span>Eigenvalues & eigenvectors — PCA intuition</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge mcq"><span class="a-dot"></span>1× MCQ Quest</span>
+            <span class="assess-badge code"><span class="a-dot"></span>1× Code Quest <span class="assess-count">(NumPy linear algebra)</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">📊</span><span class="course-title">Course 2 — Statistics & Probability for ML</span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>Probability distributions — normal, binomial, Bernoulli</div>
+            <div class="topic-item"><span class="topic-dot"></span>Bayes' theorem and its role in ML</div>
+            <div class="topic-item"><span class="topic-dot"></span>Descriptive stats — mean, variance, std dev, correlation, covariance</div>
+            <div class="topic-item"><span class="topic-dot"></span>Information theory basics — entropy, cross-entropy (loss functions)</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge mcq"><span class="a-dot"></span>1× MCQ Quest</span>
+            <span class="assess-badge essay"><span class="a-dot"></span>1× Essay Quest <span class="assess-count">(explain ML loss function choices)</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">∇</span><span class="course-title">Course 3 — Calculus & Optimization Intuition</span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>Derivatives & gradients — what they mean, chain rule</div>
+            <div class="topic-item"><span class="topic-dot"></span>Gradient descent — intuition, learning rate, convergence</div>
+            <div class="topic-item"><span class="topic-dot"></span>Partial derivatives and the role of Jacobians (conceptual)</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge mcq"><span class="a-dot"></span>1× MCQ Quest</span>
+          </div>
+        </div>
+      </div>
+      <div class="gate-bar">🔴 Checkpoint 2 — Math Foundations. 30 min. MCQ (25 q). Online. Soft gate (can re-take up to 2×).</div>
+    </div>
+  </div>
+
+  <!-- S3 -->
+  <div class="subject-card">
+    <div class="subject-header">
+      <span class="subject-number">S3</span>
+      <span class="subject-title">Machine Learning Foundations</span>
+      <div class="subject-meta"><span class="weeks-badge">Weeks 3–5</span></div>
+    </div>
+    <div class="subject-body">
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">🗺️</span><span class="course-title">Course 1 — The ML Paradigm</span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>Supervised, unsupervised, and reinforcement learning taxonomy</div>
+            <div class="topic-item"><span class="topic-dot"></span>The ML workflow: problem definition → data → features → model → evaluation → production</div>
+            <div class="topic-item"><span class="topic-dot"></span>Feature engineering — encoding, scaling, selection</div>
+            <div class="topic-item"><span class="topic-dot"></span>Train/validation/test splits — data leakage, stratification, cross-validation</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge notebook"><span class="a-dot"></span>1× Notebook Quest <span class="assess-count">(feature engineering on a dataset)</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">🌳</span><span class="course-title">Course 2 — Classical Algorithms</span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>Linear regression — cost function, normal equation, gradient descent</div>
+            <div class="topic-item"><span class="topic-dot"></span>Logistic regression — sigmoid, binary and multi-class classification</div>
+            <div class="topic-item"><span class="topic-dot"></span>Decision trees, Random Forests, Gradient Boosting (XGBoost, LightGBM)</div>
+            <div class="topic-item"><span class="topic-dot"></span>Support Vector Machines (conceptual + scikit-learn usage)</div>
+            <div class="topic-item"><span class="topic-dot"></span>K-Means clustering and DBSCAN</div>
+            <div class="topic-item"><span class="topic-dot"></span>Dimensionality reduction — PCA and t-SNE</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge code"><span class="a-dot"></span>3× Code Quest <span class="assess-count">(train/evaluate each algorithm class)</span></span>
+            <span class="assess-badge notebook"><span class="a-dot"></span>1× Notebook Quest <span class="assess-count">(comparative algorithm analysis)</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">📏</span><span class="course-title">Course 3 — Model Evaluation & Improvement</span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>Classification metrics — accuracy, precision, recall, F1, AUC-ROC, confusion matrix</div>
+            <div class="topic-item"><span class="topic-dot"></span>Regression metrics — MAE, MSE, RMSE, R²</div>
+            <div class="topic-item"><span class="topic-dot"></span>Overfitting & underfitting — bias-variance tradeoff</div>
+            <div class="topic-item"><span class="topic-dot"></span>Regularization — L1 (Lasso), L2 (Ridge), dropout</div>
+            <div class="topic-item"><span class="topic-dot"></span>Hyperparameter tuning — grid search, random search, optuna basics</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge code"><span class="a-dot"></span>2× Code Quest <span class="assess-count">(tune + evaluate pipelines)</span></span>
+            <span class="assess-badge essay"><span class="a-dot"></span>1× Essay Quest <span class="assess-count">(model selection justification)</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="gate-bar raid-gate">⚔ Standard Raid (3–4 ppl) — End-to-end ML pipeline: given a business problem + dataset, build, tune, and evaluate a complete solution. 5 days. Shared Gitea repo + explanation requirement.</div>
+      <div class="gate-bar">🔴 Checkpoint 3 — ML Foundations. 60 min. MCQ (30 q) + 1 code output interpretation task + 1 short answer. Online. Hard gate.</div>
+    </div>
+  </div>
+
+  <!-- S4 -->
+  <div class="subject-card">
+    <div class="subject-header">
+      <span class="subject-number">S4</span>
+      <span class="subject-title">Deep Learning & Neural Networks</span>
+      <div class="subject-meta"><span class="weeks-badge">Weeks 5–7</span></div>
+    </div>
+    <div class="subject-body">
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">🧠</span><span class="course-title">Course 1 — Neural Network Fundamentals</span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>Perceptrons and multi-layer networks — architecture intuition</div>
+            <div class="topic-item"><span class="topic-dot"></span>Activation functions — ReLU, sigmoid, tanh, softmax and when to use each</div>
+            <div class="topic-item"><span class="topic-dot"></span>Backpropagation & gradient descent — forward pass, loss, backward pass</div>
+            <div class="topic-item"><span class="topic-dot"></span>Implementing a neural net from scratch (NumPy only)</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge code"><span class="a-dot"></span>2× Code Quest <span class="assess-count">(NN from scratch)</span></span>
+            <span class="assess-badge mcq"><span class="a-dot"></span>1× MCQ Quest</span>
+          </div>
+        </div>
+      </div>
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">🔥</span><span class="course-title">Course 2 — PyTorch Essentials</span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>Tensors & autograd — computation graphs, .backward()</div>
+            <div class="topic-item"><span class="topic-dot"></span>Building models with nn.Module and nn.Sequential</div>
+            <div class="topic-item"><span class="topic-dot"></span>Training loops — optimizers (Adam, SGD), loss functions, epochs</div>
+            <div class="topic-item"><span class="topic-dot"></span>Datasets, DataLoaders, and batching</div>
+            <div class="topic-item"><span class="topic-dot"></span>GPU training with CUDA — .to(device) patterns</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge code"><span class="a-dot"></span>3× Code Quest <span class="assess-count">(build & train models)</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">👁️</span><span class="course-title">Course 3 — CNNs & Transfer Learning</span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>Convolutional layers, pooling, feature maps</div>
+            <div class="topic-item"><span class="topic-dot"></span>Pre-trained CNN models — ResNet, EfficientNet, ViT</div>
+            <div class="topic-item"><span class="topic-dot"></span>Transfer learning — fine-tuning vs. feature extraction</div>
+            <div class="topic-item"><span class="topic-dot"></span>torchvision, image preprocessing pipelines</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge notebook"><span class="a-dot"></span>1× Notebook Quest <span class="assess-count">(fine-tune a CNN on custom data)</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="gate-bar">🔴 Checkpoint 4 — Deep Learning. 45 min. MCQ + code reading/output questions. Online. Hard gate.</div>
+    </div>
+  </div>
+
+  <!-- S5 -->
+  <div class="subject-card">
+    <div class="subject-header">
+      <span class="subject-number">S5</span>
+      <span class="subject-title">NLP & Large Language Models</span>
+      <div class="subject-meta"><span class="weeks-badge">Weeks 7–9</span></div>
+    </div>
+    <div class="subject-body">
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">📝</span><span class="course-title">Course 1 — NLP Foundations</span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>Text preprocessing — tokenization, stop words, stemming, lemmatization</div>
+            <div class="topic-item"><span class="topic-dot"></span>Text representations — Bag of Words, TF-IDF</div>
+            <div class="topic-item"><span class="topic-dot"></span>Word embeddings — Word2Vec, GloVe, semantic relationships</div>
+            <div class="topic-item"><span class="topic-dot"></span>Sentence transformers & semantic similarity</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge code"><span class="a-dot"></span>2× Code Quest <span class="assess-count">(text classification, semantic search)</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">🤖</span><span class="course-title">Course 2 — Transformers & the LLM Landscape</span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>Attention mechanism & transformer architecture — intuition (not full derivation)</div>
+            <div class="topic-item"><span class="topic-dot"></span>BERT, GPT, T5 — encoder-only, decoder-only, encoder-decoder</div>
+            <div class="topic-item"><span class="topic-dot"></span>Modern LLMs — GPT-4o, Claude 3.5, Gemini, Llama 3, Mistral, Qwen</div>
+            <div class="topic-item"><span class="topic-dot"></span>HuggingFace ecosystem — Hub, Transformers library, Pipelines, Inference API</div>
+            <div class="topic-item"><span class="topic-dot"></span>Ollama — running open models locally</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge code"><span class="a-dot"></span>2× Code Quest <span class="assess-count">(HuggingFace pipelines, Ollama)</span></span>
+            <span class="assess-badge mcq"><span class="a-dot"></span>1× MCQ Quest <span class="assess-count">(LLM landscape, architecture types)</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">💬</span><span class="course-title">Course 3 — Prompt Engineering</span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>Prompt anatomy — role, context, instruction, output format</div>
+            <div class="topic-item"><span class="topic-dot"></span>Zero-shot, few-shot, chain-of-thought prompting</div>
+            <div class="topic-item"><span class="topic-dot"></span>System prompts, role assignment, context window management</div>
+            <div class="topic-item"><span class="topic-dot"></span>Advanced — ReAct, Tree-of-Thought, meta-prompting</div>
+            <div class="topic-item"><span class="topic-dot"></span>Prompt injection attacks and safety considerations</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge code"><span class="a-dot"></span>1× Code Quest <span class="assess-count">(prompt optimization challenge)</span></span>
+            <span class="assess-badge essay"><span class="a-dot"></span>1× Essay Quest <span class="assess-count">(prompt design rationale & tradeoffs)</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="gate-bar">🔴 Checkpoint 5 — NLP & LLMs. 60 min. MCQ (25 q) + 1 prompt design short essay. Online. Hard gate.</div>
+    </div>
+  </div>
+
+  <!-- S6 -->
+  <div class="subject-card">
+    <div class="subject-header">
+      <span class="subject-number">S6</span>
+      <span class="subject-title">Generative AI Engineering</span>
+      <div class="subject-meta"><span class="weeks-badge">Weeks 9–11</span></div>
+    </div>
+    <div class="subject-body">
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">🔑</span><span class="course-title">Course 1 — LLM APIs & the OpenAI Platform</span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>Chat Completions API — messages array, roles, parameters (temperature, top_p, max_tokens)</div>
+            <div class="topic-item"><span class="topic-dot"></span>Token counting & context window management</div>
+            <div class="topic-item"><span class="topic-dot"></span>Streaming responses</div>
+            <div class="topic-item"><span class="topic-dot"></span>Pricing & cost optimization strategies</div>
+            <div class="topic-item"><span class="topic-dot"></span>Other providers — Anthropic Claude, Google Gemini, Cohere, Together AI, Groq</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge code"><span class="a-dot"></span>2× Code Quest <span class="assess-count">(build LLM-powered features)</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">🗄️</span><span class="course-title">Course 2 — Embeddings & Vector Databases</span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>Embeddings — what they encode, OpenAI & open-source embedding models</div>
+            <div class="topic-item"><span class="topic-dot"></span>Vector DB landscape — Chroma (local), Pinecone, Qdrant, Weaviate, pgvector</div>
+            <div class="topic-item"><span class="topic-dot"></span>Indexing & querying — HNSW, IVFFlat, approximate nearest neighbor</div>
+            <div class="topic-item"><span class="topic-dot"></span>Metadata filtering & hybrid search</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge code"><span class="a-dot"></span>2× Code Quest <span class="assess-count">(index docs, semantic search)</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">🔍</span><span class="course-title">Course 3 — RAG (Retrieval-Augmented Generation)</span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>RAG architecture — ingestion pipeline, retrieval, augmented generation</div>
+            <div class="topic-item"><span class="topic-dot"></span>Chunking strategies — fixed-size, semantic, recursive, hierarchical</div>
+            <div class="topic-item"><span class="topic-dot"></span>Retrieval optimization — reranking (cross-encoders), HyDE, multi-query</div>
+            <div class="topic-item"><span class="topic-dot"></span>RAG evaluation — faithfulness, relevance, groundedness (RAGAS)</div>
+            <div class="topic-item"><span class="topic-dot"></span>Frameworks — LangChain vs LlamaIndex vs raw implementation</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge code"><span class="a-dot"></span>3× Code Quest <span class="assess-count">(build RAG progressively: naive → advanced)</span></span>
+            <span class="assess-badge essay"><span class="a-dot"></span>1× Essay Quest <span class="assess-count">(RAG vs fine-tuning decision framework)</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">🕵️</span><span class="course-title">Course 4 — AI Agents</span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>Agent architecture — perception, memory (short/long term), action, planning loop</div>
+            <div class="topic-item"><span class="topic-dot"></span>Tool use & function calling — OpenAI tools API, Anthropic tool use</div>
+            <div class="topic-item"><span class="topic-dot"></span>ReAct pattern — reasoning + acting cycles</div>
+            <div class="topic-item"><span class="topic-dot"></span>Multi-agent systems — orchestration, delegation, CrewAI / LangGraph basics</div>
+            <div class="topic-item"><span class="topic-dot"></span>Memory systems — conversation history, vector memory, episodic memory</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge code"><span class="a-dot"></span>3× Code Quest <span class="assess-count">(build a tool-using agent, multi-agent pipeline)</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="gate-bar raid-gate">⚔ Standard Raid (3–4 ppl) — Build a complete RAG-powered AI application (e.g. document Q&A, research assistant, support bot). Deployed. 7 days. Code explanation required.</div>
+      <div class="gate-bar">🔴 Checkpoint 6 — GenAI Engineering. 75 min. MCQ + architecture essay + 1 code task. Online. Hard gate.</div>
+    </div>
+  </div>
+
+  <!-- S7 -->
+  <div class="subject-card">
+    <div class="subject-header">
+      <span class="subject-number">S7</span>
+      <span class="subject-title">AI Deployment, APIs & MLOps</span>
+      <div class="subject-meta"><span class="weeks-badge">Weeks 11–12</span></div>
+    </div>
+    <div class="subject-body">
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">🚀</span><span class="course-title">Course 1 — Serving AI Models as APIs</span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>FastAPI — async routes, Pydantic models, dependency injection, middleware</div>
+            <div class="topic-item"><span class="topic-dot"></span>Packaging AI apps — Docker, docker-compose, multi-stage builds</div>
+            <div class="topic-item"><span class="topic-dot"></span>Deployment targets — Railway, Render, HuggingFace Spaces, AWS Lambda basics</div>
+            <div class="topic-item"><span class="topic-dot"></span>Streaming LLM responses via SSE / WebSockets</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge code"><span class="a-dot"></span>2× Code Quest <span class="assess-count">(wrap a model as API, Dockerize, deploy)</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">📊</span><span class="course-title">Course 2 — MLOps Essentials</span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>Experiment tracking — MLflow or Weights & Biases (W&B)</div>
+            <div class="topic-item"><span class="topic-dot"></span>Model versioning & model registry concepts</div>
+            <div class="topic-item"><span class="topic-dot"></span>Monitoring AI systems — latency, token cost, error rates, data drift</div>
+            <div class="topic-item"><span class="topic-dot"></span>CI/CD for ML — GitHub Actions basics for model testing</div>
+            <div class="topic-item"><span class="topic-dot"></span>Caching, rate limiting, observability & LLM-specific logging</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge code"><span class="a-dot"></span>1× Code Quest <span class="assess-count">(add monitoring to an AI app)</span></span>
+            <span class="assess-badge essay"><span class="a-dot"></span>1× Essay Quest <span class="assess-count">(design a monitoring strategy for an LLM app)</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="gate-bar raid-gate">⚔ Deployment Raid (3–4 ppl) — Take a group's previous RAG/Agent app and add: auth, monitoring, rate limiting, CI/CD. Ship to production. 5 days.</div>
+    </div>
+  </div>
+
+  <!-- S8 -->
+  <div class="subject-card">
+    <div class="subject-header">
+      <span class="subject-number">S8</span>
+      <span class="subject-title">AI Ethics, Responsible AI & Capstone</span>
+      <div class="subject-meta"><span class="weeks-badge">Week 12+</span></div>
+    </div>
+    <div class="subject-body">
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">⚖️</span><span class="course-title">Course 1 — AI Ethics & Safety</span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>Bias, fairness & transparency — sources of bias, measurement, mitigation</div>
+            <div class="topic-item"><span class="topic-dot"></span>AI safety — prompt injection, jailbreaking, adversarial inputs, output sanitization</div>
+            <div class="topic-item"><span class="topic-dot"></span>Privacy in AI — training data, PII in prompts, GDPR implications</div>
+            <div class="topic-item"><span class="topic-dot"></span>Regulatory landscape — EU AI Act overview, NIST AI RMF</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge essay"><span class="a-dot"></span>1× Essay Quest <span class="assess-count">(bias audit of an AI system)</span></span>
+            <span class="assess-badge essay"><span class="a-dot"></span>1× Essay Quest <span class="assess-count">(safety threat model for an LLM app)</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">🏆</span><span class="course-title">Course 2 — Capstone Project</span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>Project scoping — problem definition, architecture planning, tech stack decision</div>
+            <div class="topic-item"><span class="topic-dot"></span>Implementation sprint — iterative development with daily Gitea commits</div>
+            <div class="topic-item"><span class="topic-dot"></span>Technical documentation — README, architecture diagram, API docs</div>
+            <div class="topic-item"><span class="topic-dot"></span>Presentation & demo — project defence to instructors + cohort</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge essay"><span class="a-dot"></span>Design Quest <span class="assess-count">(architecture doc + decision rationale)</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="gate-bar raid-gate">⚔ Extended Capstone Raid (4–5 ppl) — Build, deploy, and document a complete AI-powered application. 14 days. Includes oral defence where each member explains any piece of the codebase.</div>
+      <div class="gate-bar">🔴 Final Checkpoint — Comprehensive. 3–4 hrs. Written (MCQ + essay) + oral component. Physical/hybrid. Graduation gate.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ TRACK A · 6 MONTHS ═══════════════════════ -->
+<div class="content" id="tab-a6">
+  <div class="section-header">
+    <div class="section-icon gold">🏗️</div>
+    <div class="section-title-wrap">
+      <h2>Track A — 6 Month Program</h2>
+      <p>Prerequisite: Backend or Fullstack experience. 24 weeks. Deeper coverage + 2 additional subjects.</p>
+    </div>
+  </div>
+
+  <div class="summary-bar">
+    <div class="summary-stat"><div class="num">24</div><div class="lbl">Weeks</div></div>
+    <div class="divider"></div>
+    <div class="summary-stat"><div class="num">10</div><div class="lbl">Subjects</div></div>
+    <div class="divider"></div>
+    <div class="summary-stat"><div class="num">28</div><div class="lbl">Courses</div></div>
+    <div class="divider"></div>
+    <div class="summary-stat"><div class="num">~80</div><div class="lbl">Quests</div></div>
+    <div class="divider"></div>
+    <div class="summary-stat"><div class="num">9</div><div class="lbl">Checkpoints</div></div>
+    <div class="divider"></div>
+    <div class="summary-stat"><div class="num">7</div><div class="lbl">Raids</div></div>
+  </div>
+
+  <div class="callout">
+    <strong>What's added vs. 3-month Track A:</strong> All 8 subjects from the 3-month track are expanded with more depth and more quests. Two entirely new subjects are added: <strong>Computer Vision & Generative Image/Video AI</strong> and <strong>Advanced AI System Design</strong>. MLOps gets its own extended treatment. The capstone is 3 weeks instead of 2.
+  </div>
+
+  <div class="phase-sep"><div class="line"></div><div class="label">Phase 1 — Foundations (Weeks 1–6)</div><div class="line"></div></div>
+
+  <div class="subject-card">
+    <div class="subject-header">
+      <span class="subject-number">S1</span>
+      <span class="subject-title">Python for AI Engineering</span>
+      <div class="subject-meta"><span class="weeks-badge">Weeks 1–3</span></div>
+    </div>
+    <div class="subject-body">
+      <div class="callout" style="margin-bottom:12px;">Extended vs 3-month: adds asyncio depth, testing (pytest), type systems, and more data pipeline patterns. ~50% more quest coverage.</div>
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">📦</span><span class="course-title">Course 1 — Python Rapid Onboarding <span class="diff-badge ext">Extended</span></span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>Python syntax & idioms for experienced devs</div>
+            <div class="topic-item"><span class="topic-dot"></span>OOP, functional patterns, decorators, context managers</div>
+            <div class="topic-item"><span class="topic-dot"></span>Async Python — asyncio, aiohttp, concurrent.futures</div>
+            <div class="topic-item"><span class="topic-dot"></span>Testing with pytest — unit tests for ML code</div>
+            <div class="topic-item"><span class="topic-dot"></span>Type hints, mypy, pydantic for AI data validation</div>
+            <div class="topic-item"><span class="topic-dot"></span>Python packaging — pyproject.toml, building libraries</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge code"><span class="a-dot"></span>5× Code Quest</span>
+            <span class="assess-badge mcq"><span class="a-dot"></span>1× MCQ Quest</span>
+          </div>
+        </div>
+      </div>
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">🔬</span><span class="course-title">Course 2 — Scientific Python Stack <span class="diff-badge ext">Extended</span></span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>NumPy — full broadcasting, memory layout, strides</div>
+            <div class="topic-item"><span class="topic-dot"></span>Pandas — advanced groupby, window functions, MultiIndex</div>
+            <div class="topic-item"><span class="topic-dot"></span>Polars (modern pandas alternative) — basics</div>
+            <div class="topic-item"><span class="topic-dot"></span>Data visualization — Matplotlib, Seaborn, Plotly interactive</div>
+            <div class="topic-item"><span class="topic-dot"></span>Data pipelines — Prefect/Airflow basics for ML data flows</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge notebook"><span class="a-dot"></span>3× Notebook Quest</span>
+            <span class="assess-badge code"><span class="a-dot"></span>2× Code Quest</span>
+          </div>
+        </div>
+      </div>
+      <div class="gate-bar raid-gate">⚔ Mini Raid (Pair) — EDA + Data Pipeline: clean, transform, and visualize a messy real-world dataset. Deliver a report notebook. 3 days.</div>
+      <div class="gate-bar">🔴 Checkpoint 1 — Python & Data Stack. 45 min. MCQ + code. Online.</div>
+    </div>
+  </div>
+
+  <div class="subject-card">
+    <div class="subject-header">
+      <span class="subject-number">S2</span>
+      <span class="subject-title">Mathematics for Machine Learning</span>
+      <div class="subject-meta"><span class="weeks-badge">Weeks 3–5</span></div>
+    </div>
+    <div class="subject-body">
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">📐</span><span class="course-title">Course 1 — Linear Algebra Essentials</span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>Vectors, matrices, matrix multiplication, transpose, inverse</div>
+            <div class="topic-item"><span class="topic-dot"></span>Dot products, norms, cosine similarity</div>
+            <div class="topic-item"><span class="topic-dot"></span>Eigenvalues, eigenvectors, SVD (conceptual → PCA)</div>
+            <div class="topic-item"><span class="topic-dot"></span>Matrix decompositions used in deep learning</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge mcq"><span class="a-dot"></span>1× MCQ Quest</span>
+            <span class="assess-badge code"><span class="a-dot"></span>2× Code Quest <span class="assess-count">(NumPy implementations)</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">📊</span><span class="course-title">Course 2 — Statistics & Probability</span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>Probability distributions, Bayes' theorem</div>
+            <div class="topic-item"><span class="topic-dot"></span>Descriptive & inferential statistics</div>
+            <div class="topic-item"><span class="topic-dot"></span>Hypothesis testing, p-values, confidence intervals</div>
+            <div class="topic-item"><span class="topic-dot"></span>A/B testing for ML model evaluation</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge mcq"><span class="a-dot"></span>2× MCQ Quest</span>
+            <span class="assess-badge essay"><span class="a-dot"></span>1× Essay Quest</span>
+          </div>
+        </div>
+      </div>
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">∇</span><span class="course-title">Course 3 — Calculus & Optimization <span class="diff-badge ext">Extended</span></span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>Derivatives, gradients, chain rule</div>
+            <div class="topic-item"><span class="topic-dot"></span>Gradient descent variants — SGD, momentum, Adam</div>
+            <div class="topic-item"><span class="topic-dot"></span>Convex vs non-convex optimization</div>
+            <div class="topic-item"><span class="topic-dot"></span>Learning rate schedules — warmup, cosine annealing</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge mcq"><span class="a-dot"></span>1× MCQ Quest</span>
+            <span class="assess-badge code"><span class="a-dot"></span>1× Code Quest <span class="assess-count">(implement gradient descent)</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="gate-bar">🔴 Checkpoint 2 — Math Foundations. 45 min. MCQ + short answer. Online.</div>
+    </div>
+  </div>
+
+  <div class="phase-sep"><div class="line"></div><div class="label">Phase 2 — Core ML & DL (Weeks 6–14)</div><div class="line"></div></div>
+
+  <div class="subject-card">
+    <div class="subject-header">
+      <span class="subject-number">S3</span>
+      <span class="subject-title">Machine Learning Foundations</span>
+      <div class="subject-meta"><span class="weeks-badge">Weeks 6–9</span></div>
+    </div>
+    <div class="subject-body">
+      <div class="callout" style="margin-bottom:12px;">4 weeks vs 2 weeks in the 3-month track. Adds Bayesian ML, more ensemble methods, and proper pipeline engineering with scikit-learn.</div>
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">🗺️</span><span class="course-title">Course 1 — The ML Paradigm & Pipeline Engineering</span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>ML workflow end-to-end</div>
+            <div class="topic-item"><span class="topic-dot"></span>Feature engineering — encoding, scaling, selection, generation</div>
+            <div class="topic-item"><span class="topic-dot"></span>scikit-learn Pipelines and ColumnTransformer</div>
+            <div class="topic-item"><span class="topic-dot"></span>Data splits, cross-validation, stratification</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge notebook"><span class="a-dot"></span>2× Notebook Quest</span>
+          </div>
+        </div>
+      </div>
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">🌳</span><span class="course-title">Course 2 — Classical & Ensemble Algorithms <span class="diff-badge ext">Extended</span></span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>Regression algorithms (Linear, Ridge, Lasso, ElasticNet)</div>
+            <div class="topic-item"><span class="topic-dot"></span>Classification (Logistic, SVM, KNN, Naive Bayes)</div>
+            <div class="topic-item"><span class="topic-dot"></span>Decision Trees, Random Forest, Extra Trees</div>
+            <div class="topic-item"><span class="topic-dot"></span>Gradient Boosting — XGBoost, LightGBM, CatBoost in depth</div>
+            <div class="topic-item"><span class="topic-dot"></span>Stacking & blending ensemble strategies</div>
+            <div class="topic-item"><span class="topic-dot"></span>Clustering — K-Means, DBSCAN, hierarchical, Gaussian Mixture</div>
+            <div class="topic-item"><span class="topic-dot"></span>Dimensionality reduction — PCA, t-SNE, UMAP</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge code"><span class="a-dot"></span>4× Code Quest</span>
+            <span class="assess-badge notebook"><span class="a-dot"></span>2× Notebook Quest</span>
+          </div>
+        </div>
+      </div>
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">📏</span><span class="course-title">Course 3 — Model Evaluation, Tuning & Selection</span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>Evaluation metrics in depth (all types)</div>
+            <div class="topic-item"><span class="topic-dot"></span>Hyperparameter tuning — Optuna (Bayesian optimization)</div>
+            <div class="topic-item"><span class="topic-dot"></span>Model interpretability — SHAP values, feature importance</div>
+            <div class="topic-item"><span class="topic-dot"></span>Regularization strategies and when to use each</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge code"><span class="a-dot"></span>2× Code Quest</span>
+            <span class="assess-badge essay"><span class="a-dot"></span>1× Essay Quest <span class="assess-count">(SHAP analysis write-up)</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="gate-bar raid-gate">⚔ Standard Raid — Full ML pipeline on a Kaggle-style dataset: EDA → feature engineering → model selection → tuning → evaluation → stakeholder summary report. 7 days.</div>
+      <div class="gate-bar">🔴 Checkpoint 3 — ML Foundations. 75 min. MCQ + code interpretation + essay. Online. Hard gate.</div>
+    </div>
+  </div>
+
+  <div class="subject-card">
+    <div class="subject-header">
+      <span class="subject-number">S4</span>
+      <span class="subject-title">Deep Learning & Neural Networks</span>
+      <div class="subject-meta"><span class="weeks-badge">Weeks 9–13</span></div>
+    </div>
+    <div class="subject-body">
+      <div class="callout" style="margin-bottom:12px;">4 weeks vs 1.5 weeks in 3-month. Adds RNNs/LSTMs, GAN fundamentals, and deeper PyTorch patterns.</div>
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">🧠</span><span class="course-title">Course 1 — Neural Network Fundamentals</span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>Perceptrons, MLPs, activation functions, backprop</div>
+            <div class="topic-item"><span class="topic-dot"></span>Implement NN from scratch (NumPy)</div>
+            <div class="topic-item"><span class="topic-dot"></span>Vanishing/exploding gradients, batch normalization</div>
+            <div class="topic-item"><span class="topic-dot"></span>Dropout, weight initialization strategies</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge code"><span class="a-dot"></span>2× Code Quest</span>
+          </div>
+        </div>
+      </div>
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">🔥</span><span class="course-title">Course 2 — PyTorch Deep Dive <span class="diff-badge ext">Extended</span></span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>Tensors, autograd, computation graphs in depth</div>
+            <div class="topic-item"><span class="topic-dot"></span>Custom datasets, DataLoaders, transforms</div>
+            <div class="topic-item"><span class="topic-dot"></span>Training loops with callbacks, gradient clipping</div>
+            <div class="topic-item"><span class="topic-dot"></span>Mixed precision training (fp16/bf16)</div>
+            <div class="topic-item"><span class="topic-dot"></span>PyTorch Lightning — clean training abstraction</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge code"><span class="a-dot"></span>4× Code Quest</span>
+          </div>
+        </div>
+      </div>
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">👁️</span><span class="course-title">Course 3 — CNNs & Transfer Learning</span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>Convolutional layers, pooling, receptive fields</div>
+            <div class="topic-item"><span class="topic-dot"></span>CNN architectures — LeNet → ResNet → EfficientNet</div>
+            <div class="topic-item"><span class="topic-dot"></span>Transfer learning & fine-tuning strategies</div>
+            <div class="topic-item"><span class="topic-dot"></span>Vision Transformer (ViT) — conceptual</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge notebook"><span class="a-dot"></span>2× Notebook Quest</span>
+          </div>
+        </div>
+      </div>
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">🔁</span><span class="course-title">Course 4 — RNNs, LSTMs & Sequence Models <span class="diff-badge new">New in 6M</span></span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>Recurrent networks — vanishing gradient problem</div>
+            <div class="topic-item"><span class="topic-dot"></span>LSTM & GRU architectures and use cases</div>
+            <div class="topic-item"><span class="topic-dot"></span>Sequence-to-sequence models</div>
+            <div class="topic-item"><span class="topic-dot"></span>Where RNNs are still useful vs. transformers</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge code"><span class="a-dot"></span>1× Code Quest</span>
+            <span class="assess-badge mcq"><span class="a-dot"></span>1× MCQ Quest</span>
+          </div>
+        </div>
+      </div>
+      <div class="gate-bar">🔴 Checkpoint 4 — Deep Learning. 60 min. MCQ + code output questions + short essay. Online.</div>
+    </div>
+  </div>
+
+  <div class="phase-sep"><div class="line"></div><div class="label">Phase 3 — LLMs & Generative AI (Weeks 14–20)</div><div class="line"></div></div>
+
+  <div class="subject-card">
+    <div class="subject-header">
+      <span class="subject-number">S5</span>
+      <span class="subject-title">NLP & Large Language Models</span>
+      <div class="subject-meta"><span class="weeks-badge">Weeks 14–16</span></div>
+    </div>
+    <div class="subject-body">
+      <p style="color:var(--muted); font-size:13px; margin-bottom:14px;">Same structure as Track A 3-month S5, but with 3 weeks instead of 2. Adds fine-tuning (LoRA/QLoRA) as an additional course.</p>
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">📝</span><span class="course-title">Course 1–3 — NLP Foundations, Transformers & Prompt Engineering</span></div>
+        <div class="course-body">
+          <p style="color:var(--muted); font-size:12px;">Same as 3-month S5 C1–C3, with additional quests and deeper coverage of attention mechanism math.</p>
+          <div class="assessments-row">
+            <span class="assess-badge code"><span class="a-dot"></span>5× Code Quest</span>
+            <span class="assess-badge mcq"><span class="a-dot"></span>2× MCQ Quest</span>
+            <span class="assess-badge essay"><span class="a-dot"></span>2× Essay Quest</span>
+          </div>
+        </div>
+      </div>
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">🎯</span><span class="course-title">Course 4 — Fine-tuning LLMs (LoRA/QLoRA) <span class="diff-badge new">New in 6M</span></span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>When to fine-tune vs. RAG vs. prompt engineering</div>
+            <div class="topic-item"><span class="topic-dot"></span>Parameter-efficient fine-tuning — LoRA, QLoRA, adapters</div>
+            <div class="topic-item"><span class="topic-dot"></span>Dataset preparation for instruction fine-tuning</div>
+            <div class="topic-item"><span class="topic-dot"></span>Fine-tuning with Hugging Face PEFT + Transformers</div>
+            <div class="topic-item"><span class="topic-dot"></span>Evaluating fine-tuned models — benchmarks, ROUGE, human eval</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge notebook"><span class="a-dot"></span>2× Notebook Quest <span class="assess-count">(fine-tune a small LLM)</span></span>
+            <span class="assess-badge essay"><span class="a-dot"></span>1× Essay Quest <span class="assess-count">(RAG vs fine-tune decision framework)</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="gate-bar">🔴 Checkpoint 5 — NLP & LLMs. 75 min. MCQ + essay + code reading. Online. Hard gate.</div>
+    </div>
+  </div>
+
+  <div class="subject-card">
+    <div class="subject-header">
+      <span class="subject-number">S6</span>
+      <span class="subject-title">Computer Vision & Generative Image AI <span class="diff-badge new">New Subject</span></span>
+      <div class="subject-meta"><span class="weeks-badge">Weeks 17–19</span></div>
+    </div>
+    <div class="subject-body">
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">🖼️</span><span class="course-title">Course 1 — Applied Computer Vision</span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>Image classification, object detection, segmentation (concepts + APIs)</div>
+            <div class="topic-item"><span class="topic-dot"></span>OpenCV basics — image preprocessing, transformations</div>
+            <div class="topic-item"><span class="topic-dot"></span>Using pre-trained detection models (YOLO, SAM) via APIs</div>
+            <div class="topic-item"><span class="topic-dot"></span>Vision-Language Models (CLIP, LLaVA) — integrating vision into AI apps</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge code"><span class="a-dot"></span>2× Code Quest</span>
+            <span class="assess-badge notebook"><span class="a-dot"></span>1× Notebook Quest</span>
+          </div>
+        </div>
+      </div>
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">🎨</span><span class="course-title">Course 2 — Generative Image & Multimodal AI</span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>Diffusion models — DDPM intuition, how Stable Diffusion works</div>
+            <div class="topic-item"><span class="topic-dot"></span>Image generation APIs — DALL-E, Midjourney API, Stability AI</div>
+            <div class="topic-item"><span class="topic-dot"></span>Multimodal LLMs — GPT-4V, Claude Vision, Gemini Vision</div>
+            <div class="topic-item"><span class="topic-dot"></span>Speech APIs — Whisper (ASR), TTS models</div>
+            <div class="topic-item"><span class="topic-dot"></span>Building multimodal AI applications (LangChain multimodal)</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge code"><span class="a-dot"></span>3× Code Quest <span class="assess-count">(multimodal app features)</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="gate-bar raid-gate">⚔ CV/Multimodal Raid — Build a multimodal AI app (e.g. image analysis chatbot, vision-powered document scanner, audio transcription + summary tool). 7 days.</div>
+      <div class="gate-bar">🔴 Checkpoint 6 — CV & GenAI. 45 min. MCQ + short answer. Online.</div>
+    </div>
+  </div>
+
+  <div class="subject-card">
+    <div class="subject-header">
+      <span class="subject-number">S7</span>
+      <span class="subject-title">Generative AI Engineering (RAG, Agents, APIs)</span>
+      <div class="subject-meta"><span class="weeks-badge">Weeks 19–21</span></div>
+    </div>
+    <div class="subject-body">
+      <p style="color:var(--muted); font-size:13px; margin-bottom:14px;">Same 4 courses as Track A 3-month S6 (LLM APIs, Embeddings, RAG, Agents). 3 weeks instead of 2.5, with additional advanced quests.</p>
+      <div class="assessments-row" style="margin-bottom:14px;">
+        <span class="assess-badge code"><span class="a-dot"></span>8× Code Quest</span>
+        <span class="assess-badge essay"><span class="a-dot"></span>2× Essay Quest</span>
+      </div>
+      <div class="gate-bar raid-gate">⚔ Standard Raid — Complete RAG + Agent application, with evaluation framework and production deployment. 10 days.</div>
+      <div class="gate-bar">🔴 Checkpoint 7 — GenAI Engineering. 90 min. Full mixed assessment. Online. Hard gate.</div>
+    </div>
+  </div>
+
+  <div class="phase-sep"><div class="line"></div><div class="label">Phase 4 — Production & Capstone (Weeks 21–24)</div><div class="line"></div></div>
+
+  <div class="subject-card">
+    <div class="subject-header">
+      <span class="subject-number">S8</span>
+      <span class="subject-title">AI Deployment, MLOps & System Design</span>
+      <div class="subject-meta"><span class="weeks-badge">Weeks 21–23</span></div>
+    </div>
+    <div class="subject-body">
+      <div class="callout" style="margin-bottom:12px;">2 weeks vs 1 week in 3-month. Adds a full AI System Design course not present in the 3-month track.</div>
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">🚀</span><span class="course-title">Course 1 — Serving & Deployment</span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>FastAPI in depth — background tasks, auth, middleware, OpenAPI docs</div>
+            <div class="topic-item"><span class="topic-dot"></span>Docker + docker-compose + multi-stage builds</div>
+            <div class="topic-item"><span class="topic-dot"></span>Kubernetes basics — pods, services, deployments for ML workloads</div>
+            <div class="topic-item"><span class="topic-dot"></span>Cloud deployment — AWS SageMaker, GCP Vertex AI, or Azure ML (pick one)</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge code"><span class="a-dot"></span>3× Code Quest</span>
+          </div>
+        </div>
+      </div>
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">📊</span><span class="course-title">Course 2 — MLOps & LLMOps <span class="diff-badge ext">Extended</span></span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>Experiment tracking — W&B or MLflow in depth</div>
+            <div class="topic-item"><span class="topic-dot"></span>Model registry, versioning, artifact lineage</div>
+            <div class="topic-item"><span class="topic-dot"></span>CI/CD for ML — GitHub Actions, automated model testing</div>
+            <div class="topic-item"><span class="topic-dot"></span>LLM observability — LangSmith, Helicone, or Langfuse</div>
+            <div class="topic-item"><span class="topic-dot"></span>Cost monitoring, prompt caching, fallback chains</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge code"><span class="a-dot"></span>2× Code Quest</span>
+            <span class="assess-badge essay"><span class="a-dot"></span>2× Essay Quest</span>
+          </div>
+        </div>
+      </div>
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">🏛️</span><span class="course-title">Course 3 — AI System Design <span class="diff-badge new">New in 6M</span></span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>AI system design patterns — pipeline vs. real-time, batch inference</div>
+            <div class="topic-item"><span class="topic-dot"></span>Scalability — load balancing LLM APIs, queue-based architectures</div>
+            <div class="topic-item"><span class="topic-dot"></span>Caching strategies — semantic caching, response caching, KV cache</div>
+            <div class="topic-item"><span class="topic-dot"></span>Multi-tenant AI systems — tenant isolation, rate limiting per user</div>
+            <div class="topic-item"><span class="topic-dot"></span>Design a production AI system from scratch (mock interview style)</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge essay"><span class="a-dot"></span>2× Essay Quest <span class="assess-count">(system design documents)</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="gate-bar raid-gate">⚔ Deployment + MLOps Raid — Take a previous project and fully productionize it: K8s deploy, CI/CD pipeline, monitoring dashboard, cost tracking. 7 days.</div>
+      <div class="gate-bar">🔴 Checkpoint 8 — Deployment & MLOps. 60 min. MCQ + design essay. Online.</div>
+    </div>
+  </div>
+
+  <div class="subject-card">
+    <div class="subject-header">
+      <span class="subject-number">S9 + S10</span>
+      <span class="subject-title">AI Ethics & Extended Capstone</span>
+      <div class="subject-meta"><span class="weeks-badge">Weeks 23–24</span></div>
+    </div>
+    <div class="subject-body">
+      <p style="color:var(--muted); font-size:13px; margin-bottom:14px;">Same Ethics course as 3-month S8. Capstone is 3 weeks with a more structured product development process (including user research and product spec).</p>
+      <div class="assessments-row">
+        <span class="assess-badge essay"><span class="a-dot"></span>3× Essay Quest <span class="assess-count">(ethics, safety, regulatory)</span></span>
+      </div>
+      <div class="gate-bar raid-gate">⚔ Extended Capstone Raid — Full product: user research → spec → implementation → deployment → presentation. 3 weeks. All members defend any part of the codebase.</div>
+      <div class="gate-bar">🔴 Final Checkpoint — 4–6 hrs. Written + oral + live demo assessment. Physical. Graduation gate.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ TRACK B · 3 MONTHS ═══════════════════════ -->
+<div class="content" id="tab-b3">
+  <div class="section-header">
+    <div class="section-icon blue">🌱</div>
+    <div class="section-title-wrap">
+      <h2>Track B — 3 Month Program (No Experience)</h2>
+      <p>Zero prior coding experience. 12 weeks. Focus: Python foundations → LLM app engineering. Applied/API-first approach.</p>
+    </div>
+  </div>
+
+  <div class="summary-bar">
+    <div class="summary-stat"><div class="num blue">12</div><div class="lbl">Weeks</div></div>
+    <div class="divider"></div>
+    <div class="summary-stat"><div class="num blue">6</div><div class="lbl">Subjects</div></div>
+    <div class="divider"></div>
+    <div class="summary-stat"><div class="num blue">16</div><div class="lbl">Courses</div></div>
+    <div class="divider"></div>
+    <div class="summary-stat"><div class="num blue">~35</div><div class="lbl">Quests</div></div>
+    <div class="divider"></div>
+    <div class="summary-stat"><div class="num blue">5</div><div class="lbl">Checkpoints</div></div>
+    <div class="divider"></div>
+    <div class="summary-stat"><div class="num blue">3</div><div class="lbl">Raids</div></div>
+  </div>
+
+  <div class="callout blue">
+    <strong>Track B Philosophy:</strong> Absolute beginners need 3 weeks of Python before they can think about AI. The 3-month track makes a deliberate trade-off: it skips ML theory, classical algorithms, and DL foundations entirely. Instead it goes <em>Python → Python for AI tools → LLM APIs → RAG → Agents → Deploy</em>. This produces an applied AI engineer who can build with LLMs immediately, and can layer in ML depth post-program.
+  </div>
+
+  <div class="subject-card">
+    <div class="subject-header">
+      <span class="subject-number subject-number-blue" style="color:var(--accent2)">S1</span>
+      <span class="subject-title">Python Programming Foundations</span>
+      <div class="subject-meta"><span class="weeks-badge">Weeks 1–3</span></div>
+    </div>
+    <div class="subject-body">
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">🐣</span><span class="course-title">Course 1 — Absolute Python Basics</span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>Variables, data types (int, float, string, bool)</div>
+            <div class="topic-item"><span class="topic-dot"></span>Operators, expressions, print statements</div>
+            <div class="topic-item"><span class="topic-dot"></span>if/elif/else — conditional logic</div>
+            <div class="topic-item"><span class="topic-dot"></span>for loops, while loops, break/continue</div>
+            <div class="topic-item"><span class="topic-dot"></span>Lists, tuples, dictionaries, sets</div>
+            <div class="topic-item"><span class="topic-dot"></span>Functions — definition, parameters, return values</div>
+          </div>
+          <div class="modules-note">📄 Modules: 8 short modules — highest density in the whole curriculum. Small steps, no assumed knowledge.</div>
+          <div class="assessments-row">
+            <span class="assess-badge code"><span class="a-dot"></span>5× Code Quest <span class="assess-count">(small, guided problems)</span></span>
+            <span class="assess-badge mcq"><span class="a-dot"></span>2× MCQ Quest <span class="assess-count">(syntax & concept checks)</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">🔧</span><span class="course-title">Course 2 — Tooling, Files & the Command Line</span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>Terminal basics — navigation, files, running Python scripts</div>
+            <div class="topic-item"><span class="topic-dot"></span>VS Code setup, extensions, debugging basics</div>
+            <div class="topic-item"><span class="topic-dot"></span>Git basics — init, add, commit, push (Gitea workflow)</div>
+            <div class="topic-item"><span class="topic-dot"></span>Virtual environments, pip, installing packages</div>
+            <div class="topic-item"><span class="topic-dot"></span>Reading & writing files (txt, JSON, CSV)</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge code"><span class="a-dot"></span>2× Code Quest <span class="assess-count">(file I/O tasks, Git commit required)</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">🏗️</span><span class="course-title">Course 3 — Functions, Modules & OOP Basics</span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>Function scope, default arguments, *args/**kwargs</div>
+            <div class="topic-item"><span class="topic-dot"></span>Importing modules — standard library (os, json, datetime, random)</div>
+            <div class="topic-item"><span class="topic-dot"></span>Introduction to classes and objects</div>
+            <div class="topic-item"><span class="topic-dot"></span>Error handling — try/except/finally</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge code"><span class="a-dot"></span>3× Code Quest</span>
+          </div>
+        </div>
+      </div>
+      <div class="gate-bar">🔴 Checkpoint 1 — Python Foundations. 45 min. MCQ (25 q) + 2 short code tasks. Online. Hard gate to S2.</div>
+    </div>
+  </div>
+
+  <div class="subject-card">
+    <div class="subject-header">
+      <span class="subject-number" style="color:var(--accent2)">S2</span>
+      <span class="subject-title">Python for AI & Data</span>
+      <div class="subject-meta"><span class="weeks-badge">Weeks 4–5</span></div>
+    </div>
+    <div class="subject-body">
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">🔢</span><span class="course-title">Course 1 — NumPy & Pandas Essentials</span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>NumPy arrays — creation, indexing, slicing, basic operations</div>
+            <div class="topic-item"><span class="topic-dot"></span>Why NumPy (vectorization vs. Python loops)</div>
+            <div class="topic-item"><span class="topic-dot"></span>Pandas Series & DataFrames — loading, inspecting, filtering</div>
+            <div class="topic-item"><span class="topic-dot"></span>Data cleaning — handling nulls, duplicates, type conversion</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge notebook"><span class="a-dot"></span>2× Notebook Quest <span class="assess-count">(data manipulation tasks)</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">🌐</span><span class="course-title">Course 2 — Working with APIs in Python</span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>HTTP basics — GET, POST, headers, JSON responses</div>
+            <div class="topic-item"><span class="topic-dot"></span>requests library — calling REST APIs</div>
+            <div class="topic-item"><span class="topic-dot"></span>API keys, environment variables, .env files (python-dotenv)</div>
+            <div class="topic-item"><span class="topic-dot"></span>Handling API errors, retries, rate limits</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge code"><span class="a-dot"></span>2× Code Quest <span class="assess-count">(call a public API, process response)</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="gate-bar raid-gate">⚔ Mini Raid (Pair) — Data Exploration: load, clean, and summarize a real dataset using Pandas. Deliver a Jupyter notebook with findings. 3 days.</div>
+      <div class="gate-bar">🔴 Checkpoint 2 — Python for AI. 30 min. MCQ + code reading. Online.</div>
+    </div>
+  </div>
+
+  <div class="subject-card">
+    <div class="subject-header">
+      <span class="subject-number" style="color:var(--accent2)">S3</span>
+      <span class="subject-title">LLMs, Prompt Engineering & AI APIs</span>
+      <div class="subject-meta"><span class="weeks-badge">Weeks 6–7</span></div>
+    </div>
+    <div class="subject-body">
+      <div class="callout blue" style="margin-bottom:12px;">This is where beginners get their first hands-on experience building with AI. No ML theory required — they use pre-built models via APIs, same as most professional AI engineers.</div>
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">🤖</span><span class="course-title">Course 1 — What are LLMs? (Conceptual Foundations)</span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>What is a language model — tokens, probabilities, generation (intuition only)</div>
+            <div class="topic-item"><span class="topic-dot"></span>AI vs ML vs LLM — taxonomy without equations</div>
+            <div class="topic-item"><span class="topic-dot"></span>Popular models — GPT-4o, Claude 3.5, Gemini, Llama, Mistral</div>
+            <div class="topic-item"><span class="topic-dot"></span>Context windows, tokenization, temperature</div>
+            <div class="topic-item"><span class="topic-dot"></span>Open vs closed source models — tradeoffs</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge mcq"><span class="a-dot"></span>1× MCQ Quest</span>
+          </div>
+        </div>
+      </div>
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">🔑</span><span class="course-title">Course 2 — OpenAI API & Prompt Engineering</span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>Chat Completions API — messages, roles, parameters</div>
+            <div class="topic-item"><span class="topic-dot"></span>Prompt patterns — zero-shot, few-shot, role prompting</div>
+            <div class="topic-item"><span class="topic-dot"></span>System prompts — giving the model a persona and constraints</div>
+            <div class="topic-item"><span class="topic-dot"></span>Chain-of-thought prompting</div>
+            <div class="topic-item"><span class="topic-dot"></span>Token cost awareness — counting tokens, staying within budget</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge code"><span class="a-dot"></span>3× Code Quest <span class="assess-count">(build LLM-powered features)</span></span>
+            <span class="assess-badge essay"><span class="a-dot"></span>1× Essay Quest <span class="assess-count">(prompt design rationale)</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">🆓</span><span class="course-title">Course 3 — Open Source Models & HuggingFace</span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>HuggingFace Hub — browsing models, understanding model cards</div>
+            <div class="topic-item"><span class="topic-dot"></span>Inference API — using models without running them locally</div>
+            <div class="topic-item"><span class="topic-dot"></span>Ollama — running open models locally (Llama, Mistral, Qwen)</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge code"><span class="a-dot"></span>1× Code Quest <span class="assess-count">(use HuggingFace Inference API)</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="gate-bar">🔴 Checkpoint 3 — LLMs & Prompting. 45 min. MCQ + 1 prompt optimization task. Online. Hard gate.</div>
+    </div>
+  </div>
+
+  <div class="subject-card">
+    <div class="subject-header">
+      <span class="subject-number" style="color:var(--accent2)">S4</span>
+      <span class="subject-title">Embeddings, Vector Databases & RAG</span>
+      <div class="subject-meta"><span class="weeks-badge">Weeks 8–9</span></div>
+    </div>
+    <div class="subject-body">
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">🗄️</span><span class="course-title">Course 1 — Embeddings & Semantic Search</span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>What are embeddings — numbers that represent meaning (intuition)</div>
+            <div class="topic-item"><span class="topic-dot"></span>Generating embeddings — OpenAI Embeddings API, sentence-transformers</div>
+            <div class="topic-item"><span class="topic-dot"></span>Cosine similarity — finding similar content</div>
+            <div class="topic-item"><span class="topic-dot"></span>Vector databases — Chroma (local), Pinecone basics</div>
+            <div class="topic-item"><span class="topic-dot"></span>Indexing and querying a vector DB</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge code"><span class="a-dot"></span>2× Code Quest <span class="assess-count">(build semantic search)</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">🔍</span><span class="course-title">Course 2 — RAG from Scratch</span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>What is RAG and why it exists</div>
+            <div class="topic-item"><span class="topic-dot"></span>Document ingestion — loading PDFs, text, web pages</div>
+            <div class="topic-item"><span class="topic-dot"></span>Chunking — splitting documents intelligently</div>
+            <div class="topic-item"><span class="topic-dot"></span>The RAG pipeline: embed → store → retrieve → generate</div>
+            <div class="topic-item"><span class="topic-dot"></span>LangChain for RAG — chains and retrieval QA</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge code"><span class="a-dot"></span>3× Code Quest <span class="assess-count">(build a document Q&A RAG system)</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="gate-bar raid-gate">⚔ Standard Raid (3–4 ppl) — Build a domain-specific RAG chatbot (e.g. a university Q&A bot, a product manual assistant). Deployed to a public URL. 7 days.</div>
+      <div class="gate-bar">🔴 Checkpoint 4 — Embeddings & RAG. 45 min. MCQ + short answer. Online. Hard gate.</div>
+    </div>
+  </div>
+
+  <div class="subject-card">
+    <div class="subject-header">
+      <span class="subject-number" style="color:var(--accent2)">S5</span>
+      <span class="subject-title">AI Agents & Basic Deployment</span>
+      <div class="subject-meta"><span class="weeks-badge">Weeks 10–11</span></div>
+    </div>
+    <div class="subject-body">
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">🕵️</span><span class="course-title">Course 1 — AI Agents (Applied Focus)</span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>What is an AI agent — the sense → think → act loop</div>
+            <div class="topic-item"><span class="topic-dot"></span>Tool/function calling — giving your LLM the ability to take actions</div>
+            <div class="topic-item"><span class="topic-dot"></span>Building simple agents with LangChain or raw function calling</div>
+            <div class="topic-item"><span class="topic-dot"></span>Memory in agents — conversation history, external memory stores</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge code"><span class="a-dot"></span>3× Code Quest <span class="assess-count">(build agents with tool use)</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">🌐</span><span class="course-title">Course 2 — Deploying AI Applications</span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>FastAPI basics — building a simple AI API endpoint</div>
+            <div class="topic-item"><span class="topic-dot"></span>Streamlit / Gradio — building quick AI UIs</div>
+            <div class="topic-item"><span class="topic-dot"></span>Deploying to the cloud — Railway or Render (zero-config platforms)</div>
+            <div class="topic-item"><span class="topic-dot"></span>Environment variables in production, basic security</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge code"><span class="a-dot"></span>2× Code Quest <span class="assess-count">(build + deploy an AI app)</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="gate-bar raid-gate">⚔ Deployment Raid (3–4 ppl) — Deploy a production-ready AI agent application with a UI. Public URL, working demo, README. 5 days.</div>
+    </div>
+  </div>
+
+  <div class="subject-card">
+    <div class="subject-header">
+      <span class="subject-number" style="color:var(--accent2)">S6</span>
+      <span class="subject-title">AI Ethics & Capstone</span>
+      <div class="subject-meta"><span class="weeks-badge">Week 12</span></div>
+    </div>
+    <div class="subject-body">
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">⚖️</span><span class="course-title">Course 1 — Responsible AI (Applied)</span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>Bias in AI — what it looks like in LLM outputs</div>
+            <div class="topic-item"><span class="topic-dot"></span>Prompt injection attacks — how they work and how to defend</div>
+            <div class="topic-item"><span class="topic-dot"></span>Hallucinations — why they happen and how to mitigate with RAG</div>
+            <div class="topic-item"><span class="topic-dot"></span>Responsible use of AI in products and communication</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge essay"><span class="a-dot"></span>1× Essay Quest <span class="assess-count">(responsible AI audit of a system)</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">🏆</span><span class="course-title">Course 2 — Capstone Project</span></div>
+        <div class="course-body">
+          <p style="color:var(--muted); font-size:12px;">Students build and deploy their own AI application individually (or in pairs), combining RAG + Agent capabilities. Presented to the cohort.</p>
+        </div>
+      </div>
+      <div class="gate-bar">🔴 Final Checkpoint — 2 hrs. Written MCQ + short answers + oral component. Physical/hybrid.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ TRACK B · 6 MONTHS ═══════════════════════ -->
+<div class="content" id="tab-b6">
+  <div class="section-header">
+    <div class="section-icon blue">🌳</div>
+    <div class="section-title-wrap">
+      <h2>Track B — 6 Month Program (No Experience)</h2>
+      <p>Zero prior coding experience. 24 weeks. Full AI engineering foundations + applied LLM engineering.</p>
+    </div>
+  </div>
+
+  <div class="summary-bar">
+    <div class="summary-stat"><div class="num blue">24</div><div class="lbl">Weeks</div></div>
+    <div class="divider"></div>
+    <div class="summary-stat"><div class="num blue">9</div><div class="lbl">Subjects</div></div>
+    <div class="divider"></div>
+    <div class="summary-stat"><div class="num blue">24</div><div class="lbl">Courses</div></div>
+    <div class="divider"></div>
+    <div class="summary-stat"><div class="num blue">~65</div><div class="lbl">Quests</div></div>
+    <div class="divider"></div>
+    <div class="summary-stat"><div class="num blue">8</div><div class="lbl">Checkpoints</div></div>
+    <div class="divider"></div>
+    <div class="summary-stat"><div class="num blue">6</div><div class="lbl">Raids</div></div>
+  </div>
+
+  <div class="callout blue">
+    <strong>6-Month Track B Difference:</strong> Compared to 3-month Track B, this adds: ML Foundations (light/applied), Deep Learning conceptual understanding, NLP depth, and a more complete deployment/MLOps section. The outcome is closer to full Track A (6M) in applied skills, with less mathematical depth but stronger applied LLM engineering.
+  </div>
+
+  <div class="phase-sep"><div class="line"></div><div class="label">Phase 1 — Programming Foundations (Weeks 1–5)</div><div class="line"></div></div>
+
+  <div class="subject-card">
+    <div class="subject-header">
+      <span class="subject-number" style="color:var(--accent2)">S1</span>
+      <span class="subject-title">Python Programming Foundations</span>
+      <div class="subject-meta"><span class="weeks-badge">Weeks 1–4</span></div>
+    </div>
+    <div class="subject-body">
+      <p style="color:var(--muted); font-size:13px; margin-bottom:14px;">Same 3 courses as Track B 3-month S1, but with 4 weeks instead of 3. More quests, more practice time, slower pacing on difficult concepts.</p>
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">🐣</span><span class="course-title">Course 1 — Absolute Python Basics <span class="diff-badge ext">Extended</span></span></div>
+        <div class="course-body">
+          <p style="color:var(--muted); font-size:12px;">Same topics as B3 S1 C1 but with 10 quests (5 more), weekly mini-challenges, and a debugging exercise set added.</p>
+          <div class="assessments-row">
+            <span class="assess-badge code"><span class="a-dot"></span>8× Code Quest</span>
+            <span class="assess-badge mcq"><span class="a-dot"></span>2× MCQ Quest</span>
+          </div>
+        </div>
+      </div>
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">🔧</span><span class="course-title">Course 2 — Tooling & Git</span></div>
+        <div class="course-body">
+          <p style="color:var(--muted); font-size:12px;">Same as B3 S1 C2 + adds branching, merge conflicts, and pull request workflows on Gitea.</p>
+          <div class="assessments-row">
+            <span class="assess-badge code"><span class="a-dot"></span>3× Code Quest</span>
+          </div>
+        </div>
+      </div>
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">🏗️</span><span class="course-title">Course 3 — Intermediate Python <span class="diff-badge ext">Extended</span></span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>Functions in depth — scope, closures, decorators</div>
+            <div class="topic-item"><span class="topic-dot"></span>OOP — classes, inheritance, magic methods</div>
+            <div class="topic-item"><span class="topic-dot"></span>List comprehensions, generators, iterators</div>
+            <div class="topic-item"><span class="topic-dot"></span>Standard library — os, json, datetime, collections</div>
+            <div class="topic-item"><span class="topic-dot"></span>Error handling patterns</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge code"><span class="a-dot"></span>4× Code Quest</span>
+          </div>
+        </div>
+      </div>
+      <div class="gate-bar">🔴 Checkpoint 1 — Python Foundations. 60 min. MCQ + code tasks. Online. Hard gate.</div>
+    </div>
+  </div>
+
+  <div class="subject-card">
+    <div class="subject-header">
+      <span class="subject-number" style="color:var(--accent2)">S2</span>
+      <span class="subject-title">Python for AI & Data Science</span>
+      <div class="subject-meta"><span class="weeks-badge">Weeks 5–6</span></div>
+    </div>
+    <div class="subject-body">
+      <p style="color:var(--muted); font-size:13px; margin-bottom:14px;">Same as B3 S2, plus adds visualization depth and a full data project as the closing raid.</p>
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">🔢</span><span class="course-title">Course 1 — NumPy & Pandas</span></div>
+        <div class="course-body">
+          <p style="color:var(--muted); font-size:12px;">Same topics as B3 S2 C1, with more practice quests.</p>
+          <div class="assessments-row">
+            <span class="assess-badge notebook"><span class="a-dot"></span>3× Notebook Quest</span>
+            <span class="assess-badge code"><span class="a-dot"></span>1× Code Quest</span>
+          </div>
+        </div>
+      </div>
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">📊</span><span class="course-title">Course 2 — Data Visualization & Exploratory Analysis</span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>Matplotlib — basic plots (line, bar, scatter, histogram)</div>
+            <div class="topic-item"><span class="topic-dot"></span>Seaborn — statistical visualizations</div>
+            <div class="topic-item"><span class="topic-dot"></span>Plotly — interactive charts</div>
+            <div class="topic-item"><span class="topic-dot"></span>EDA workflow — distribution analysis, outlier detection, correlation</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge notebook"><span class="a-dot"></span>2× Notebook Quest</span>
+          </div>
+        </div>
+      </div>
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">🌐</span><span class="course-title">Course 3 — Working with APIs in Python</span></div>
+        <div class="course-body">
+          <p style="color:var(--muted); font-size:12px;">Same as B3 S2 C2.</p>
+          <div class="assessments-row">
+            <span class="assess-badge code"><span class="a-dot"></span>2× Code Quest</span>
+          </div>
+        </div>
+      </div>
+      <div class="gate-bar raid-gate">⚔ Mini Raid (Pair) — EDA report: load, clean, explore, and visualize a dataset. Present key findings. 4 days.</div>
+      <div class="gate-bar">🔴 Checkpoint 2 — Python for AI/Data. 30 min. MCQ + code reading. Online.</div>
+    </div>
+  </div>
+
+  <div class="phase-sep"><div class="line"></div><div class="label">Phase 2 — ML & DL Foundations (Weeks 7–13) — Light/Applied</div><div class="line"></div></div>
+
+  <div class="subject-card">
+    <div class="subject-header">
+      <span class="subject-number" style="color:var(--accent2)">S3</span>
+      <span class="subject-title">Mathematics for ML (Light) <span class="diff-badge new">New vs B3</span></span>
+      <div class="subject-meta"><span class="weeks-badge">Week 7</span></div>
+    </div>
+    <div class="subject-body">
+      <div class="callout blue" style="margin-bottom:12px;">1 week, conceptual only. No proofs. The goal is enough intuition to understand what ML algorithms are doing.</div>
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">📐</span><span class="course-title">Course 1 — Math Intuition for AI</span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>Vectors & matrices — intuition (rows of data, columns of features)</div>
+            <div class="topic-item"><span class="topic-dot"></span>Dot products & cosine similarity (why they matter for embeddings)</div>
+            <div class="topic-item"><span class="topic-dot"></span>Functions, derivatives, gradients — what "learning" means mathematically</div>
+            <div class="topic-item"><span class="topic-dot"></span>Probabilities & distributions — what models predict</div>
+            <div class="topic-item"><span class="topic-dot"></span>Loss functions — what we're trying to minimize</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge mcq"><span class="a-dot"></span>1× MCQ Quest</span>
+            <span class="assess-badge essay"><span class="a-dot"></span>1× Essay Quest <span class="assess-count">(explain gradient descent in plain terms)</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="subject-card">
+    <div class="subject-header">
+      <span class="subject-number" style="color:var(--accent2)">S4</span>
+      <span class="subject-title">Machine Learning Foundations (Applied) <span class="diff-badge new">New vs B3</span></span>
+      <div class="subject-meta"><span class="weeks-badge">Weeks 8–10</span></div>
+    </div>
+    <div class="subject-body">
+      <div class="callout blue" style="margin-bottom:12px;">Applied/practical focus. Emphasis on using scikit-learn correctly, not deriving algorithms. Understanding tradeoffs and knowing when to use what.</div>
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">🗺️</span><span class="course-title">Course 1 — The ML Workflow</span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>What is supervised learning — classification & regression</div>
+            <div class="topic-item"><span class="topic-dot"></span>The ML pipeline: data → features → model → evaluate</div>
+            <div class="topic-item"><span class="topic-dot"></span>Train/test splits, validation, avoiding data leakage</div>
+            <div class="topic-item"><span class="topic-dot"></span>Feature scaling and encoding (practical, not mathematical)</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge notebook"><span class="a-dot"></span>2× Notebook Quest</span>
+          </div>
+        </div>
+      </div>
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">🌳</span><span class="course-title">Course 2 — Core Algorithms (Applied)</span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>Linear & logistic regression — with scikit-learn, interpret outputs</div>
+            <div class="topic-item"><span class="topic-dot"></span>Decision trees & random forests — intuition + usage</div>
+            <div class="topic-item"><span class="topic-dot"></span>K-Means clustering — finding patterns without labels</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge code"><span class="a-dot"></span>3× Code Quest <span class="assess-count">(train + evaluate algorithms)</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">📏</span><span class="course-title">Course 3 — Evaluation & Model Improvement</span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>Evaluation metrics (accuracy, precision, recall, F1, RMSE)</div>
+            <div class="topic-item"><span class="topic-dot"></span>Overfitting & underfitting — what to do when model fails</div>
+            <div class="topic-item"><span class="topic-dot"></span>Hyperparameter tuning — grid search basics</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge notebook"><span class="a-dot"></span>1× Notebook Quest</span>
+            <span class="assess-badge essay"><span class="a-dot"></span>1× Essay Quest</span>
+          </div>
+        </div>
+      </div>
+      <div class="gate-bar raid-gate">⚔ Standard Raid — Build an ML solution for a real-world problem (classification or regression). Present findings and model performance. 5 days.</div>
+      <div class="gate-bar">🔴 Checkpoint 3 — ML Foundations. 45 min. MCQ + short answer. Online.</div>
+    </div>
+  </div>
+
+  <div class="subject-card">
+    <div class="subject-header">
+      <span class="subject-number" style="color:var(--accent2)">S5</span>
+      <span class="subject-title">Deep Learning Concepts & LLM Foundations <span class="diff-badge new">New vs B3</span></span>
+      <div class="subject-meta"><span class="weeks-badge">Weeks 11–13</span></div>
+    </div>
+    <div class="subject-body">
+      <div class="callout blue" style="margin-bottom:12px;">Conceptual + applied. Students won't train large DL models from scratch but will understand how they work and be able to use them confidently.</div>
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">🧠</span><span class="course-title">Course 1 — Neural Networks (Conceptual)</span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>How neurons and layers work — intuition</div>
+            <div class="topic-item"><span class="topic-dot"></span>What training means — gradient descent intuition</div>
+            <div class="topic-item"><span class="topic-dot"></span>CNNs for images — how they see patterns</div>
+            <div class="topic-item"><span class="topic-dot"></span>Transfer learning — standing on the shoulders of giants</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge mcq"><span class="a-dot"></span>1× MCQ Quest</span>
+          </div>
+        </div>
+      </div>
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">🔥</span><span class="course-title">Course 2 — PyTorch for Beginners</span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>Tensors — what they are, basic operations</div>
+            <div class="topic-item"><span class="topic-dot"></span>Building a simple model with nn.Module</div>
+            <div class="topic-item"><span class="topic-dot"></span>Training loop walkthrough (conceptual + hands-on with a small dataset)</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge code"><span class="a-dot"></span>2× Code Quest</span>
+          </div>
+        </div>
+      </div>
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">🤖</span><span class="course-title">Course 3 — Transformers & the LLM Landscape</span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>Attention mechanism intuition (not the full math)</div>
+            <div class="topic-item"><span class="topic-dot"></span>BERT vs GPT vs T5 — what each is good for</div>
+            <div class="topic-item"><span class="topic-dot"></span>HuggingFace — using pre-trained models with Pipelines</div>
+            <div class="topic-item"><span class="topic-dot"></span>Ollama — running models locally</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge code"><span class="a-dot"></span>2× Code Quest</span>
+            <span class="assess-badge mcq"><span class="a-dot"></span>1× MCQ Quest</span>
+          </div>
+        </div>
+      </div>
+      <div class="gate-bar">🔴 Checkpoint 4 — DL & LLM Foundations. 45 min. MCQ + short answer. Online.</div>
+    </div>
+  </div>
+
+  <div class="phase-sep"><div class="line"></div><div class="label">Phase 3 — LLM Engineering (Weeks 13–20)</div><div class="line"></div></div>
+
+  <div class="subject-card">
+    <div class="subject-header">
+      <span class="subject-number" style="color:var(--accent2)">S6</span>
+      <span class="subject-title">LLMs, Prompt Engineering & AI APIs</span>
+      <div class="subject-meta"><span class="weeks-badge">Weeks 14–15</span></div>
+    </div>
+    <div class="subject-body">
+      <p style="color:var(--muted); font-size:13px; margin-bottom:12px;">Same 3 courses as B3 S3 (LLM concepts, OpenAI API, HuggingFace/Ollama), extended to 2 weeks with more quests and deeper prompt engineering practice.</p>
+      <div class="assessments-row" style="margin-bottom:10px;">
+        <span class="assess-badge code"><span class="a-dot"></span>5× Code Quest</span>
+        <span class="assess-badge mcq"><span class="a-dot"></span>2× MCQ Quest</span>
+        <span class="assess-badge essay"><span class="a-dot"></span>2× Essay Quest</span>
+      </div>
+      <div class="gate-bar">🔴 Checkpoint 5 — LLMs & Prompting. 45 min. MCQ + task. Online.</div>
+    </div>
+  </div>
+
+  <div class="subject-card">
+    <div class="subject-header">
+      <span class="subject-number" style="color:var(--accent2)">S7</span>
+      <span class="subject-title">Embeddings, Vector Databases & RAG</span>
+      <div class="subject-meta"><span class="weeks-badge">Weeks 16–18</span></div>
+    </div>
+    <div class="subject-body">
+      <p style="color:var(--muted); font-size:13px; margin-bottom:12px;">Same 2 courses as B3 S4, extended to 3 weeks. Adds advanced RAG techniques (reranking, HyDE, RAGAS evaluation) as a third course.</p>
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">🔍</span><span class="course-title">Course 3 — Advanced RAG Techniques <span class="diff-badge new">New vs B3</span></span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>Advanced chunking — semantic, hierarchical</div>
+            <div class="topic-item"><span class="topic-dot"></span>Reranking with cross-encoders</div>
+            <div class="topic-item"><span class="topic-dot"></span>Multi-query retrieval and HyDE</div>
+            <div class="topic-item"><span class="topic-dot"></span>RAG evaluation — RAGAS framework basics</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge code"><span class="a-dot"></span>2× Code Quest</span>
+          </div>
+        </div>
+      </div>
+      <div class="gate-bar raid-gate">⚔ Standard Raid — Domain-specific RAG system with evaluation metrics. 7 days. Deployed.</div>
+      <div class="gate-bar">🔴 Checkpoint 6 — RAG Engineering. 45 min. MCQ + short answer. Online. Hard gate.</div>
+    </div>
+  </div>
+
+  <div class="subject-card">
+    <div class="subject-header">
+      <span class="subject-number" style="color:var(--accent2)">S8</span>
+      <span class="subject-title">AI Agents, Deployment & MLOps</span>
+      <div class="subject-meta"><span class="weeks-badge">Weeks 19–21</span></div>
+    </div>
+    <div class="subject-body">
+      <p style="color:var(--muted); font-size:13px; margin-bottom:12px;">Combines B3 S5 (Agents + Deployment) with an added MLOps basics course. 3 weeks.</p>
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">🕵️</span><span class="course-title">Course 1 — AI Agents (Extended)</span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>Same as B3 S5 C1 + adds multi-agent patterns (CrewAI basics)</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge code"><span class="a-dot"></span>4× Code Quest</span>
+          </div>
+        </div>
+      </div>
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">🚀</span><span class="course-title">Course 2 — Production Deployment</span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>FastAPI in depth — auth, middleware, background tasks</div>
+            <div class="topic-item"><span class="topic-dot"></span>Docker — containers for AI apps</div>
+            <div class="topic-item"><span class="topic-dot"></span>Cloud deployment — Railway/Render + basic AWS</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge code"><span class="a-dot"></span>3× Code Quest</span>
+          </div>
+        </div>
+      </div>
+      <div class="course-block">
+        <div class="course-header"><span class="course-icon">📊</span><span class="course-title">Course 3 — MLOps Basics <span class="diff-badge new">New vs B3</span></span></div>
+        <div class="course-body">
+          <div class="topics-grid">
+            <div class="topic-item"><span class="topic-dot"></span>Experiment tracking — W&B or MLflow basics</div>
+            <div class="topic-item"><span class="topic-dot"></span>LLM monitoring — latency, cost, error tracking</div>
+            <div class="topic-item"><span class="topic-dot"></span>Basic CI/CD for AI apps</div>
+          </div>
+          <div class="assessments-row">
+            <span class="assess-badge code"><span class="a-dot"></span>1× Code Quest</span>
+            <span class="assess-badge essay"><span class="a-dot"></span>1× Essay Quest</span>
+          </div>
+        </div>
+      </div>
+      <div class="gate-bar raid-gate">⚔ Deployment Raid — Full production AI app: agents + RAG + monitoring + deployment. 7 days.</div>
+      <div class="gate-bar">🔴 Checkpoint 7 — Deployment & MLOps. 45 min. MCQ + essay. Online.</div>
+    </div>
+  </div>
+
+  <div class="subject-card">
+    <div class="subject-header">
+      <span class="subject-number" style="color:var(--accent2)">S9</span>
+      <span class="subject-title">AI Ethics & Extended Capstone</span>
+      <div class="subject-meta"><span class="weeks-badge">Weeks 22–24</span></div>
+    </div>
+    <div class="subject-body">
+      <p style="color:var(--muted); font-size:13px; margin-bottom:12px;">Same Ethics course as B3 S6. Capstone is 3 weeks with more structure — product spec, iterative development, public demo.</p>
+      <div class="assessments-row" style="margin-bottom:10px;">
+        <span class="assess-badge essay"><span class="a-dot"></span>2× Essay Quest <span class="assess-count">(ethics, safety)</span></span>
+      </div>
+      <div class="gate-bar raid-gate">⚔ Extended Capstone Raid (4–5 ppl) — Complete AI application, deployed, with documentation and a public demo. 3 weeks.</div>
+      <div class="gate-bar">🔴 Final Checkpoint — 2–3 hrs. MCQ + essay + oral component. Physical/hybrid. Graduation gate.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ ASSESSMENT FRAMEWORK ═══════════════════════ -->
+<div class="content" id="tab-assessment">
+  <div class="section-header">
+    <div class="section-icon gold">🎯</div>
+    <div class="section-title-wrap">
+      <h2>Assessment Framework</h2>
+      <p>Quest taxonomy, checkpoint structure, and raid design — mapped to platform entity types.</p>
+    </div>
+  </div>
+
+  <div class="callout">
+    All assessments map to the platform's existing entities: <strong>Quest</strong> (individual challenges, sequential, XP-gated), <strong>Checkpoint</strong> (hard gates, timed, exam format), <strong>Raid</strong> (group projects, Gitea repos, code explanation required). Quest subtypes are implemented via <code>QuestTask.task_type</code>.
+  </div>
+
+  <div class="phase-sep"><div class="line"></div><div class="label">Quest Types</div><div class="line"></div></div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Quest Type</th>
+          <th>Platform task_type</th>
+          <th>Gitea Required?</th>
+          <th>Auto-graded?</th>
+          <th>Used For</th>
+          <th>Typical Frequency</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="assess-badge code" style="display:inline-flex"><span class="a-dot"></span>Code Quest</span></td>
+          <td><code>code</code></td>
+          <td>✅ Yes</td>
+          <td>✅ Test cases</td>
+          <td>Python tasks, ML implementations, API integrations, RAG/Agent builds</td>
+          <td>3–5 per course</td>
+        </tr>
+        <tr>
+          <td><span class="assess-badge notebook" style="display:inline-flex"><span class="a-dot"></span>Notebook Quest</span></td>
+          <td><code>file_submission</code></td>
+          <td>✅ Yes (commit .ipynb)</td>
+          <td>⚠️ Partial (cell outputs checked + AI review)</td>
+          <td>EDA, model training experiments, visualization tasks</td>
+          <td>1–3 per course</td>
+        </tr>
+        <tr>
+          <td><span class="assess-badge mcq" style="display:inline-flex"><span class="a-dot"></span>MCQ Quest</span></td>
+          <td><code>multiple_choice</code></td>
+          <td>❌ No</td>
+          <td>✅ Fully automated</td>
+          <td>Concept checks, terminology, algorithm understanding</td>
+          <td>1–2 per course</td>
+        </tr>
+        <tr>
+          <td><span class="assess-badge essay" style="display:inline-flex"><span class="a-dot"></span>Essay Quest</span></td>
+          <td><code>free_response</code></td>
+          <td>❌ No</td>
+          <td>❌ Peer + AI rubric</td>
+          <td>Design decisions, tradeoff analysis, ethics, architecture rationale</td>
+          <td>1–2 per subject</td>
+        </tr>
+        <tr>
+          <td>Short Answer Quest</td>
+          <td><code>short_answer</code></td>
+          <td>❌ No</td>
+          <td>⚠️ AI-assisted matching</td>
+          <td>Definition checks, code output explanation, brief technical explanations</td>
+          <td>Embedded in checkpoints</td>
+        </tr>
+        <tr>
+          <td>Design Quest</td>
+          <td><code>file_submission</code></td>
+          <td>Optional</td>
+          <td>❌ Rubric-based</td>
+          <td>Architecture diagrams, system design documents, monitoring plans</td>
+          <td>1–2 per program</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="phase-sep"><div class="line"></div><div class="label">Checkpoint Types & Placement</div><div class="line"></div></div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Checkpoint Type</th>
+          <th>Duration</th>
+          <th>Format</th>
+          <th>Format (online / physical)</th>
+          <th>Placement</th>
+          <th>Re-take Policy</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Concept Checkpoint</strong></td>
+          <td>30–45 min</td>
+          <td>MCQ (25–30 q) + optional short answer</td>
+          <td>Online</td>
+          <td>End of math or conceptual subjects</td>
+          <td>Up to 2× (with cooldown)</td>
+        </tr>
+        <tr>
+          <td><strong>Technical Checkpoint</strong></td>
+          <td>45–75 min</td>
+          <td>MCQ + 1–2 code tasks + 1 short essay</td>
+          <td>Online</td>
+          <td>End of Python, ML, DL, GenAI subjects</td>
+          <td>Up to 2× (may require quest re-validation)</td>
+        </tr>
+        <tr>
+          <td><strong>Mid-Program Gate</strong></td>
+          <td>90–120 min</td>
+          <td>MCQ + code + essay (comprehensive for all subjects to date)</td>
+          <td>Online (physical optional)</td>
+          <td>End of S4 (roughly halfway)</td>
+          <td>1× re-take only</td>
+        </tr>
+        <tr>
+          <td><strong>Final / Graduation Checkpoint</strong></td>
+          <td>3–6 hours</td>
+          <td>MCQ + essay + code task + oral component</td>
+          <td>Physical / Hybrid</td>
+          <td>End of program, after capstone</td>
+          <td>1× re-take (delayed by 2 weeks)</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout">
+    <strong>Question Banks:</strong> All checkpoints draw from a randomized question bank (<code>CheckpointQuestion.checkpoint_id = null</code>) using stratified selection by difficulty (easy/medium/hard). Students in the same cohort receive different question sets, reducing answer-sharing. Questions are tagged by subject and difficulty.
+  </div>
+
+  <div class="phase-sep"><div class="line"></div><div class="label">Raid Types & Structure</div><div class="line"></div></div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Raid Type</th>
+          <th>Group Size</th>
+          <th>Duration</th>
+          <th>Submission</th>
+          <th>Code Explanation?</th>
+          <th>Placement</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Mini Raid (Pair)</strong></td>
+          <td>2 students</td>
+          <td>3–4 days</td>
+          <td>Gitea repo + notebook</td>
+          <td>Written explanation per member</td>
+          <td>S1 (Python/Data subject)</td>
+        </tr>
+        <tr>
+          <td><strong>Standard Raid</strong></td>
+          <td>3–4 students</td>
+          <td>5–7 days</td>
+          <td>Gitea repo + README + demo</td>
+          <td>✅ Required — verbal or written</td>
+          <td>ML Foundations, GenAI Engineering</td>
+        </tr>
+        <tr>
+          <td><strong>Deployment Raid</strong></td>
+          <td>3–4 students</td>
+          <td>5–7 days</td>
+          <td>Gitea + deployed URL + monitoring dashboard</td>
+          <td>✅ Required</td>
+          <td>Deployment/MLOps subject</td>
+        </tr>
+        <tr>
+          <td><strong>Extended Capstone Raid</strong></td>
+          <td>4–5 students</td>
+          <td>14–21 days</td>
+          <td>Gitea + deployed product + docs + oral defence</td>
+          <td>✅ Required — any member can be asked about any part</td>
+          <td>Final subject (Capstone)</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout red">
+    <strong>Code Explanation Rule:</strong> For all Raids with <code>requires_code_explanation = true</code>, if any group member cannot explain what a piece of code does or why a decision was made, the entire group fails the raid. This is non-negotiable. It prevents contribution free-riding and is the primary academic integrity mechanism for group work.
+  </div>
+
+  <div class="phase-sep"><div class="line"></div><div class="label">XP & Progression Design</div><div class="line"></div></div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Assessment</th><th>XP Award</th><th>XP Deadline</th><th>Gate Behavior</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Code Quest (easy)</td><td>50–100 XP</td><td>48 hrs from activation → 50% XP after</td><td>Must pass to unlock next quest</td></tr>
+        <tr><td>Code Quest (medium)</td><td>150–250 XP</td><td>72 hrs from activation → 60% XP after</td><td>Must pass to unlock next quest</td></tr>
+        <tr><td>Code Quest (hard)</td><td>300–500 XP</td><td>5 days from activation → 70% XP after</td><td>Must pass to unlock next quest</td></tr>
+        <tr><td>Notebook Quest</td><td>100–200 XP</td><td>4 days from activation → 60% XP after</td><td>Sequential unlock</td></tr>
+        <tr><td>MCQ Quest</td><td>25–75 XP</td><td>24 hrs → 70% XP after</td><td>Sequential unlock</td></tr>
+        <tr><td>Essay Quest</td><td>100–200 XP</td><td>5 days → 60% XP after</td><td>Sequential unlock</td></tr>
+        <tr><td>Checkpoint</td><td>500–1000 XP on pass</td><td>Scheduled time (no early bonus)</td><td>Hard gate — program halts until passed</td></tr>
+        <tr><td>Raid (per member)</td><td>400–800 XP on pass</td><td>N/A (time-boxed by duration_days)</td><td>Required for subject completion</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════════════ AUDITING SYSTEM ═══════════════════════ -->
+<div class="content" id="tab-auditing">
+  <div class="section-header">
+    <div class="section-icon gold">🔎</div>
+    <div class="section-title-wrap">
+      <h2>Auditing System</h2>
+      <p>Per-assessment-type auditing strategy, escalation tiers, and integrity mechanisms.</p>
+    </div>
+  </div>
+
+  <div class="callout">
+    The platform's <strong>Audit</strong> entity carries <code>conference_link</code> (for raid oral defences), <code>AuditQuestion</code> checklists (configurable per context), and a <code>peer_audit_required</code> flag on quests and raids. The auditing strategy below maps to these fields.
+  </div>
+
+  <div class="audit-grid">
+    <div class="audit-card code-card">
+      <h4><span class="assess-badge code" style="display:inline-flex; margin-bottom:8px"><span class="a-dot"></span>Code Quest Auditing</span></h4>
+      <div class="audit-tier">
+        <div class="tier-number">T1</div>
+        <div class="tier-content">
+          <div class="tier-label">Automated Test Cases (100% of submissions)</div>
+          <div class="tier-desc">All code quests have test_cases JSON. Submission triggers automated runner against defined input/output pairs. Pass/fail determined by test coverage threshold (default: 100% pass rate on public tests, hidden tests vary).</div>
+        </div>
+      </div>
+      <div class="audit-tier">
+        <div class="tier-number">T2</div>
+        <div class="tier-content">
+          <div class="tier-label">AI-Assisted Code Review (all passing submissions)</div>
+          <div class="tier-desc">LLM reviews code for: style alignment, potential plagiarism indicators (unusual similarity to other submissions), hardcoded test outputs, inappropriate shortcuts. Flags suspicious submissions for T3.</div>
+        </div>
+      </div>
+      <div class="audit-tier">
+        <div class="tier-number">T3</div>
+        <div class="tier-content">
+          <div class="tier-label">Peer Audit (for <code>allows_peer_audit = true</code> quests)</div>
+          <div class="tier-desc">Assigned reviewer (anonymous) checks: does the code actually solve the problem? Is it the student's own work? Uses AuditQuestion checklist. Reviewer has 48 hours. Dispute resolution goes to T4.</div>
+        </div>
+      </div>
+      <div class="audit-tier">
+        <div class="tier-number">T4</div>
+        <div class="tier-content">
+          <div class="tier-label">Instructor Review (flagged only, &lt;5% of submissions)</div>
+          <div class="tier-desc">Manual review by instructor. May trigger a live explanation session (verbal defense via conference_link). Outcome: pass / fail / retry.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="audit-card notebook-card">
+      <h4><span class="assess-badge notebook" style="display:inline-flex; margin-bottom:8px"><span class="a-dot"></span>Notebook Quest Auditing</span></h4>
+      <div class="audit-tier">
+        <div class="tier-number">T1</div>
+        <div class="tier-content">
+          <div class="tier-label">Structure Validation (automated)</div>
+          <div class="tier-desc">Check: notebook is committed to Gitea, all required cells exist, outputs are present (not cleared), file naming convention matches <code>repository_naming_convention</code>.</div>
+        </div>
+      </div>
+      <div class="audit-tier">
+        <div class="tier-number">T2</div>
+        <div class="tier-content">
+          <div class="tier-label">AI Output Review (automated + AI-assisted)</div>
+          <div class="tier-desc">Specific cell outputs (model accuracy, final metrics, visualizations) are extracted and checked against expected ranges. AI reviews narrative cells for coherence and correctness.</div>
+        </div>
+      </div>
+      <div class="audit-tier">
+        <div class="tier-number">T3</div>
+        <div class="tier-content">
+          <div class="tier-label">Instructor Spot-Check (15% random + all flagged)</div>
+          <div class="tier-desc">Instructor reviews full notebook. Checks that analysis is genuine, conclusions are supported by the data, and there's no copy-paste of outputs without understanding.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="audit-card mcq-card">
+      <h4><span class="assess-badge mcq" style="display:inline-flex; margin-bottom:8px"><span class="a-dot"></span>MCQ Quest & Checkpoint Auditing</span></h4>
+      <div class="audit-tier">
+        <div class="tier-number">T1</div>
+        <div class="tier-content">
+          <div class="tier-label">Fully Automated Scoring</div>
+          <div class="tier-desc">Instant scoring on submission. Results locked on submit (no editing after). Score history kept per attempt.</div>
+        </div>
+      </div>
+      <div class="audit-tier">
+        <div class="tier-number">T2</div>
+        <div class="tier-content">
+          <div class="tier-label">Behavioral Analytics</div>
+          <div class="tier-desc">Time-per-question tracking. Flag if: all questions answered in under 60s total, answer pattern matches another student identically, session IP/device anomalies. Flagged → T3.</div>
+        </div>
+      </div>
+      <div class="audit-tier">
+        <div class="tier-number">T3</div>
+        <div class="tier-content">
+          <div class="tier-label">Randomized Question Banks + Re-sit Protocol</div>
+          <div class="tier-desc">Different students see different questions from the same bank. If cheating is suspected, student is required to re-take under proctored conditions (physical or screen-share). Outcome determines official score.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="audit-card essay-card">
+      <h4><span class="assess-badge essay" style="display:inline-flex; margin-bottom:8px"><span class="a-dot"></span>Essay & Short Answer Auditing</span></h4>
+      <div class="audit-tier">
+        <div class="tier-number">T1</div>
+        <div class="tier-content">
+          <div class="tier-label">AI Rubric Scoring (all submissions)</div>
+          <div class="tier-desc">LLM grades against a pre-defined rubric with criteria and weights. Returns a score + criterion-level breakdown. This score is the starting score.</div>
+        </div>
+      </div>
+      <div class="audit-tier">
+        <div class="tier-number">T2</div>
+        <div class="tier-content">
+          <div class="tier-label">Blind Peer Review (2 peers per essay)</div>
+          <div class="tier-desc">Two cohort members grade the same essay independently using AuditQuestion checklist. Reviewers don't see each other's scores. Final score = weighted avg of AI score + peer 1 + peer 2 (configurable weights per quest). Outlier resolution goes to T3.</div>
+        </div>
+      </div>
+      <div class="audit-tier">
+        <div class="tier-number">T3</div>
+        <div class="tier-content">
+          <div class="tier-label">Instructor Adjudication (outliers + disputes)</div>
+          <div class="tier-desc">Triggered when: peer scores diverge by >30%, student disputes the score, or AI flagged the essay as potentially AI-generated. Instructor makes final call.</div>
+        </div>
+      </div>
+      <div class="audit-tier">
+        <div class="tier-number">T4</div>
+        <div class="tier-content">
+          <div class="tier-label">AI-generated Content Detection</div>
+          <div class="tier-desc">All essays screened for LLM-generation patterns. High-probability AI-generated submissions require a live verbal follow-up (explain your argument verbally). Confirmed AI-generated work = 0 score + warning.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="audit-card cp-card">
+      <h4><span class="assess-badge cp" style="display:inline-flex; margin-bottom:8px"><span class="a-dot"></span>Checkpoint Auditing</span></h4>
+      <div class="audit-tier">
+        <div class="tier-number">T1</div>
+        <div class="tier-content">
+          <div class="tier-label">Automated Scoring (MCQ + code portions)</div>
+          <div class="tier-desc">MCQ: instant scoring. Code tasks: automated test runners. Results available within 1 hour of submission close.</div>
+        </div>
+      </div>
+      <div class="audit-tier">
+        <div class="tier-number">T2</div>
+        <div class="tier-content">
+          <div class="tier-label">Instructor Review (essay + short answer)</div>
+          <div class="tier-desc">All essay portions reviewed by instructor within 48 hours. Rubric-based, documented scoring. Appeals window of 72 hours after results.</div>
+        </div>
+      </div>
+      <div class="audit-tier">
+        <div class="tier-number">T3</div>
+        <div class="tier-content">
+          <div class="tier-label">Final Checkpoint — Oral Component</div>
+          <div class="tier-desc">Oral exam scored live by 2 instructors. AuditQuestion checklist used. Recording kept for 30 days. Pass requires ≥70% on written + oral combined.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="audit-card raid-card">
+      <h4><span class="assess-badge raid" style="display:inline-flex; margin-bottom:8px"><span class="a-dot"></span>Raid Auditing</span></h4>
+      <div class="audit-tier">
+        <div class="tier-number">T1</div>
+        <div class="tier-content">
+          <div class="tier-label">Automated Repo Tests (all raids with code)</div>
+          <div class="tier-desc">Test suite runs against the shared Gitea repo. Checks: all tests pass, deployment URL returns 200, required files present, commit history shows multiple contributors.</div>
+        </div>
+      </div>
+      <div class="audit-tier">
+        <div class="tier-number">T2</div>
+        <div class="tier-content">
+          <div class="tier-label">Contribution Analysis</div>
+          <div class="tier-desc">Git commit history analyzed: each member must have a meaningful commit ratio. Flags groups where one person did >80% of commits. Flagged groups → T4.</div>
+        </div>
+      </div>
+      <div class="audit-tier">
+        <div class="tier-number">T3</div>
+        <div class="tier-content">
+          <div class="tier-label">Peer Contribution Rating (within group)</div>
+          <div class="tier-desc">Each group member rates all other members' contribution (1–5 scale + short text). Aggregated privately. Severe outliers (member rated 1 by all others) → instructor review.</div>
+        </div>
+      </div>
+      <div class="audit-tier">
+        <div class="tier-number">T4</div>
+        <div class="tier-content">
+          <div class="tier-label">Code Explanation Oral Audit (all Standard/Extended Raids)</div>
+          <div class="tier-desc">All members are called into a video session (conference_link on Audit entity). Each member is asked to explain 2–3 random parts of the codebase — including parts they didn't write. Inability to explain = group fail. Session recorded. AuditQuestion checklist used.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="phase-sep"><div class="line"></div><div class="label">Integrity Policy Summary</div><div class="line"></div></div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Violation Type</th>
+          <th>Detection Method</th>
+          <th>First Offense</th>
+          <th>Second Offense</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Hardcoded test outputs in code quest</td>
+          <td>AI code review (T2) + hidden test cases</td>
+          <td>Quest invalidated, 72hr cooldown, re-attempt required</td>
+          <td>Subject-level review + formal warning</td>
+        </tr>
+        <tr>
+          <td>Code copying between students</td>
+          <td>Similarity detection (T2)</td>
+          <td>Both students: quest invalidated + oral explanation required</td>
+          <td>Program probation</td>
+        </tr>
+        <tr>
+          <td>AI-generated essay submission</td>
+          <td>AI detection + verbal follow-up</td>
+          <td>Score = 0, must resubmit with verified work</td>
+          <td>Program suspension review</td>
+        </tr>
+        <tr>
+          <td>Raid free-riding (contribution &lt;15%)</td>
+          <td>Git analysis (T2) + peer rating (T3)</td>
+          <td>Individual raid fail (group may still pass), quest re-assigned</td>
+          <td>Group disbanded, solo re-do</td>
+        </tr>
+        <tr>
+          <td>Inability to explain code in oral audit</td>
+          <td>Oral audit (T4)</td>
+          <td>Entire group fails the raid, must redo</td>
+          <td>Individual academic review</td>
+        </tr>
+        <tr>
+          <td>Checkpoint cheating (copied answers)</td>
+          <td>Behavioral analytics (T2)</td>
+          <td>Proctored re-sit required (physical)</td>
+          <td>Formal academic misconduct process</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout green">
+    <strong>Auditing Philosophy:</strong> The goal is not to catch cheaters — it's to make authentic learning the path of least resistance. Automated tests are intentionally designed so that gaming them (e.g. hardcoded outputs) is harder than solving the problem. Oral components at checkpoints and raids make knowledge internalization non-negotiable. The peer audit system is as much a teaching tool (reviewers learn by reviewing) as an integrity mechanism.
+  </div>
+</div>
+
+<script>
+function showTab(id, el) {
+  document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  el.classList.add('active');
+}
+</script>
+
+</body>
+</html>
