@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Trophy, Crown, Medal, TrendingUp, ArrowUp, ArrowDown, Minus, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -23,8 +23,9 @@ const players = [
   { name: ME, level: 2, xp: 2480, quests: 12, raids: 2, change: 6, badge: "Vector Initiate", location: "Ikeja" },
 ];
 
-const Leaderboard = () => {
-  const { scope = "global" } = useParams<{ scope: string }>();
+const LeaderboardCampus = () => {
+  const scope = "campus";
+  
   const navigate = useNavigate();
   const sorted = [...players].sort((a, b) => b.xp - a.xp);
   const myIndex = sorted.findIndex((p) => p.name === ME);
@@ -36,7 +37,7 @@ const Leaderboard = () => {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-xs font-mono uppercase tracking-widest text-secondary mb-2">// hall of legends</p>
-          <h1 className="font-display text-3xl lg:text-4xl font-bold">Leaderboard</h1>
+          <h1 className="font-display text-3xl lg:text-4xl font-bold">Campus Leaderboard</h1>
           <p className="text-muted-foreground mt-2">Rank by XP, quests completed, raids passed, or custom admin metrics.</p>
         </div>
 
@@ -156,4 +157,4 @@ const Leaderboard = () => {
   );
 };
 
-export default Leaderboard;
+export default LeaderboardCampus;

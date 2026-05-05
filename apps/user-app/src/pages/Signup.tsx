@@ -82,7 +82,7 @@ const Signup = () => {
                 onChange={setPassword}
                 visible={showPassword}
                 onToggle={() => setShowPassword((visible) => !visible)}
-                placeholder="At least 6 characters"
+                placeholder="At least 8 characters"
               />
             </Field>
             <Field label="Confirm password">

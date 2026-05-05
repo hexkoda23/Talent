@@ -217,25 +217,6 @@ model OnboardingDocument {
   @@index([applicationId, documentType])
 }
 
-model SelectionGameAttempt {
-  id                String    @id @default(uuid())
-  selectionGameId   String
-  userId            String
-  applicationId     String
-  startedAt         DateTime  @default(now())
-  deadlineAt        DateTime?
-  score             Int?
-  passed            Boolean?
-  completedAt       DateTime?
-  attemptData       Json?
-
-  selectionGame     SelectionGame @relation(fields: [selectionGameId], references: [id])
-  user              User          @relation(fields: [userId], references: [id])
-  application       Application   @relation(fields: [applicationId], references: [id])
-
-  @@index([userId, selectionGameId])
-}
-
 model RegistrationDocument {
   id                String                     @id @default(uuid())
   applicationId     String

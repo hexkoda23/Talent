@@ -1,5 +1,7 @@
-import { Trophy, Github, MapPin, Calendar, Star, Award, Code2, Flame, Target, TrendingUp } from "lucide-react";
+import { Trophy, Github, MapPin, Calendar, Star, Award, Code2, Flame, Target, TrendingUp, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
+import { authApi } from "@/api/endpoints";
 import CurriculumRoadmap from "./CurriculumRoadmap";
 
 const submissions = [
@@ -16,6 +18,13 @@ const badges = [
 ];
 
 const Profile = () => {
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await authApi.logout();
+    navigate("/", { replace: true });
+  };
+
   return (
     <div className="space-y-6 animate-fade-up">
       {/* Header card */}
@@ -36,7 +45,12 @@ const Profile = () => {
               </div>
             </div>
           </div>
-          <Button variant="soft">Edit profile</Button>
+          <div className="flex items-center gap-2">
+            <Button variant="soft">Edit profile</Button>
+            <Button variant="ghost" onClick={handleLogout} className="gap-2">
+              <LogOut className="h-4 w-4" /> Log out
+            </Button>
+          </div>
         </div>
       </div>
 

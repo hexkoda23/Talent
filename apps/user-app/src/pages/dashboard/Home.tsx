@@ -76,7 +76,7 @@ const DashboardHome = () => {
               </div>
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-warning/15 border border-warning/30 text-warning">
                 <Clock className="h-3.5 w-3.5" />
-                <span className="text-xs font-mono font-bold">{countdown}</span>
+                <span className="text-xs font-mono font-bold">{countdown} left for quest submission</span>
               </div>
             </div>
           </div>

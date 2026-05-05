@@ -25,7 +25,10 @@ import Workspace from "./pages/dashboard/Workspace.tsx";
 import Logbook from "./pages/dashboard/Logbook.tsx";
 import Profile from "./pages/dashboard/Profile.tsx";
 import Notifications from "./pages/dashboard/Notifications.tsx";
-import Leaderboard from "./pages/dashboard/Leaderboard.tsx";
+import LeaderboardGlobal from "./pages/dashboard/LeaderboardGlobal.tsx";
+import LeaderboardCampus from "./pages/dashboard/LeaderboardCampus.tsx";
+import LeaderboardCourse from "./pages/dashboard/LeaderboardCourse.tsx";
+import LeaderboardProgram from "./pages/dashboard/LeaderboardProgram.tsx";
 import Community from "./pages/dashboard/Community.tsx";
 import Checkpoints from "./pages/dashboard/Checkpoints.tsx";
 import Achievements from "./pages/dashboard/Achievements.tsx";
@@ -65,7 +68,11 @@ const App = () => (
             <Route path="raid" element={<Raid />} />
             <Route path="audits" element={<Audits />} />
             <Route path="checkpoints" element={<Checkpoints />} />
-            <Route path="leaderboard" element={<Leaderboard />} />
+            <Route path="leaderboard" element={<Navigate to="global" replace />} />
+            <Route path="leaderboard/global" element={<LeaderboardGlobal />} />
+            <Route path="leaderboard/campus" element={<LeaderboardCampus />} />
+            <Route path="leaderboard/course" element={<LeaderboardCourse />} />
+            <Route path="leaderboard/program" element={<LeaderboardProgram />} />
             <Route path="community" element={<Community />} />
             <Route path="achievements" element={<Achievements />} />
             <Route path="workspace" element={<Workspace />} />

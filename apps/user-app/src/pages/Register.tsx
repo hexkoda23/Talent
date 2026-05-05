@@ -22,7 +22,7 @@ import { Label } from "@/components/ui/label";
 import { Logo } from "@/components/Logo";
 import { cn } from "@/lib/utils";
 import { authApi, registrationApi } from "@/api/endpoints";
-import { toErrorMessage } from "@/api/client";
+import { authToken, toErrorMessage } from "@/api/client";
 import type { Campus } from "@/api/types";
 
 const steps = [
@@ -32,38 +32,105 @@ const steps = [
   { id: 4, title: "Code Zone", icon: MapPin },
 ];
 
+const STORAGE_KEY = "talentNationRegistrationProgress";
+
 const Register = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const correctionMode = searchParams.get("correction") === "1";
-  const [step, setStep] = useState(1);
+  
+  const getInitialState = () => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        return {
+          step: parsed.step || 1,
+          data: {
+            firstName: parsed.firstName || "",
+            lastName: parsed.lastName || "",
+            phone: parsed.phone || "",
+            accountEmail: "",
+            schoolEmail: parsed.schoolEmail || "",
+            school: parsed.school || "",
+            department: parsed.department || "",
+            address: parsed.address || "",
+            duration: parsed.duration || "6 months",
+            matric: parsed.matric || "",
+            level: parsed.level || "",
+            nin: parsed.nin || "",
+            schoolId: null,
+            profilePhoto: null,
+            governmentId: null,
+            phoneLinkedToNin: parsed.phoneLinkedToNin || false,
+            duplicateConsent: parsed.duplicateConsent || false,
+            truthConsent: parsed.truthConsent || false,
+            codeZone: parsed.codeZone || "",
+          }
+        };
+      } catch {
+        // ignore parse errors
+      }
+    }
+    return {
+      step: 1,
+      data: {
+        firstName: "",
+        lastName: "",
+        phone: "",
+        accountEmail: "",
+        schoolEmail: "",
+        school: "",
+        department: "",
+        address: "",
+        duration: "6 months",
+        matric: "",
+        level: "",
+        nin: "",
+        schoolId: null as File | null,
+        profilePhoto: null as File | null,
+        governmentId: null as File | null,
+        phoneLinkedToNin: false,
+        duplicateConsent: false,
+        truthConsent: false,
+        codeZone: "",
+      }
+    };
+  };
+
+  const initialState = getInitialState();
+  const [step, setStep] = useState(initialState.step);
   const [submitting, setSubmitting] = useState(false);
   const [campuses, setCampuses] = useState<Campus[]>([]);
   const [loadingCampuses, setLoadingCampuses] = useState(false);
   const [error, setError] = useState("");
-  const [data, setData] = useState({
-    firstName: "",
-    lastName: "",
-    phone: "",
-    accountEmail: "",
-    schoolEmail: "",
-    school: "",
-    department: "",
-    address: "",
-    duration: "6 months",
-    matric: "",
-    level: "",
-    nin: "",
-    schoolId: null as File | null,
-    profilePhoto: null as File | null,
-    governmentId: null as File | null,
-    phoneLinkedToNin: false,
-    duplicateConsent: false,
-    truthConsent: false,
-    codeZone: "",
-  });
+  const [data, setData] = useState(initialState.data);
 
-  const update = (k: keyof typeof data, v: any) => setData((d) => ({ ...d, [k]: v }));
+  const update = (k: keyof typeof data, v: any) => {
+    setData((d) => {
+      const newData = { ...d, [k]: v };
+      const toSave = {
+        step,
+        firstName: newData.firstName,
+        lastName: newData.lastName,
+        phone: newData.phone,
+        schoolEmail: newData.schoolEmail,
+        school: newData.school,
+        department: newData.department,
+        address: newData.address,
+        duration: newData.duration,
+        matric: newData.matric,
+        level: newData.level,
+        nin: newData.nin,
+        phoneLinkedToNin: newData.phoneLinkedToNin,
+        duplicateConsent: newData.duplicateConsent,
+        truthConsent: newData.truthConsent,
+        codeZone: newData.codeZone,
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
+      return newData;
+    });
+  };
 
   const ninValid = /^\d{11}$/.test(data.nin);
   const phoneValid = data.phone.replace(/\D/g, "").length >= 11;
@@ -74,26 +141,82 @@ const Register = () => {
     return !!data.codeZone;
   }, [data, ninValid, phoneValid, step]);
 
-  const next = () => setStep((s) => Math.min(4, s + 1));
-  const prev = () => setStep((s) => Math.max(1, s - 1));
+  const next = () => {
+    const newStep = Math.min(4, step + 1);
+    setStep(newStep);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      step: newStep,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      phone: data.phone,
+      schoolEmail: data.schoolEmail,
+      school: data.school,
+      department: data.department,
+      address: data.address,
+      duration: data.duration,
+      matric: data.matric,
+      level: data.level,
+      nin: data.nin,
+      phoneLinkedToNin: data.phoneLinkedToNin,
+      duplicateConsent: data.duplicateConsent,
+      truthConsent: data.truthConsent,
+      codeZone: data.codeZone,
+    }));
+  };
+  
+  const prev = () => {
+    const newStep = Math.max(1, step - 1);
+    setStep(newStep);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      step: newStep,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      phone: data.phone,
+      schoolEmail: data.schoolEmail,
+      school: data.school,
+      department: data.department,
+      address: data.address,
+      duration: data.duration,
+      matric: data.matric,
+      level: data.level,
+      nin: data.nin,
+      phoneLinkedToNin: data.phoneLinkedToNin,
+      duplicateConsent: data.duplicateConsent,
+      truthConsent: data.truthConsent,
+      codeZone: data.codeZone,
+    }));
+  };
+
+  const handleLogout = async () => {
+    localStorage.removeItem(STORAGE_KEY);
+    await authApi.logout();
+    navigate("/", { replace: true });
+  };
 
   useEffect(() => {
-    authApi.session()
-      .then((session) =>
-        setData((d) => ({
-          ...d,
-          accountEmail: session.user.email || "",
-          schoolEmail: d.schoolEmail || session.user.email || "",
-        })),
-      )
-      .catch(() => undefined);
+    if (authToken.exists()) {
+      authApi.session()
+        .then((session) =>
+          setData((d) => ({
+            ...d,
+            accountEmail: session.user.email || "",
+          })),
+        )
+        .catch(() => {
+          // If session fails, redirect to login/landing
+          navigate("/", { replace: true });
+        });
+    } else {
+      // No token, redirect to landing
+      navigate("/", { replace: true });
+    }
 
     setLoadingCampuses(true);
     registrationApi.campuses()
       .then((response) => setCampuses(response.data))
       .catch((err) => setError(toErrorMessage(err)))
       .finally(() => setLoadingCampuses(false));
-  }, []);
+  }, [navigate]);
 
   const submit = async () => {
     if (correctionMode) {
@@ -129,6 +252,7 @@ const Register = () => {
 
     try {
       await authApi.registerApplicant(formData);
+      localStorage.removeItem(STORAGE_KEY);
       navigate("/assessment", { replace: true });
     } catch (err) {
       setError(toErrorMessage(err));
@@ -141,7 +265,10 @@ const Register = () => {
     <div className="min-h-screen flex flex-col">
       <header className="px-5 lg:px-10 py-5 flex items-center justify-between border-b border-border">
         <Logo />
-        <Link to="/" className="text-sm text-muted-foreground hover:text-foreground">Cancel</Link>
+        <div className="flex items-center gap-3">
+          <Link to="/" className="text-sm text-muted-foreground hover:text-foreground">Cancel</Link>
+          <Button variant="ghost" onClick={handleLogout} className="text-sm">Log out</Button>
+        </div>
       </header>
 
       <main className="flex-1 px-5 py-8 lg:py-12 max-w-4xl w-full mx-auto">

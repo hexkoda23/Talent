@@ -120,9 +120,8 @@ const Countdown = () => {
                   <Breakdown seconds={nowSeconds} />
                   <div className="flex items-center justify-center gap-3 flex-col">
                     <div className="flex gap-3">
-                      <Button variant="ghost" onClick={() => navigate("/dashboard")}>Return to dashboard</Button>
                       {adminMode ? (
-                        <Button variant="destructive" onClick={() => navigate("/assessment", { replace: true })}>Start now</Button>
+                        <Button variant="destructive" onClick={() => navigate("/assessment/play", { replace: true })}>Start now</Button>
                       ) : (
                         <Button variant="secondary" onClick={() => {
                           try {

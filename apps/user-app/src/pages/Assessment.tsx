@@ -49,11 +49,7 @@ const Assessment = () => {
     <header className="px-5 lg:px-10 py-5 flex items-center justify-between border-b border-border">
       <div className="flex items-center gap-3">
         <Logo />
-        <Link to="/register" className="hidden sm:inline-flex text-sm text-muted-foreground hover:text-foreground">
-          &lt;- Back to intra
-        </Link>
       </div>
-      <Link to="/" className="text-sm text-muted-foreground hover:text-foreground">Save and exit</Link>
     </header>
 
     <main className="flex-1 px-5 py-10 lg:py-16 max-w-6xl w-full mx-auto">
@@ -85,7 +81,7 @@ const Assessment = () => {
           <h2 className="text-2xl text-muted-foreground mb-8">Games</h2>
           <div className="space-y-0">
             {games.map((game) => (
-              <article key={game.id} className="border-b border-border py-8 grid md:grid-cols-[1fr,auto] gap-5 items-center">
+              <article key={game.id} className="border-b border-border py-8 grid gap-5 items-center">
                 <div>
                   <div className="flex items-center gap-3">
                     <game.icon className="h-5 w-5 text-primary" />
@@ -97,11 +93,13 @@ const Assessment = () => {
                     {game.time}
                   </div>
                 </div>
-                <Button variant="hero" size="lg" asChild>
-                  <Link to="/assessment/play">-&gt; Start</Link>
-                </Button>
               </article>
             ))}
+          </div>
+          <div className="mt-8 flex justify-end">
+            <Button variant="hero" size="xl" asChild className="px-10 gap-2">
+              <Link to="/assessment/play">Start Now <ArrowRight className="h-5 w-5" /></Link>
+            </Button>
           </div>
         </section>
       </div>

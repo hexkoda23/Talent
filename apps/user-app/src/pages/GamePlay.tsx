@@ -99,9 +99,9 @@ const GamePlay = () => {
 };
 
 const memoryProfiles = {
-  standard: { rounds: 10, baseLength: 2, revealMs: 800, gapMs: 400, mistakes: Infinity },
-  hard: { rounds: 10, baseLength: 3, revealMs: 600, gapMs: 300, mistakes: Infinity },
-  boss: { rounds: 10, baseLength: 4, revealMs: 400, gapMs: 200, mistakes: Infinity },
+  standard: { rounds: 10, baseLength: 2, revealMs: 500, gapMs: 250, mistakes: Infinity },
+  hard: { rounds: 10, baseLength: 3, revealMs: 400, gapMs: 200, mistakes: Infinity },
+  boss: { rounds: 10, baseLength: 4, revealMs: 300, gapMs: 150, mistakes: Infinity },
 };
 
 const calcMemoryScore = (r: number) => {
@@ -112,6 +112,7 @@ const calcMemoryScore = (r: number) => {
 const MemoryGrid = ({ settings, onComplete }: { settings: ReturnType<typeof getGameSettings>; onComplete: (score: number, meta?: Record<string, unknown>) => void }) => {
   const profile = memoryProfiles[settings.difficulty];
   const [round, setRound] = useState(1);
+  const [retryKey, setRetryKey] = useState(0);
   const [sequence, setSequence] = useState<number[]>([]);
   const [showing, setShowing] = useState<number | null>(null);
   const [phase, setPhase] = useState<"show" | "input" | "wrong">("show");
@@ -145,7 +146,7 @@ const MemoryGrid = ({ settings, onComplete }: { settings: ReturnType<typeof getG
 
     const ready = window.setTimeout(() => setPhase("input"), seq.length * (profile.revealMs + profile.gapMs) + 120);
     return () => window.clearTimeout(ready);
-  }, [profile.baseLength, profile.gapMs, profile.revealMs, round]);
+  }, [profile.baseLength, profile.gapMs, profile.revealMs, round, retryKey]);
 
   const tap = (cell: number) => {
     if (phase !== "input") return;
@@ -161,8 +162,8 @@ const MemoryGrid = ({ settings, onComplete }: { settings: ReturnType<typeof getG
       window.setTimeout(() => {
         if (nextMistakes >= profile.mistakes) onComplete(calcMemoryScore(round - 1), { memory: { rounds_completed: Math.max(0, round - 1) } });
         else {
-          setUserInput([]);
-          setPhase("input");
+          setRound((r) => Math.max(1, r - 1));
+          setRetryKey((k) => k + 1);
         }
       }, 650);
       return;

@@ -42,6 +42,8 @@ export const authApi = {
   async logout() {
     try {
       await apiRequest<void>("/auth/logout", { method: "POST" });
+    } catch {
+      // Ignore errors, just clear token and redirect
     } finally {
       authToken.clear();
     }

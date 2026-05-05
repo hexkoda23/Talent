@@ -56,17 +56,21 @@ async function main() {
     },
   });
 
-  await prisma.selectionGame.upsert({
+  const existingGame = await prisma.selectionGame.findUnique({
     where: { cohortId: cohort.id },
-    update: {},
-    create: {
-      cohortId: cohort.id,
-      name: 'Cohort 03 Selection',
-      scheduledAt: new Date('2026-06-20T09:00:00.000Z'),
-      durationMinutes: 30,
-      status: SelectionGameStatus.upcoming,
-    },
   });
+
+  if (!existingGame) {
+    await prisma.selectionGame.create({
+      data: {
+        cohortId: cohort.id,
+        name: 'Cohort 03 Selection',
+        scheduledAt: new Date('2026-06-20T09:00:00.000Z'),
+        durationMinutes: 30,
+        status: SelectionGameStatus.upcoming,
+      },
+    });
+  }
 
   const candidateRole = await prisma.role.upsert({
     where: { name: 'candidate' },

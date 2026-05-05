@@ -13,8 +13,8 @@ export const PASS_MARK = 70;
 
 export const defaultGameSettings: GameSettings = {
   difficulty: "standard",
-  memorySeconds: 300,
-  zzleSeconds: 1200,
+  memorySeconds: 30,
+  zzleSeconds: 30,
 };
 
 export const getGameSettings = (): GameSettings => {

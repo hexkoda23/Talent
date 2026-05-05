@@ -51,14 +51,7 @@ const Quests = () => {
             Curriculum-attached challenges configured by admins. Deadlines, cooldowns, XP, and attempt rules are set per quest.
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Button variant="soft" size="sm" asChild>
-            <Link to="/dashboard/raid">Open raid <ArrowRight className="h-4 w-4" /></Link>
-          </Button>
-          <Button variant="soft" size="sm" asChild>
-            <Link to="/dashboard/audits">Open audits <ArrowRight className="h-4 w-4" /></Link>
-          </Button>
-        </div>
+
       </div>
 
       {!learnDone ? (

@@ -24,10 +24,7 @@ const Result = () => {
   const attempt = latest && "attempt" in latest ? latest.attempt : null;
   const application = latest?.application;
   const total = attempt?.score ?? 0;
-  const qualified = Boolean(attempt?.passed ?? application?.passed_game);
-  const nextRoute = latest && "next_route_hint" in latest
-    ? routeFromHint(latest.next_route_hint)
-    : routeFromApplication(application?.dashboard_state, application?.status);
+  const qualified = total >= 70;
 
   return (
     <div className="min-h-screen flex flex-col bg-background font-mono">
@@ -46,24 +43,19 @@ const Result = () => {
           <div className="text-7xl text-foreground mb-1">{total}</div>
           <p className="text-sm text-muted-foreground">out of 100</p>
 
-          <div className="grid sm:grid-cols-2 gap-3 mt-8">
-            <Score icon={Brain} label="Application status" value={application?.status || "pending"} />
-            <Score icon={Grid3X3} label="Dashboard state" value={application?.dashboard_state || "pending"} />
+          <div className={`mt-8 p-4 border ${qualified ? "bg-primary/10 border-primary/40 text-primary" : "bg-warning/10 border-warning/40 text-warning"}`}>
+            <div className="flex items-center gap-2 mb-2 font-bold text-lg">
+              <Trophy className="h-5 w-5" />
+              {qualified ? "Congratulations you passed, waiting for verification" : "Waiting for verification"}
+            </div>
+            <p className="text-sm opacity-90">Verification would be sent to your email.</p>
           </div>
-
-          <div className={`mt-8 inline-flex items-center gap-2 px-4 py-2 border text-sm ${qualified ? "bg-primary/10 text-primary border-primary/40" : "bg-warning/10 text-warning border-warning/40"}`}>
-            <Trophy className="h-4 w-4" />
-            {qualified ? "Game passed" : "Awaiting backend decision"}
-          </div>
-          <p className="text-xs text-muted-foreground mt-3 max-w-sm">
-            The frontend no longer hardcodes a pass mark. The backend response decides the status and next route.
-          </p>
         </section>
 
         <div className="mt-8">
           {error && <p className="mb-4 border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}
-          <Button variant="hero" size="xl" className="gap-2" onClick={() => navigate(nextRoute)}>
-            Continue <ArrowRight className="h-5 w-5" />
+          <Button variant="hero" size="xl" className="gap-2" onClick={() => navigate("/dashboard")}>
+            Go to Dashboard <ArrowRight className="h-5 w-5" />
           </Button>
         </div>
       </main>
@@ -79,16 +71,6 @@ const Score = ({ icon: Icon, label, value }: { icon: any; label: string; value: 
   </div>
 );
 
-const routeFromHint = (hint?: string) => {
-  if (hint === "onboarding") return "/onboarding";
-  if (hint === "dashboard") return "/dashboard";
-  return "/status";
-};
 
-const routeFromApplication = (dashboardState?: string, status?: string) => {
-  if (dashboardState === "onboarding_form" || status === "onboarding") return "/onboarding";
-  if (dashboardState === "full_learning" || status === "accepted") return "/dashboard";
-  return "/status";
-};
 
 export default Result;
