@@ -9,31 +9,15 @@ export class CampusesService {
     const campuses = await this.prisma.campus.findMany({
       orderBy: { name: 'asc' },
     });
-
-    const data = await Promise.all(
-      campuses.map(async (campus) => {
-        const registeredCount = await this.prisma.application.count({
-          where: { campusId: campus.id },
-        });
-        const seatsRemaining = Math.max(campus.capacity - registeredCount, 0);
-        const ratio = campus.capacity === 0 ? 1 : seatsRemaining / campus.capacity;
-        const demandLabel = ratio < 0.2 ? 'High demand' : ratio < 0.6 ? 'Recommended' : 'Open';
-
-        return {
-          id: campus.id,
-          name: campus.name,
-          location: {
-            city: campus.locationCity,
-            state: campus.locationState,
-            address: campus.locationAddress,
-          },
-          capacity: campus.capacity,
-          seats_remaining: seatsRemaining,
-          demand_label: demandLabel,
-        };
-      }),
-    );
-
+    const data = campuses.map((campus) => ({
+      id: campus.id,
+      name: campus.name,
+      location: {
+        city: campus.locationCity,
+        state: campus.locationState,
+        address: campus.locationAddress,
+      },
+    }));
     return { data };
   }
 }
