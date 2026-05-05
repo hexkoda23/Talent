@@ -217,7 +217,7 @@ const Register = () => {
               </Field>
               <Field label="SIWES duration">
                 <div className="grid grid-cols-3 gap-2">
-                  {["3 months", "4 months", "6 months"].map((d) => (
+                  {["3 months", "6 months"].map((d) => (
                     <button
                       key={d}
                       type="button"
@@ -249,7 +249,6 @@ const Register = () => {
                     <option>200L</option>
                     <option>300L</option>
                     <option>400L</option>
-                    <option>500L</option>
                   </select>
                 </Field>
                 <Field label="NIN">
@@ -264,7 +263,7 @@ const Register = () => {
               </div>
 
               <div className={cn("rounded-xl border p-3 text-sm", ninValid ? "border-accent/30 bg-accent/10 text-accent" : "border-warning/30 bg-warning/10 text-warning")}>
-                {ninValid ? "NIN format looks valid: 11 digits captured." : "NIN must be exactly 11 digits before you can continue."}
+                {ninValid ? "NIN format is valid: 11 digits captured." : "NIN must be exactly 11 digits before you can continue."}
               </div>
             </div>
           )}
@@ -318,7 +317,7 @@ const Register = () => {
                           <div>
                             <h3 className="font-display font-semibold">{zone.name}</h3>
                             <p className="text-xs text-muted-foreground">{zone.location.city}, {zone.location.state}</p>
-                            <p className="text-xs text-primary mt-1">{zone.seats_remaining} seats remaining - {zone.demand_label}</p>
+
                           </div>
                         </div>
                         {selected && <Check className="h-5 w-5 text-primary shrink-0" />}
