@@ -2,14 +2,10 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Trophy,
-  Flame,
   Zap,
   ArrowRight,
   Lock,
-  CheckCircle2,
   Clock,
-  Sparkles,
-  TrendingUp,
   BookOpen,
   Code2,
   PlayCircle,
@@ -19,15 +15,12 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useDashboardSummary } from "@/hooks/useDashboardSummary";
+import { useRotatingPhrase } from "@/hooks/useRotatingPhrase";
+import { isQuestUnlocked } from "@/lib/moduleAccess";
 
-// --- Mock curriculum state ---
-const learnPct = 65;            // < 100 means quest is locked
-const questAttemptsLeft = 3;    // mock
-const weekCompletionPct = 72;   // checkpoint readiness
-const streak = 7;
-const xp = 2480;
-const learnDone = learnPct >= 100;
-const checkpointReady = weekCompletionPct >= 80;
+const CURRENT_MODULE_ID = "mod-embeddings-101";
+const ACTIVE_QUEST_ID = "quest-topk-search";
 
 const useCountdown = (target: Date) => {
   const [now, setNow] = useState(Date.now());
@@ -50,10 +43,14 @@ const endOfDay = () => {
 
 const DashboardHome = () => {
   const countdown = useCountdown(endOfDay());
+  const summary = useDashboardSummary();
+  const phrase = useRotatingPhrase(summary.firstName);
+  const questUnlocked = isQuestUnlocked(CURRENT_MODULE_ID, ACTIVE_QUEST_ID);
+  const checkpointReady = summary.programProgressPct >= 80;
 
   return (
     <div className="space-y-6 animate-fade-up">
-      {/* Welcome + day status */}
+      {/* Welcome */}
       <div className="relative overflow-hidden rounded-2xl glass-panel p-5 lg:p-8">
         <div className="absolute inset-0 bg-gradient-aurora opacity-50" />
         <div className="relative">
@@ -62,54 +59,40 @@ const DashboardHome = () => {
               <p className="text-xs font-mono uppercase tracking-widest text-secondary mb-2">
                 // day 14 · friday
               </p>
-              <h1 className="font-display text-2xl lg:text-4xl font-bold">
-                Adaeze, lock in 🔒
+              <h1 className="font-display text-2xl lg:text-4xl font-bold transition-opacity">
+                {phrase}
               </h1>
               <p className="text-muted-foreground mt-2 max-w-lg text-sm lg:text-base">
-                Continue your current subject, complete the active quest, and prepare for the next curriculum checkpoint.
+                Continue your current module, complete the active quest, and prepare for the next checkpoint.
               </p>
             </div>
             <div className="flex flex-col items-end gap-2">
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-background/50 border border-border">
-                <div className="h-2 w-2 rounded-full bg-accent animate-pulse" />
-                <span className="text-xs lg:text-sm font-medium">AI Engineer · Level 4</span>
-              </div>
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-warning/15 border border-warning/30 text-warning">
                 <Clock className="h-3.5 w-3.5" />
                 <span className="text-xs font-mono font-bold">{countdown} left for quest submission</span>
               </div>
+              <div className="text-xs text-muted-foreground font-mono">
+                Program progress · {summary.modulesCompleted} / {summary.modulesTotal} modules
+              </div>
             </div>
           </div>
 
-          {/* Curriculum progress */}
-          <div className="mt-6 grid grid-cols-3 gap-2 lg:gap-3">
-            <DayStep
-              n={1}
-              label="Current subject"
-              status={learnDone ? "done" : "current"}
-              pct={learnPct}
-            />
-            <DayStep
-              n={2}
-              label="Quest"
-              status={learnDone ? "current" : "locked"}
-            />
-            <DayStep
-              n={3}
-              label="Checkpoint"
-              status={checkpointReady ? "current" : "locked"}
-              hint={`Sat · ${weekCompletionPct}%`}
-            />
+          {/* Program progress bar */}
+          <div className="mt-6">
+            <div className="flex items-center justify-between text-xs text-muted-foreground mb-1.5">
+              <span>Overall completion</span>
+              <span className="font-mono">{summary.programProgressPct}%</span>
+            </div>
+            <div className="h-2.5 bg-muted rounded-full overflow-hidden border border-border">
+              <div
+                className="h-full bg-gradient-primary relative"
+                style={{ width: `${summary.programProgressPct}%` }}
+              >
+                <div className="absolute inset-0 animate-shimmer" />
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-
-      {/* Quick stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
-        <StatCard icon={Sparkles} label="XP" value={xp.toLocaleString()} trend="+340 this week" tone="primary" />
-        <StatCard icon={Flame} label="Streak" value={`${streak} days`} trend="Don't break it" tone="warning" />
-        <StatCard icon={TrendingUp} label="Completion" value={`${weekCompletionPct}%`} trend="Admin checkpoint gate" tone="violet" />
-        <StatCard icon={Trophy} label="Rank" value="#24" trend="↑ 6 this week" tone="accent" />
       </div>
 
       {/* Current curriculum work */}
@@ -118,7 +101,7 @@ const DashboardHome = () => {
         <div className="lg:col-span-2 glass-panel rounded-2xl p-5 lg:p-6">
           <div className="flex items-center justify-between mb-3">
             <p className="text-xs font-mono uppercase tracking-widest text-secondary">
-              // current subject
+              // current module
             </p>
             <span className="px-2.5 py-0.5 rounded-full bg-primary/15 text-primary text-[11px] font-semibold border border-primary/30">
               Learn Phase
@@ -128,20 +111,8 @@ const DashboardHome = () => {
             Embeddings & Vector Search
           </h2>
           <p className="text-sm text-muted-foreground mt-1 mb-4">
-            4 videos and 3 readings. Continue into the quest when the required content is done.
+            Open the module to start. Quest unlocks once you have read through it.
           </p>
-
-          <div className="mb-4">
-            <div className="flex items-center justify-between text-xs text-muted-foreground mb-1.5">
-              <span>Learn progress</span>
-              <span className="font-mono">{learnPct}%</span>
-            </div>
-            <div className="h-2.5 bg-muted rounded-full overflow-hidden border border-border">
-              <div className="h-full bg-gradient-primary relative" style={{ width: `${learnPct}%` }}>
-                <div className="absolute inset-0 animate-shimmer" />
-              </div>
-            </div>
-          </div>
 
           <div className="flex flex-wrap gap-2">
             <Link to="/dashboard/learn" className="flex-1 min-w-[160px]">
@@ -151,17 +122,17 @@ const DashboardHome = () => {
             </Link>
             <Link to="/dashboard/workspace">
               <Button variant="soft" className="gap-2">
-                <Code2 className="h-4 w-4" /> Open GTEA
+                <Code2 className="h-4 w-4" /> Open Workspace
               </Button>
             </Link>
           </div>
         </div>
 
-        {/* Quest card (locked) */}
+        {/* Quest card */}
         <div
           className={cn(
             "glass-panel rounded-2xl p-5 lg:p-6 relative overflow-hidden",
-            !learnDone && "border-muted"
+            !questUnlocked && "border-muted"
           )}
         >
           <div className="flex items-center justify-between mb-3">
@@ -171,7 +142,7 @@ const DashboardHome = () => {
             <span
               className={cn(
                 "px-2.5 py-0.5 rounded-full text-[11px] font-semibold border",
-                learnDone
+                questUnlocked
                   ? "bg-secondary/15 text-secondary border-secondary/30"
                   : "bg-muted text-muted-foreground border-border"
               )}
@@ -180,7 +151,7 @@ const DashboardHome = () => {
             </span>
           </div>
 
-          {!learnDone && (
+          {!questUnlocked && (
             <div className="absolute inset-0 bg-background/40 backdrop-blur-[1px] grid place-items-center pointer-events-none">
               <div className="flex flex-col items-center gap-2 text-center px-4">
                 <div className="h-12 w-12 rounded-full bg-muted border border-border grid place-items-center">
@@ -188,7 +159,7 @@ const DashboardHome = () => {
                 </div>
                 <p className="text-sm font-semibold">Locked</p>
                 <p className="text-xs text-muted-foreground">
-                  Finish the required module first
+                  Open the module first
                 </p>
               </div>
             </div>
@@ -202,18 +173,18 @@ const DashboardHome = () => {
           </p>
 
           <div className="space-y-2 text-xs text-muted-foreground">
-            <Row icon={Zap} text="+180 XP · +60 early-bird bonus" />
+            <Row icon={Zap} text="+180 XP on pass" />
             <Row icon={Clock} text={`Admin-set deadline · ${countdown} left`} />
-            <Row icon={AlertTriangle} text={`${questAttemptsLeft} of 3 attempts left`} />
+            <Row icon={AlertTriangle} text="Miss the deadline = 0 XP" />
           </div>
 
           <Link to="/dashboard/quests">
             <Button
-              variant={learnDone ? "hero" : "soft"}
+              variant={questUnlocked ? "hero" : "soft"}
               className="w-full mt-4 gap-2"
-              disabled={!learnDone}
+              disabled={!questUnlocked}
             >
-              {learnDone ? "Start quest" : "Locked"} <ArrowRight className="h-4 w-4" />
+              {questUnlocked ? "Start quest" : "Locked"} <ArrowRight className="h-4 w-4" />
             </Button>
           </Link>
         </div>
@@ -239,7 +210,7 @@ const DashboardHome = () => {
                 "h-full transition-all relative",
                 checkpointReady ? "bg-gradient-primary" : "bg-warning"
               )}
-              style={{ width: `${weekCompletionPct}%` }}
+              style={{ width: `${summary.programProgressPct}%` }}
             >
               <div className="absolute inset-0 animate-shimmer" />
             </div>
@@ -250,7 +221,7 @@ const DashboardHome = () => {
             />
           </div>
           <div className="flex items-center justify-between text-xs">
-            <span className="font-mono text-foreground">{weekCompletionPct}%</span>
+            <span className="font-mono text-foreground">{summary.programProgressPct}%</span>
             <span className="text-muted-foreground">target 80%</span>
           </div>
 
@@ -308,62 +279,14 @@ const DashboardHome = () => {
 
       {/* Quick links */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
-        <QuickLink to="/dashboard/workspace" icon={Code2} title="GTEA Workspace" desc="Push commits" />
+        <QuickLink to="/dashboard/workspace" icon={Code2} title="Workspace" desc="Push commits" />
         <QuickLink to="/dashboard/logbook" icon={BookOpen} title="Logbook" desc="Log today" />
-        <QuickLink to="/dashboard/leaderboard" icon={Trophy} title="Leaderboard" desc="#24 · climb" />
-        <QuickLink to="/dashboard/notifications" icon={Bell} title="Alerts" desc="3 new" />
+        <QuickLink to="/dashboard/leaderboard" icon={Trophy} title="Leaderboard" desc="Climb the ranks" />
+        <QuickLink to="/dashboard/notifications" icon={Bell} title="Alerts" desc={`${summary.unreadNotifications} new`} />
       </div>
     </div>
   );
 };
-
-const DayStep = ({
-  n,
-  label,
-  status,
-  pct,
-  hint,
-}: {
-  n: number;
-  label: string;
-  status: "done" | "current" | "locked";
-  pct?: number;
-  hint?: string;
-}) => (
-  <div
-    className={cn(
-      "rounded-xl p-3 border bg-background/40",
-      status === "done" && "border-accent/40",
-      status === "current" && "border-primary/50",
-      status === "locked" && "border-border opacity-70"
-    )}
-  >
-    <div className="flex items-center justify-between mb-1.5">
-      <span
-        className={cn(
-          "font-mono text-[10px] uppercase",
-          status === "done" && "text-accent",
-          status === "current" && "text-primary",
-          status === "locked" && "text-muted-foreground"
-        )}
-      >
-        Step {n}
-      </span>
-      {status === "done" && <CheckCircle2 className="h-4 w-4 text-accent" />}
-      {status === "locked" && <Lock className="h-3.5 w-3.5 text-muted-foreground" />}
-      {status === "current" && (
-        <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-      )}
-    </div>
-    <p className="text-sm font-semibold leading-tight">{label}</p>
-    {pct !== undefined && status !== "done" && (
-      <div className="h-1 mt-2 bg-muted rounded-full overflow-hidden">
-        <div className="h-full bg-gradient-primary" style={{ width: `${pct}%` }} />
-      </div>
-    )}
-    {hint && <p className="text-[10px] text-muted-foreground mt-1.5 font-mono">{hint}</p>}
-  </div>
-);
 
 const Row = ({ icon: Icon, text }: { icon: any; text: string }) => (
   <div className="flex items-center gap-2">
@@ -371,39 +294,6 @@ const Row = ({ icon: Icon, text }: { icon: any; text: string }) => (
     <span>{text}</span>
   </div>
 );
-
-const StatCard = ({
-  icon: Icon,
-  label,
-  value,
-  trend,
-  tone,
-}: {
-  icon: any;
-  label: string;
-  value: string;
-  trend: string;
-  tone: "primary" | "violet" | "accent" | "warning";
-}) => {
-  const tones: Record<string, string> = {
-    primary: "bg-primary/15 text-primary",
-    violet: "bg-secondary/15 text-secondary",
-    accent: "bg-accent/15 text-accent",
-    warning: "bg-warning/15 text-warning",
-  };
-  return (
-    <div className="glass-panel rounded-xl p-3 lg:p-4">
-      <div className={`h-8 w-8 lg:h-9 lg:w-9 rounded-lg grid place-items-center mb-2 lg:mb-3 ${tones[tone]}`}>
-        <Icon className="h-4 w-4" />
-      </div>
-      <p className="text-[11px] text-muted-foreground">{label}</p>
-      <p className="font-display text-lg lg:text-2xl font-bold mt-0.5">{value}</p>
-      <p className="text-[10px] lg:text-[11px] text-muted-foreground mt-0.5 lg:mt-1 truncate">
-        {trend}
-      </p>
-    </div>
-  );
-};
 
 const QuickLink = ({
   to,

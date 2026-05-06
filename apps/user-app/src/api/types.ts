@@ -158,7 +158,7 @@ export type OnboardingDocumentSlot = {
 
 export type OnboardingDocumentsResponse = {
   required_documents: OnboardingDocumentSlot[];
-  campus_supervisor?: {
+  campus_signing_contact?: {
     name: string;
     email: string;
   } | null;

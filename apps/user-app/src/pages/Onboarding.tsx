@@ -11,7 +11,7 @@ const Onboarding = () => {
   const navigate = useNavigate();
   const [ack, setAck] = useState(false);
   const [docs, setDocs] = useState<OnboardingDocumentSlot[]>([]);
-  const [supervisor, setSupervisor] = useState<{ name: string; email: string } | null>(null);
+  const [signingContact, setSigningContact] = useState<{ name: string; email: string } | null>(null);
   const [uploading, setUploading] = useState("");
   const [submittingAck, setSubmittingAck] = useState(false);
   const [error, setError] = useState("");
@@ -20,7 +20,7 @@ const Onboarding = () => {
     onboardingApi.documents()
       .then((response) => {
         setDocs(response.required_documents);
-        setSupervisor(response.campus_supervisor || null);
+        setSigningContact(response.campus_signing_contact || null);
       })
       .catch((err) => setError(toErrorMessage(err)));
   };
@@ -74,7 +74,7 @@ const Onboarding = () => {
           <p className="text-sm font-mono uppercase tracking-widest text-secondary mb-2">// onboarding documents</p>
           <h1 className="font-display text-3xl lg:text-4xl font-bold">Prepare your SIWES documents</h1>
           <p className="text-muted-foreground mt-2 max-w-2xl">
-            Check your mail for the address and instructions from the admin. Passed users will be told where to submit SIWES forms for physical signing and stamping by the campus supervisor.
+            Check your mail for the address and instructions from the admin. Passed users will be told where to submit SIWES forms for physical signing and stamping by the campus team.
           </p>
         </div>
 
@@ -84,9 +84,9 @@ const Onboarding = () => {
             <div>
               <p className="font-semibold">Check your email before submitting physical documents</p>
               <p className="text-sm text-muted-foreground mt-1">
-                {supervisor
-                  ? `${supervisor.name} (${supervisor.email}) is your campus supervisor for physical signing and stamping.`
-                  : "Admin will send the Code Zone address and supervisor instructions. Bring the physical SIWES form for signing/stamping when requested."}
+                {signingContact
+                  ? `${signingContact.name} (${signingContact.email}) is your campus signing contact.`
+                  : "Admin will send the Code Zone address and signing instructions. Bring the physical SIWES form for signing/stamping when requested."}
               </p>
             </div>
           </div>
@@ -133,7 +133,7 @@ const Onboarding = () => {
           <label className="flex items-start gap-3 p-4 rounded-xl bg-muted/40 border border-border cursor-pointer hover:border-primary/40 transition-colors">
             <input type="checkbox" checked={ack} onChange={(e) => setAck(e.target.checked)} className="mt-0.5 h-5 w-5 rounded accent-primary" />
             <span className="text-sm">
-              I understand that physical SIWES forms must be signed/stamped by the assigned campus supervisor and submitted according to the admin email.
+              I understand that physical SIWES forms must be signed/stamped by the assigned campus team and submitted according to the admin email.
             </span>
           </label>
         </div>

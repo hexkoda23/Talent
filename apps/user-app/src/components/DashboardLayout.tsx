@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { NavLink, Outlet, useLocation } from "react-router-dom";
+import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
   Trophy,
@@ -19,10 +19,13 @@ import {
   Crown,
   MessagesSquare,
   Award,
+  TrendingUp,
 } from "lucide-react";
 import { Logo } from "./Logo";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useDashboardSummary } from "@/hooks/useDashboardSummary";
+import { RankIcon } from "./RankIcon";
 
 const nav = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -43,6 +46,7 @@ const nav = [
 export const DashboardLayout = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
+  const summary = useDashboardSummary();
 
   useEffect(() => {
     setMobileOpen(false);
@@ -61,13 +65,6 @@ export const DashboardLayout = () => {
           ))}
         </nav>
         <div className="p-3 border-t border-sidebar-border">
-          <div className="rounded-sm glass-panel p-3 mb-3">
-            <div className="flex items-center gap-2 mb-1">
-              <Flame className="h-4 w-4 text-warning" />
-              <span className="text-xs font-semibold">7-day streak</span>
-            </div>
-            <p className="text-[11px] text-muted-foreground">Keep it going to earn the Phoenix badge.</p>
-          </div>
           <NavLink to="/" className="flex items-center gap-3 px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
             <LogOut className="h-4 w-4" />
             Sign out
@@ -103,34 +100,62 @@ export const DashboardLayout = () => {
             <div className="lg:hidden">
               <Logo withText={false} />
             </div>
-            <div className="hidden md:flex items-center gap-2 flex-1 max-w-md">
+            <div className="hidden md:flex items-center gap-2 flex-1 max-w-xs">
               <div className="relative w-full">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <input
                   type="text"
-                  placeholder="Search quests, repos, students…"
+                  placeholder="Search quests, repos, students..."
                   className="w-full h-10 rounded-sm bg-muted border border-border pl-9 pr-4 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
                 />
               </div>
             </div>
-            <div className="flex-1 md:hidden" />
-            <div className="flex items-center gap-2">
-              <div className="hidden sm:flex items-center gap-2 px-3 h-10 rounded-sm bg-muted border border-border">
-                <Sparkles className="h-4 w-4 text-secondary" />
-                <span className="font-mono text-sm font-semibold">2,480</span>
-                <span className="text-xs text-muted-foreground">XP</span>
+
+            <div className="hidden xl:flex items-center gap-2">
+              <MetricChip
+                icon={Sparkles}
+                tone="primary"
+                label="XP"
+                value={summary.xp.toLocaleString()}
+              />
+              <RankIcon level={summary.rankLevel} name={summary.rankName} size="md" />
+              <MetricChip
+                icon={Flame}
+                tone="warning"
+                label="Streak"
+                value={`${summary.streakDays}d`}
+              />
+              <MetricChip
+                icon={TrendingUp}
+                tone="violet"
+                label="Done"
+                value={`${summary.programProgressPct}%`}
+              />
+            </div>
+
+            <div className="flex-1 xl:hidden" />
+
+            <div className="flex items-center gap-1.5">
+              <div className="xl:hidden flex items-center">
+                <RankIcon level={summary.rankLevel} size="sm" showName={false} />
               </div>
-              <div className="hidden md:flex items-center gap-1.5 px-3 h-10 rounded-sm bg-muted border border-border">
-                <Crown className="h-4 w-4 text-warning" />
-                <span className="font-mono text-sm font-semibold">#13</span>
-              </div>
-              <Button variant="ghost" size="icon" className="relative">
+              <Link
+                to="/dashboard/notifications"
+                aria-label="Notifications"
+                className="relative h-9 w-9 grid place-items-center rounded-sm hover:bg-muted transition-colors"
+              >
                 <Bell className="h-5 w-5" />
-                <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-destructive" />
-              </Button>
-              <div className="h-9 w-9 rounded-full bg-muted border border-border grid place-items-center text-sm font-semibold text-foreground">
-                AO
-              </div>
+                {summary.unreadNotifications > 0 && (
+                  <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-destructive" />
+                )}
+              </Link>
+              <Link
+                to="/dashboard/profile"
+                aria-label="Profile"
+                className="h-9 w-9 rounded-full bg-muted border border-border grid place-items-center text-sm font-semibold text-foreground hover:border-primary/40 transition-colors"
+              >
+                {summary.initials}
+              </Link>
             </div>
           </div>
         </header>
@@ -139,6 +164,31 @@ export const DashboardLayout = () => {
           <Outlet />
         </main>
       </div>
+    </div>
+  );
+};
+
+const MetricChip = ({
+  icon: Icon,
+  tone,
+  label,
+  value,
+}: {
+  icon: any;
+  tone: "primary" | "warning" | "violet";
+  label: string;
+  value: string;
+}) => {
+  const tones: Record<string, string> = {
+    primary: "text-primary",
+    warning: "text-warning",
+    violet: "text-secondary",
+  };
+  return (
+    <div className="flex items-center gap-1.5 px-2.5 h-9 rounded-sm bg-muted border border-border">
+      <Icon className={cn("h-4 w-4", tones[tone])} />
+      <span className="font-mono text-sm font-semibold">{value}</span>
+      <span className="text-[11px] text-muted-foreground uppercase">{label}</span>
     </div>
   );
 };

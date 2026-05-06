@@ -18,6 +18,11 @@ type ZzleLevel = {
 
 const BOARD_SIZE = 12;
 
+type GameMeta = {
+  seconds_elapsed: number;
+  details: Record<string, unknown>;
+};
+
 const GamePlay = () => {
   const navigate = useNavigate();
   const settings = getGameSettings();
@@ -26,6 +31,8 @@ const GamePlay = () => {
   const [submitting, setSubmitting] = useState(false);
   const [active, setActive] = useState<GameKey>("memory");
   const [scores, setScores] = useState<Record<GameKey, number>>({ memory: 0, zzle: 0 });
+  const [meta, setMeta] = useState<Record<GameKey, GameMeta | null>>({ memory: null, zzle: null });
+  const [overallStart] = useState(() => Date.now());
 
   const order: GameKey[] = ["memory", "zzle"];
   const idx = order.indexOf(active);
@@ -37,9 +44,15 @@ const GamePlay = () => {
       .catch((err) => setError(toErrorMessage(err)));
   }, []);
 
-  const onComplete = async (key: GameKey, score: number, meta: Record<string, unknown> = {}) => {
+  const onComplete = async (
+    key: GameKey,
+    score: number,
+    perGameMeta: GameMeta,
+  ) => {
     const nextScores = { ...scores, [key]: score };
+    const nextMeta = { ...meta, [key]: perGameMeta };
     setScores(nextScores);
+    setMeta(nextMeta);
 
     if (key === "memory") {
       setActive("zzle");
@@ -47,16 +60,27 @@ const GamePlay = () => {
     }
 
     const total = Math.round((nextScores.memory + nextScores.zzle) / 2);
+    const totalSeconds = Math.floor((Date.now() - overallStart) / 1000);
     setSubmitting(true);
     setError("");
     try {
-      const attemptPayload: Record<string, unknown> = {
+      // breakdown = per-game scores (concise summary).
+      // attempt_data = per-game telemetry (time + game-specific details). No duplication of score.
+      const attemptPayload = {
         score: total,
-        breakdown: nextScores,
+        breakdown: nextScores as Record<string, number>,
         attempt_data: {
-          memory: { score: nextScores.memory, ...(meta.memory || {}) },
-          zzle: { score: nextScores.zzle, ...(meta.zzle || {}) },
-        },
+          total_seconds_elapsed: totalSeconds,
+          difficulty: settings.difficulty,
+          memory: {
+            seconds_elapsed: nextMeta.memory?.seconds_elapsed ?? 0,
+            ...(nextMeta.memory?.details ?? {}),
+          },
+          zzle: {
+            seconds_elapsed: perGameMeta.seconds_elapsed,
+            ...perGameMeta.details,
+          },
+        } as Record<string, unknown>,
       };
 
       const response = await selectionGameApi.completeAttempt(attemptId, attemptPayload);
@@ -91,8 +115,8 @@ const GamePlay = () => {
       <main className="flex-1 px-5 py-8 lg:py-10 max-w-5xl w-full mx-auto">
         {error && <p className="mb-4 border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}
         {submitting && <p className="mb-4 border border-primary/40 bg-primary/10 p-3 text-sm text-primary">Submitting attempt to backend...</p>}
-        {active === "memory" && <MemoryGrid settings={settings} onComplete={(score, meta) => onComplete("memory", score, meta)} />}
-        {active === "zzle" && <ZzleGame settings={settings} onComplete={(score, meta) => onComplete("zzle", score, meta)} />}
+        {active === "memory" && <MemoryGrid settings={settings} onComplete={(score, m) => onComplete("memory", score, m)} />}
+        {active === "zzle" && <ZzleGame settings={settings} onComplete={(score, m) => onComplete("zzle", score, m)} />}
       </main>
     </div>
   );
@@ -109,7 +133,7 @@ const calcMemoryScore = (r: number) => {
   return Math.max(0, Math.min(100, r * 10));
 };
 
-const MemoryGrid = ({ settings, onComplete }: { settings: ReturnType<typeof getGameSettings>; onComplete: (score: number, meta?: Record<string, unknown>) => void }) => {
+const MemoryGrid = ({ settings, onComplete }: { settings: ReturnType<typeof getGameSettings>; onComplete: (score: number, meta: GameMeta) => void }) => {
   const profile = memoryProfiles[settings.difficulty];
   const [round, setRound] = useState(1);
   const [retryKey, setRetryKey] = useState(0);
@@ -120,10 +144,23 @@ const MemoryGrid = ({ settings, onComplete }: { settings: ReturnType<typeof getG
   const [score, setScore] = useState(0);
   const [mistakes, setMistakes] = useState(0);
   const [timeLeft, setTimeLeft] = useState(settings.memorySeconds);
+  const [startedAt] = useState(() => Date.now());
+
+  const finish = (finalScore: number, roundsCompleted: number) => {
+    const seconds_elapsed = Math.floor((Date.now() - startedAt) / 1000);
+    onComplete(finalScore, {
+      seconds_elapsed,
+      details: {
+        rounds_completed: roundsCompleted,
+        rounds_total: profile.rounds,
+        mistakes,
+      },
+    });
+  };
 
   useEffect(() => {
     if (timeLeft <= 0) {
-      onComplete(calcMemoryScore(round - 1), { memory: { rounds_completed: Math.max(0, round - 1) } });
+      finish(calcMemoryScore(round - 1), Math.max(0, round - 1));
       return;
     }
 
@@ -160,7 +197,7 @@ const MemoryGrid = ({ settings, onComplete }: { settings: ReturnType<typeof getG
       setPhase("wrong");
 
       window.setTimeout(() => {
-        if (nextMistakes >= profile.mistakes) onComplete(calcMemoryScore(round - 1), { memory: { rounds_completed: Math.max(0, round - 1) } });
+        if (nextMistakes >= profile.mistakes) finish(calcMemoryScore(round - 1), Math.max(0, round - 1));
         else {
           setRound((r) => Math.max(1, r - 1));
           setRetryKey((k) => k + 1);
@@ -172,7 +209,7 @@ const MemoryGrid = ({ settings, onComplete }: { settings: ReturnType<typeof getG
     if (next.length === sequence.length) {
       const newScore = calcMemoryScore(round);
       setScore(newScore);
-      if (round >= profile.rounds) onComplete(100, { memory: { rounds_completed: profile.rounds } });
+      if (round >= profile.rounds) finish(100, profile.rounds);
       else window.setTimeout(() => setRound((value) => value + 1), 550);
     }
   };
@@ -270,22 +307,35 @@ const zzleProfiles = {
   boss: { visiblePreview: 0, wrongPenalty: 6 },
 };
 
-const ZzleGame = ({ settings, onComplete }: { settings: ReturnType<typeof getGameSettings>; onComplete: (score: number, meta?: Record<string, unknown>) => void }) => {
+const ZzleGame = ({ settings, onComplete }: { settings: ReturnType<typeof getGameSettings>; onComplete: (score: number, meta: GameMeta) => void }) => {
   const profile = zzleProfiles[settings.difficulty];
   const [levelIndex, setLevelIndex] = useState(0);
   const [placed, setPlaced] = useState<Point[]>([]);
   const [failures, setFailures] = useState(0);
   const [score, setScore] = useState(0);
   const [timeLeft, setTimeLeft] = useState(settings.zzleSeconds);
+  const [startedAt] = useState(() => Date.now());
   const level = levels[levelIndex];
   const start = level.path[0];
   const end = level.path[level.path.length - 1];
+
+  const finish = (finalScore: number, levelsCompleted: number) => {
+    const seconds_elapsed = Math.floor((Date.now() - startedAt) / 1000);
+    onComplete(finalScore, {
+      seconds_elapsed,
+      details: {
+        levels_completed: levelsCompleted,
+        levels_total: levels.length,
+        failures,
+      },
+    });
+  };
 
   useEffect(() => setPlaced([]), [levelIndex]);
 
   useEffect(() => {
     if (timeLeft <= 0) {
-      onComplete(calcZzleScore(levelIndex), { zzle: { levels_completed: Math.max(0, levelIndex) } });
+      finish(calcZzleScore(levelIndex), Math.max(0, levelIndex));
       return;
     }
 
@@ -301,7 +351,7 @@ const ZzleGame = ({ settings, onComplete }: { settings: ReturnType<typeof getGam
     const nextScore = calcZzleScore(levelIndex);
     const timer = window.setTimeout(() => {
       setScore(nextScore);
-      if (levelIndex + 1 >= levels.length) onComplete(100, { zzle: { levels_completed: levels.length } });
+      if (levelIndex + 1 >= levels.length) finish(100, levels.length);
       else setLevelIndex((value) => value + 1);
     }, 700);
 

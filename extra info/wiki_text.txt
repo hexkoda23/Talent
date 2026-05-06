@@ -70,7 +70,7 @@ At a scheduled time, the student accesses the Selection Game directly from their
 Stage 3 — Institutional Verification
 Passing the game does not yet mean acceptance. The admin team must verify each student's identity against their institution. The process is currently manual: bulk emails are sent to schools using the student's matric number and name. The school responds to confirm or deny enrollment. This is modelled as a VerificationRequest entity, with follow-up tracking. Rejected students receive a rejection email; the exact reason is withheld to avoid disputes.
 Stage 4 — Onboarding
-After verification passes, the student's dashboard signals that they should complete onboarding. This involves uploading scanned SIWES documents — primarily the CYS (Company Year Schedule) form and the logbook. Some documents can be electronically signed and stamped; others (particularly the logbook) require physical signatures from campus supervisors. Campus selection earlier in the flow determines which supervisor handles the physical elements.
+After verification passes, the student's dashboard signals that they should complete onboarding. This involves uploading scanned SIWES documents — primarily the CYS (Company Year Schedule) form and the logbook. Some documents can be electronically signed and stamped; others (particularly the logbook) require physical signatures from campus admins. Campus selection earlier in the flow determines which campus admin handles the physical elements.
 Stage 5 — Active Learning
 Once onboarding is complete, the student's dashboard transforms from a status page into the full learning interface. The home tab shows the next actionable module as a card. Students progress through a curriculum of Subjects, Courses, Topics, and Modules, completing Quests for XP, passing Checkpoints to unlock the next phase, and collaborating on Raids with assigned groups. A community layer provides group chat, direct messages, and a social graph.
 Cohort Closing
@@ -256,7 +256,7 @@ Verification Flow
   A confirmed request advances the Application to verified → onboarding and triggers a notification to the student
   A denied request marks the Application as rejected and sends a rejection email (reason withheld)
 StudentProfile Data
-The StudentProfile entity holds all SIWES-specific information about a student. It is separate from the base User entity because not all users are students (mentors, admins, and campus supervisors do not have student profiles), and because this data is collected only after game selection — the student submits it as part of the process that enables verification to begin.
+The StudentProfile entity holds all SIWES-specific information about a student. It is separate from the base User entity because not all users are students (mentors, admins, and campus admins do not have student profiles), and because this data is collected only after game selection — the student submits it as part of the process that enables verification to begin.
   StudentProfile — Key Fields
   institution_namestringThe student's university or polytechnic
   institution_emailstringSchool contact email for verification outreach
@@ -283,10 +283,10 @@ No Response: Remains in pending until the cohort is closed, at which point they 
       { label: 'status', value: 'pending_review → approved / rejected / needs_reupload' },
       { label: 'requires_physical_signature', value: 'boolean' },
       { label: 'physical_signature_status', value: 'not_required | pending | signed' },
-      { label: 'signed_by', value: 'Campus supervisor name/ID' },
+      { label: 'signed_by', value: 'Campus campus admin name/ID' },
     ]
   },
-  lead: `Onboarding is the stage between institutional verification and active learning. It involves the student uploading official SIWES documents — primarily the CYS (Company Year Schedule) form and logbook — and having them reviewed and signed. Some documents can be processed entirely online; others require physical signatures from a campus supervisor.`,
+  lead: `Onboarding is the stage between institutional verification and active learning. It involves the student uploading official SIWES documents — primarily the CYS (Company Year Schedule) form and logbook — and having them reviewed and signed. Some documents can be processed entirely online; others require physical signatures from a campus admin.`,
   toc: [
     { id: 'required-docs', title: 'Required Documents' },
     { id: 'digital-vs-physical', title: 'Digital vs. Physical Processing' },
@@ -297,10 +297,10 @@ No Response: Remains in pending until the cohort is closed, at which point they 
 Required Documents
 The primary SIWES documents are the CYS form (Company Year Schedule — the formal agreement between the student, institution, and placement company) and the logbook. Additional items such as an acceptance letter or ID card copy may also be required, and exact requirements can vary by institution. Each uploaded file is stored as an OnboardingDocument record with its own status and review workflow.
 Digital vs. Physical Processing
-Where possible, documents are scanned, electronically signed, and electronically stamped. The platform supports this through the OnboardingDocument record's review/approval workflow. However, some documents — particularly the logbook — carry signature requirements that cannot be fully digitised under current SIWES regulations. These are flagged with requires_physical_signature = true, and their physical_signature_status tracks whether the campus supervisor has signed.
+Where possible, documents are scanned, electronically signed, and electronically stamped. The platform supports this through the OnboardingDocument record's review/approval workflow. However, some documents — particularly the logbook — carry signature requirements that cannot be fully digitised under current SIWES regulations. These are flagged with requires_physical_signature = true, and their physical_signature_status tracks whether the campus admin has signed.
 Institution variation: Different schools have different logbook formats — different page layouts, different places for signatures, and different signing frequencies (some weekly, some monthly). The OnboardingDocument.metadata JSON field accommodates school-specific notes and format details.
 Role of the Campus
-The campus a student selected during registration becomes the physical hub for their onboarding. The campus supervisor listed on the campus record is responsible for physically signing logbooks and stamping documents. This is why campus selection happens early in the pipeline — even before the game — so that physical signing logistics are tied to the student's record from the start.
+The campus a student selected during registration becomes the physical hub for their onboarding. The campus admin listed on the campus record is responsible for physically signing logbooks and stamping documents. This is why campus selection happens early in the pipeline — even before the game — so that physical signing logistics are tied to the student's record from the start.
 Completion & Transition
 Once all required OnboardingDocument records reach approved status (and any physical signatures are confirmed), the platform marks the Application as accepted and creates an Enrollment record in the learning Cohort. The student's dashboard then transitions from the onboarding form view (dashboard_state: onboarding_form) to the full learning interface (dashboard_state: full_learning). The student also receives a Gitea account at this point, provisioned automatically by the platform.
 `,
@@ -562,12 +562,12 @@ Mapping Entities
       { label: 'Full name', value: 'Students Industrial Work Experience Scheme' },
       { label: 'Regulator', value: 'ITF (Industrial Training Fund), Nigeria' },
       { label: 'Key documents', value: 'CYS form, Logbook' },
-      { label: 'Physical requirement', value: 'Logbook must be signed by supervisor' },
+      { label: 'Physical requirement', value: 'Logbook must be signed by campus admin' },
       { label: 'Entities', value: 'Logbook, LogbookEntry, OnboardingDocument' },
       { label: 'Institution variation', value: 'Logbook formats differ by school' },
     ]
   },
-  lead: `SIWES is a mandatory scheme for Nigerian engineering students, requiring them to undergo supervised industrial attachment and maintain documented evidence of their work through logbooks and official forms. The platform is built around SIWES compliance — from the campus selection that ties students to physical supervisors, to the document onboarding flow, to the logbook entities that track weekly entries and signatures.`,
+  lead: `SIWES is a mandatory scheme for Nigerian engineering students, requiring them to undergo supervised industrial attachment and maintain documented evidence of their work through logbooks and official forms. The platform is built around SIWES compliance — from the campus selection that ties students to physical campus admins, to the document onboarding flow, to the logbook entities that track weekly entries and signatures.`,
   toc: [
     { id: 'what-is-siwes', title: 'What is SIWES' },
     { id: 'logbook', title: 'The Logbook' },
@@ -576,23 +576,23 @@ Mapping Entities
   ],
   body: `
 What is SIWES
-The Students Industrial Work Experience Scheme (SIWES) is a skills training programme established by the Industrial Training Fund (ITF) to expose Nigerian university and polytechnic students to industrial work situations related to their courses of study. Most Nigerian engineering programmes require a minimum of 6 months of SIWES before graduation. Students must be placed with an approved company, maintain a logbook of daily/weekly work, and have the logbook signed by their industrial supervisor.
+The Students Industrial Work Experience Scheme (SIWES) is a skills training programme established by the Industrial Training Fund (ITF) to expose Nigerian university and polytechnic students to industrial work situations related to their courses of study. Most Nigerian engineering programmes require a minimum of 6 months of SIWES before graduation. Students must be placed with an approved company, maintain a logbook of daily/weekly work, and have the logbook signed by their industrial signing admin.
 This platform serves as the industrial placement — the company students are attached to — providing structured software engineering training as the SIWES experience. The program's online nature is accommodated by SIWES regulations, but physical documentation (logbook signatures, CYS form stamping) still applies.
 The Logbook
-The SIWES logbook is a physical or digital record of a student's daily and weekly industrial activities. Ideally, entries should be written daily and signed weekly by the industrial supervisor. The platform models this through two entities:
+The SIWES logbook is a physical or digital record of a student's daily and weekly industrial activities. Ideally, entries should be written daily and signed weekly by the industrial signing admin. The platform models this through two entities:
   Logbook
   enrollment_idFKThe student's active enrollment
-  campus_idFKDetermines which supervisor handles physical signing
+  campus_idFKDetermines which campus admin handles physical signing
   institution_formattext?Notes on the student's school's specific logbook format
   statusenumnot_started | in_progress | pending_signature | signed | completed
   LogbookEntry
   entry_datedateThe date this entry covers
   week_numberintegerWhich week of the program
   contenttextWhat the student did/learned that day or week
-  supervisor_signedbooleanWhether the campus supervisor has physically signed this entry
-  supervisor_commentstext?Optional comments from the supervisor at signing
+  campus_admin_signedbooleanWhether the campus admin has physically signed this entry
+  campus_admin_commentstext?Optional comments from the campus admin at signing
 The CYS Form
-The Company Year Schedule (CYS) form is the formal agreement document between the student, their institution, and the placement organization. It must be completed and submitted during onboarding. The platform accepts it as a scanned upload (OnboardingDocument.document_type = 'cys_form'), and the campus office can apply an electronic stamp where regulations allow. Where a physical stamp is required, requires_physical_signature = true and the campus supervisor handles it.
+The Company Year Schedule (CYS) form is the formal agreement document between the student, their institution, and the placement organization. It must be completed and submitted during onboarding. The platform accepts it as a scanned upload (OnboardingDocument.document_type = 'cys_form'), and the campus office can apply an electronic stamp where regulations allow. Where a physical stamp is required, requires_physical_signature = true and the campus admin handles it.
 Institution Variation
 A significant practical challenge is that Nigerian universities and polytechnics use different logbook formats — different page layouts, different column structures, different places for signatures, and different schedules for when entries must be made. The Logbook.institution_format text field and OnboardingDocument.metadata JSON field exist to capture these variations. The platform cannot standardize what the institutions have not standardized; instead, it accommodates variation and surfaces it to campus staff who handle the physical elements.
 `,
@@ -842,13 +842,13 @@ A coding mentor can reassign any audit to themselves or to another mentor in the
 // ═══════════════════════════════════════════
 'campus': {
   title: 'Campus',
-  subtitle: 'Physical locations that anchor students to a SIWES supervisor and signing facility',
+  subtitle: 'Physical locations that anchor students to a SIWES campus admin and signing facility',
   breadcrumb: ['home'],
   infobox: {
     title: 'Campus Entity',
     rows: [
       { label: 'location', value: 'City, state, address' },
-      { label: 'supervisor_contact', value: 'JSON: name, email, phone of the signing supervisor' },
+      { label: 'signing_contact', value: 'JSON: name, email, phone of the signing campus admin' },
       { label: 'capacity', value: 'Max students that can be assigned' },
       { label: 'settings_overrides', value: 'JSON: campus-level config overrides' },
       { label: 'Role', value: 'Physical signing, logbook management, in-person checkpoints' },
@@ -863,13 +863,13 @@ A coding mentor can reassign any audit to themselves or to another mentor in the
   ],
   body: `
 Why Campus Exists in an Online Program
-SIWES regulations require that students' logbooks be physically signed by an industrial supervisor, and that CYS forms carry an official stamp. These requirements cannot be entirely digitised under current regulations. The campus entity represents a physical office or center where the organization has a presence, staffed by at least one supervisor who can perform these physical duties. Even though day-to-day learning is online, the campus is a mandatory administrative anchor for each student's SIWES record.
+SIWES regulations require that students' logbooks be physically signed by an industrial signing admin, and that CYS forms carry an official stamp. These requirements cannot be entirely digitised under current regulations. The campus entity represents a physical office or center where the organization has a presence, staffed by at least one campus admin who can perform these physical duties. Even though day-to-day learning is online, the campus is a mandatory administrative anchor for each student's SIWES record.
 Campus Selection
 Students select their campus during or immediately after registration — before the selection game. This early placement matters because campus selection affects physical document logistics from the start of the process. The selected campus is stored on the Application record and carried through to the Enrollment when the student is accepted.
 Location may optionally be inferred from the student's IP address to suggest a nearby campus, but the student explicitly confirms their selection. This avoids the situation where a student is assigned to a campus that is geographically inconvenient for the rare physical interactions required.
 Signing Responsibilities
-The Campus.supervisor_contact JSON field stores the name, email, and phone of the campus supervisor responsible for physical document handling. This supervisor:
-  Signs LogbookEntry records weekly (updating supervisor_signed = true)
+The Campus.signing_contact JSON field stores the name, email, and phone of the campus admin responsible for physical document handling. This campus admin:
+  Signs LogbookEntry records weekly (updating campus_admin_signed = true)
   Stamps OnboardingDocument records that require physical stamping
   Hosts any in-person Checkpoint sessions assigned to their campus
   Is the student's point of contact for any physical SIWES matters
@@ -995,3 +995,4 @@ window.addEventListener('hashchange', () => {
   renderPage(pageId);
 });
 renderPage(window.location.hash.slice(1) || 'home');
+

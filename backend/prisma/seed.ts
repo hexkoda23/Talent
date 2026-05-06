@@ -77,6 +77,27 @@ async function main() {
     update: {},
     create: { name: 'candidate', description: 'Applicant awaiting acceptance' },
   });
+  const studentRole = await prisma.role.upsert({
+    where: { name: 'student' },
+    update: {},
+    create: { name: 'student', description: 'Accepted learner in the platform' },
+  });
+  const codingMentorRole = await prisma.role.upsert({
+    where: { name: 'coding_mentor' },
+    update: {},
+    create: { name: 'coding_mentor', description: 'Mentor who can audit submissions and support raid reviews' },
+  });
+  const campusAdminRole = await prisma.role.upsert({
+    where: { name: 'campus_admin' },
+    update: {},
+    create: { name: 'campus_admin', description: 'Admin for campus operations, candidate review, and document handling' },
+  });
+  const superadminRole = await prisma.role.upsert({
+    where: { name: 'superadmin' },
+    update: {},
+    create: { name: 'superadmin', description: 'Top-level administrator seeded by the platform' },
+  });
+  await prisma.role.deleteMany({ where: { name: ['super', 'visor'].join('') } });
 
   const passwordHash = await bcrypt.hash('Password123!', 10);
   const demoUser = await prisma.user.upsert({
@@ -107,7 +128,43 @@ async function main() {
     },
   });
 
+  const adminPasswordHash = await bcrypt.hash('AdminPassword123!', 10);
+  const superadmin = await prisma.user.upsert({
+    where: { email: 'admin@talentnation.test' },
+    update: {
+      passwordHash: adminPasswordHash,
+      isActive: true,
+    },
+    create: {
+      organizationId: organization.id,
+      firstName: 'Seeded',
+      lastName: 'Superadmin',
+      email: 'admin@talentnation.test',
+      phone: '+2348000000000',
+      nin: '99999999999',
+      passwordHash: adminPasswordHash,
+      isActive: true,
+    },
+  });
+
+  await prisma.userRole.upsert({
+    where: {
+      userId_roleId: {
+        userId: superadmin.id,
+        roleId: superadminRole.id,
+      },
+    },
+    update: {},
+    create: {
+      userId: superadmin.id,
+      roleId: superadminRole.id,
+    },
+  });
+
   void campuses;
+  void studentRole;
+  void codingMentorRole;
+  void campusAdminRole;
 }
 
 main()

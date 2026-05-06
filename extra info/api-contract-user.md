@@ -393,9 +393,9 @@ Returns the *list of required document slots* for this program/campus, with the 
     { "document_type": "acceptance_letter", "title": "Acceptance letter", "uploaded": null },
     { "document_type": "other",             "title": "Student ID card",   "uploaded": null }
   ],
-  "campus_supervisor": {                   // shown to user so they know who signs the physical pages
+  "campus_signing_contact": {                   // shown to user so they know who signs the physical pages
     "name": "Mr. Chukwu",
-    "email": "supervisor@..."
+    "email": "campus admin@..."
   }
 }
 ```
@@ -1345,7 +1345,7 @@ Returns the user's `Logbook` shell + the current week's entries + the latest wee
   "logbook": {
     "id": "uuid",
     "status": "in_progress|pending_signature|signed|completed",
-    "campus_supervisor": { "name": "Mr. Chukwu", "email": "..." }
+    "campus_signing_contact": { "name": "Mr. Chukwu", "email": "..." }
   },
   "current_week": {
     "week_number": 4,
@@ -1359,8 +1359,8 @@ Returns the user's `Logbook` shell + the current week's entries + the latest wee
         "day_label": "Mon",
         "content": "Built RAG ingest script...",
         "hours_worked": 6,
-        "supervisor_name": "Mr. Chukwu",
-        "supervisor_signed": true,
+        "campus_admin_name": "Mr. Chukwu",
+        "campus_admin_signed": true,
         "submitted_at": "..."
       },
       { "entry_date": "2026-04-25", "day_label": "Fri", "content": null }   // today, unfilled
@@ -1379,7 +1379,7 @@ Save / upsert today's entry.
   "entry_date": "2026-04-25",
   "content": "Implemented hybrid BM25 + vector reranker. Ran eval...",
   "hours_worked": 6,
-  "supervisor_name": "Mr. Chukwu"
+  "campus_admin_name": "Mr. Chukwu"
 }
 // response — LogbookEntry
 ```
@@ -1414,7 +1414,7 @@ User edits the final text before submitting.
 ```
 
 ### `POST /me/logbook/weekly-reports/{report_id}/submit`
-Submits the report for supervisor signing.
+Submits the report for campus admin signing.
 
 ```jsonc
 // response
@@ -1663,4 +1663,5 @@ Event payloads:
 6. **GitHub handle on Profile.** The FE shows `@adaeze-dev` — the data model has `GiteaAccount.gitea_username`, not GitHub. Likely a UI label drift; surface `gitea_username` as `workspace_handle` and let the FE relabel.
 7. **DM between any two users.** The data model allows this, but the community wiki implies "no group DMs — multi-person convos happen in groups." That's fine; the contract above only documents 1:1 DMs.
 8. **File upload flow.** The contract assumes presigned S3. If BE prefers multipart-direct, swap `POST /me/onboarding-documents` and `POST /applications/{id}/registration-documents` to accept `multipart/form-data` and drop `/uploads/presign`.
+
 

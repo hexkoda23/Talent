@@ -97,7 +97,7 @@ export class OnboardingService {
 
     return {
       required_documents,
-      campus_supervisor: null,
+      campus_signing_contact: null,
     };
   }
 

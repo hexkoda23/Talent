@@ -57,8 +57,8 @@ const Logbook = () => {
                 <Input type="number" defaultValue={6} />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-sm">Supervisor</Label>
-                <Input defaultValue="Mr. Chukwu" />
+                <Label className="text-sm">Campus signer</Label>
+                <Input defaultValue="Campus admin" />
               </div>
             </div>
             <Button variant="hero" className="w-full">Save entry</Button>

@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   AlertTriangle,
-  ArrowRight,
   Clock,
   HelpCircle,
   Lock,
@@ -13,9 +12,14 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import {
+  isModuleAccessed,
+  isQuestRetryBlocked,
+  markQuestFailed,
+} from "@/lib/moduleAccess";
 
-const learnDone = false;
-const learnPct = 65;
+const ACTIVE_MODULE_ID = "mod-embeddings-101";
+const ACTIVE_QUEST_ID = "quest-topk-search";
 
 const endOfDay = () => {
   const d = new Date();
@@ -40,6 +44,19 @@ const useCountdown = (target: Date) => {
 
 const Quests = () => {
   const countdown = useCountdown(endOfDay());
+  const [tick, setTick] = useState(0);
+
+  // Re-read module access state when storage updates (e.g. another tab) or on mount.
+  useEffect(() => {
+    const id = window.setInterval(() => setTick((t) => t + 1), 2000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  const moduleAccessed = isModuleAccessed(ACTIVE_MODULE_ID);
+  const retryBlocked = isQuestRetryBlocked(ACTIVE_QUEST_ID);
+  const locked = !moduleAccessed || retryBlocked;
+  // tick is referenced so the effect re-runs reads
+  void tick;
 
   return (
     <div className="space-y-6 animate-fade-up">
@@ -48,13 +65,12 @@ const Quests = () => {
           <p className="text-xs font-mono uppercase tracking-widest text-secondary mb-2">// quest</p>
           <h1 className="font-display text-2xl lg:text-4xl font-bold">Quest</h1>
           <p className="text-muted-foreground mt-2 text-sm lg:text-base max-w-2xl">
-            Curriculum-attached challenges configured by admins. Deadlines, cooldowns, XP, and attempt rules are set per quest.
+            Curriculum-attached challenges configured by admins. Deadlines, cooldowns, and XP rules are set per quest.
           </p>
         </div>
-
       </div>
 
-      {!learnDone ? (
+      {locked ? (
         <div className="space-y-4">
           <div className="glass-panel rounded-2xl p-6 lg:p-8 relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-aurora opacity-30" />
@@ -64,21 +80,15 @@ const Quests = () => {
               </div>
               <h2 className="font-display text-2xl font-bold mb-2">Quest is locked</h2>
               <p className="text-muted-foreground mb-5">
-                This quest unlocks once you finish the <span className="text-primary font-semibold">required module content</span>.
+                {retryBlocked
+                  ? "You did not pass last attempt. Revisit the module before retrying this quest."
+                  : "This quest unlocks once you have opened and read the linked module."}
               </p>
-              <div className="w-full max-w-sm mb-5">
-                <div className="flex items-center justify-between text-xs mb-1.5">
-                  <span className="text-muted-foreground">Learn progress</span>
-                  <span className="font-mono">{learnPct}%</span>
-                </div>
-                <div className="h-2.5 bg-muted rounded-full overflow-hidden border border-border">
-                  <div className="h-full bg-gradient-primary relative" style={{ width: `${learnPct}%` }}>
-                    <div className="absolute inset-0 animate-shimmer" />
-                  </div>
-                </div>
-              </div>
               <Button variant="hero" className="gap-2" asChild>
-                <Link to="/dashboard/learn"><PlayCircle className="h-4 w-4" /> Continue Learn phase</Link>
+                <Link to="/dashboard/learn">
+                  <PlayCircle className="h-4 w-4" />
+                  {retryBlocked ? "Revisit module" : "Go to module"}
+                </Link>
               </Button>
             </div>
           </div>
@@ -98,21 +108,45 @@ const Quests = () => {
               </span>
             </div>
             <p className="text-sm text-muted-foreground mb-4">
-              Use FastAPI and pgvector. Index 50 short docs. Endpoint <code className="font-mono text-xs bg-muted px-1.5 py-0.5 rounded">POST /search</code> returns top 5 with similarity scores.
+              Use FastAPI and pgvector. Index 50 short docs. Endpoint{" "}
+              <code className="font-mono text-xs bg-muted px-1.5 py-0.5 rounded">POST /search</code>{" "}
+              returns top 5 with similarity scores.
             </p>
-            <div className="grid sm:grid-cols-3 gap-2 lg:gap-3 mb-4 text-sm">
+            <div className="grid sm:grid-cols-2 gap-2 lg:gap-3 mb-4 text-sm">
               <Pill icon={Clock} label="Closes" value={countdown} tone="warning" />
               <Pill icon={Zap} label="Reward" value="+180 XP" tone="primary" />
-              <Pill icon={RotateCcw} label="Attempts" value="3 of 3 left" tone="violet" />
             </div>
             <div className="flex flex-wrap gap-2">
-              <Button variant="hero" className="gap-2"><PlayCircle className="h-4 w-4" /> Start attempt</Button>
-              <Button variant="soft" className="gap-2"><HelpCircle className="h-4 w-4" /> Need help?</Button>
+              <Button variant="hero" className="gap-2" asChild>
+                <a
+                  href="https://gitea.example/quests/topk-search"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <PlayCircle className="h-4 w-4" /> Start attempt in Gitea
+                </a>
+              </Button>
+              <Button variant="soft" className="gap-2">
+                <HelpCircle className="h-4 w-4" /> Need help?
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="gap-2 ml-auto"
+                onClick={() => {
+                  markQuestFailed(ACTIVE_QUEST_ID);
+                  setTick((t) => t + 1);
+                }}
+                title="Demo: simulate a failed attempt"
+              >
+                <RotateCcw className="h-3.5 w-3.5" /> Simulate fail
+              </Button>
             </div>
             <div className="mt-5 rounded-xl border border-accent/30 bg-accent/5 p-3 flex items-start gap-2">
               <Sparkles className="h-4 w-4 text-accent flex-shrink-0 mt-0.5" />
               <p className="text-xs text-muted-foreground">
-                <span className="text-accent font-semibold">Early-bird bonus:</span> submit before 6:00 PM for <span className="font-mono text-foreground">+60 XP</span>.
+                <span className="text-accent font-semibold">Early-bird bonus:</span> submit before 6:00 PM for{" "}
+                <span className="font-mono text-foreground">+60 XP</span>.
               </p>
             </div>
           </div>
@@ -126,13 +160,27 @@ const RuleBanner = ({ countdown }: { countdown: string }) => (
   <div className="glass-panel rounded-xl p-4 border-warning/40 flex items-start gap-3">
     <AlertTriangle className="h-5 w-5 text-warning flex-shrink-0 mt-0.5" />
     <div className="text-sm flex-1">
-      <p className="font-semibold">Quest closes in <span className="font-mono text-warning">{countdown}</span>.</p>
-      <p className="text-muted-foreground mt-0.5">Miss it means 0 XP and your streak resets. Max 3 attempts allowed.</p>
+      <p className="font-semibold">
+        Quest closes in <span className="font-mono text-warning">{countdown}</span>.
+      </p>
+      <p className="text-muted-foreground mt-0.5">
+        Missing this deadline means you get 0 XP for completing it.
+      </p>
     </div>
   </div>
 );
 
-const Pill = ({ icon: Icon, label, value, tone }: { icon: any; label: string; value: string; tone: "warning" | "primary" | "violet" }) => {
+const Pill = ({
+  icon: Icon,
+  label,
+  value,
+  tone,
+}: {
+  icon: any;
+  label: string;
+  value: string;
+  tone: "warning" | "primary" | "violet";
+}) => {
   const tones: Record<string, string> = {
     warning: "text-warning bg-warning/10 border-warning/30",
     primary: "text-primary bg-primary/10 border-primary/30",

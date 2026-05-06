@@ -178,6 +178,7 @@ export class AuthService {
         first_name: created.user.firstName,
         last_name: created.user.lastName,
         email: created.user.email,
+        roles,
       },
       application: {
         id: created.application.id,
@@ -238,6 +239,7 @@ export class AuthService {
         first_name: user.firstName,
         last_name: user.lastName,
         email: user.email,
+        roles,
       },
       application: latestApplication
         ? {
@@ -313,6 +315,7 @@ export class AuthService {
         first_name: createdUser.firstName,
         last_name: createdUser.lastName,
         email: createdUser.email,
+        roles,
       },
       application: latestApplication
         ? {
@@ -368,6 +371,7 @@ export class AuthService {
         last_name: dbUser.lastName,
         email: dbUser.email,
         avatar_url: dbUser.avatarUrl,
+        roles: user.roles,
       },
       application: application
         ? {

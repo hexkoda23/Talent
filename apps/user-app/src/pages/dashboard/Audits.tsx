@@ -1,13 +1,67 @@
-import { ArrowRight, ClipboardCheck, Clock, FileSearch, ListChecks, Star, Zap } from "lucide-react";
+import { Link } from "react-router-dom";
+import {
+  ClipboardCheck,
+  Clock,
+  ExternalLink,
+  FileSearch,
+  ListChecks,
+  Send,
+  Star,
+  Zap,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const audits = [
-  { title: "Tunde's RAG pipeline", desc: "Score code quality, correctness, and clarity with runnable evidence.", status: "current", reward: 40, due: "Today 6:00 PM", risk: "normal" },
-  { title: "Kemi's sentiment endpoint", desc: "Run the repo, test 5 inputs, and leave structured feedback.", status: "open", reward: 40, due: "Tomorrow 12:00 PM", risk: "normal" },
-  { title: "Ifeanyi's prompt-defense write-up", desc: "Check plagiarism signals and technical accuracy.", status: "open", reward: 35, due: "Tomorrow 12:00 PM", risk: "ai-check" },
+type Audit = {
+  id: string;
+  /** Submission ID used to assemble the Gitea code-review URL */
+  submissionId: string;
+  title: string;
+  desc: string;
+  status: "current" | "open";
+  reward: number;
+  due: string;
+  risk: "normal" | "ai-check";
+};
+
+const audits: Audit[] = [
+  {
+    id: "audit-001",
+    submissionId: "sub-7c1d",
+    title: "Tunde's RAG pipeline",
+    desc: "Score code quality, correctness, and clarity with runnable evidence.",
+    status: "current",
+    reward: 40,
+    due: "Today 6:00 PM",
+    risk: "normal",
+  },
+  {
+    id: "audit-002",
+    submissionId: "sub-3f99",
+    title: "Kemi's sentiment endpoint",
+    desc: "Run the repo, test 5 inputs, and leave structured feedback.",
+    status: "open",
+    reward: 40,
+    due: "Tomorrow 12:00 PM",
+    risk: "normal",
+  },
+  {
+    id: "audit-003",
+    submissionId: "sub-a2b1",
+    title: "Ifeanyi's prompt-defense write-up",
+    desc: "Check plagiarism signals and technical accuracy.",
+    status: "open",
+    reward: 35,
+    due: "Tomorrow 12:00 PM",
+    risk: "ai-check",
+  },
 ];
 
 const rubrics = ["Requirement", "Functional", "Compliance", "Bonus", "Social"];
+
+// Configurable Gitea base — submission ID is interpolated. Backend can also return the
+// full URL per audit if it needs per-tenant control.
+const GITEA_REVIEW_URL = (submissionId: string) =>
+  `https://gitea.example/_review/${submissionId}`;
 
 const Audits = () => (
   <div className="space-y-6 animate-fade-up">
@@ -28,7 +82,7 @@ const Audits = () => (
     <div className="grid lg:grid-cols-[2fr,1fr] gap-5">
       <section className="grid md:grid-cols-2 gap-4">
         {audits.map((a) => (
-          <div key={a.title} className="glass-panel rounded-2xl p-5 hover:border-primary/40 transition-all">
+          <div key={a.id} className="glass-panel rounded-2xl p-5 hover:border-primary/40 transition-all">
             <div className="flex items-start justify-between mb-3">
               <div className="h-10 w-10 rounded-lg bg-muted border border-border grid place-items-center">
                 <FileSearch className="h-5 w-5 text-accent" />
@@ -40,13 +94,30 @@ const Audits = () => (
             <h2 className="font-display text-lg font-semibold mb-1">{a.title}</h2>
             <p className="text-sm text-muted-foreground mb-4">{a.desc}</p>
             <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground mb-4">
-              <span className="flex items-center gap-1"><Zap className="h-3.5 w-3.5 text-secondary" /> +{a.reward} XP</span>
-              <span className="flex items-center gap-1 font-mono"><Clock className="h-3.5 w-3.5" /> {a.due}</span>
+              <span className="flex items-center gap-1">
+                <Zap className="h-3.5 w-3.5 text-secondary" /> +{a.reward} XP
+              </span>
+              <span className="flex items-center gap-1 font-mono">
+                <Clock className="h-3.5 w-3.5" /> {a.due}
+              </span>
               {a.risk === "ai-check" && <span className="text-warning">AI check required</span>}
             </div>
-            <Button variant={a.status === "current" ? "hero" : "soft"} size="sm" className="gap-1">
-              {a.status === "current" ? "Continue" : "Start audit"} <ArrowRight className="h-3.5 w-3.5" />
-            </Button>
+            <div className="flex flex-wrap gap-2">
+              <Button variant="soft" size="sm" className="gap-1.5" asChild>
+                <a
+                  href={GITEA_REVIEW_URL(a.submissionId)}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <ExternalLink className="h-3.5 w-3.5" /> Start audit
+                </a>
+              </Button>
+              <Button variant="hero" size="sm" className="gap-1.5" asChild>
+                <Link to={`/dashboard/audits/${a.id}`}>
+                  <Send className="h-3.5 w-3.5" /> Submit audit
+                </Link>
+              </Button>
+            </div>
           </div>
         ))}
       </section>
@@ -58,20 +129,32 @@ const Audits = () => (
             <div key={r} className="rounded-lg bg-muted/40 border border-border p-3 flex items-center justify-between">
               <span className="text-sm">{r}</span>
               <div className="flex gap-0.5 text-warning">
-                {[1, 2, 3, 4, 5].map((n) => <Star key={n} className="h-3.5 w-3.5" />)}
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <Star key={n} className="h-3.5 w-3.5" />
+                ))}
               </div>
             </div>
           ))}
         </div>
         <div className="mt-4 rounded-xl border border-warning/30 bg-warning/5 p-3 text-xs text-muted-foreground">
-        Audit questions are grouped by requirement, functional, compliance, bonus, and social categories.
+          Audit questions are grouped by requirement, functional, compliance, bonus, and social categories.
         </div>
       </aside>
     </div>
   </div>
 );
 
-const Metric = ({ icon: Icon, label, value, tone }: { icon: any; label: string; value: string; tone: string }) => (
+const Metric = ({
+  icon: Icon,
+  label,
+  value,
+  tone,
+}: {
+  icon: any;
+  label: string;
+  value: string;
+  tone: string;
+}) => (
   <div className="glass-panel rounded-2xl p-5">
     <Icon className={`h-5 w-5 ${tone} mb-3`} />
     <div className="font-display text-2xl font-bold">{value}</div>

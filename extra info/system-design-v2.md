@@ -23,7 +23,7 @@ The top-level tenant. Everything belongs to an organization.
 - `settings` — JSON, global defaults (timezone, locale, branding, theme, etc.)
 
 ### 1.2 `Campus`
-A physical location tied to SIWES administration. Even though the program is online, campus selection is required because SIWES involves physical documentation — logbook signing, CYS form stamping, and periodic supervisor interactions. A campus represents the physical office or center a student is assigned to for these purposes.
+A physical location tied to SIWES administration. Even though the program is online, campus selection is required because SIWES involves physical documentation — logbook signing, CYS form stamping, and periodic campus admin interactions. A campus represents the physical office or center a student is assigned to for these purposes.
 
 - `id`
 - `organization_id`
@@ -31,7 +31,7 @@ A physical location tied to SIWES administration. Even though the program is onl
 - `location` — city, state, address
 - `timezone`
 - `capacity`
-- `supervisor_contact` — JSON (name, email, phone of the campus supervisor responsible for signing)
+- `signing_contact` — JSON (name, email, phone of the campus admin responsible for signing)
 - `settings_overrides` — JSON, campus-level overrides to org defaults
 
 ### 1.3 `NotificationTemplate`
@@ -70,7 +70,7 @@ A single identity in the system. A user can hold multiple roles across programs.
 - `metadata` — JSON, extensible fields
 
 ### 2.2 `StudentProfile`
-SIWES-specific information attached to a user who is a student. Separated from `User` because not all users are students (admins, mentors, supervisors are not), and because this data is only collected after game selection.
+SIWES-specific information attached to a user who is a student. Separated from `User` because not all users are students (admins, mentors, campus admins are not), and because this data is only collected after game selection.
 
 - `id`
 - `user_id`
@@ -90,7 +90,7 @@ SIWES-specific information attached to a user who is a student. Separated from `
 Named roles that govern permissions.
 
 - `id`
-- `name` — e.g., `superadmin`, `campus_admin`, `coding_mentor`, `student`, `candidate`, `supervisor`
+- `name` — e.g., `superadmin`, `campus_admin`, `coding_mentor`, `student`, `candidate`, `campus admin`
 - `description`
 - `permissions` — list of permission keys or reference to `PermissionSet`
 
@@ -223,7 +223,7 @@ Official **SIWES documents** required during the onboarding stage — CYS forms,
 - `rejection_reason` — nullable
 - `requires_physical_signature` — boolean
 - `physical_signature_status` — enum: `not_required`, `pending`, `signed`, nullable
-- `signed_by` — nullable, name or user ID of the campus supervisor
+- `signed_by` — nullable, name or user ID of the campus admin
 - `signed_at` — nullable
 - `onboarding_session_mode` — enum: `physical`, `online`, `hybrid`
 - `onboarding_session_at` — nullable, datetime of the campus session where the document was submitted/signed
@@ -906,7 +906,7 @@ Tracks daily activity streaks per enrollment. A "day of activity" is defined by 
 ## 13. SIWES Documentation
 
 ### 13.1 `Logbook`
-Tracks the SIWES logbook lifecycle. Logbooks should ideally be filled daily and signed weekly by a supervisor, though formats vary by institution.
+Tracks the SIWES logbook lifecycle. Logbooks should ideally be filled daily and signed weekly by a campus admin, though formats vary by institution.
 
 - `id`
 - `enrollment_id`
@@ -925,9 +925,9 @@ An individual daily/weekly entry in the logbook.
 - `week_number` — integer
 - `content` — text, what the student did/learned
 - `submitted_at`
-- `supervisor_signed` — boolean
-- `supervisor_signed_at` — nullable
-- `supervisor_comments` — nullable
+- `campus_admin_signed` — boolean
+- `campus_admin_signed_at` — nullable
+- `campus_admin_comments` — nullable
 - `metadata` — JSON
 
 ### 13.3 `WeeklyReport`
@@ -944,9 +944,9 @@ A weekly SIWES report compiled from the week's `LogbookEntry` records. The platf
 - `final_content` — text; the student-edited version that is actually submitted
 - `status` — enum: `draft`, `edited`, `submitted`, `signed`
 - `submitted_at` — nullable
-- `supervisor_signed` — boolean
-- `supervisor_signed_at` — nullable
-- `supervisor_comments` — nullable
+- `campus_admin_signed` — boolean
+- `campus_admin_signed_at` — nullable
+- `campus_admin_comments` — nullable
 - `metadata` — JSON
 
 ---
@@ -1098,3 +1098,4 @@ System-level audit trail for administrative actions (distinct from educational "
 16. **Tiered Auditing Per Assessment Type**: Each assessment category has its own escalation pipeline rather than a single generic audit flow. Code quests use automated tests → AI code review → peer audit → instructor review. Notebook quests use structural validation → AI output review → instructor spot-check. MCQ quests/checkpoints use automated scoring → behavioral analytics → proctored re-sit. Essay quests use AI rubric scoring → blind peer review → instructor adjudication → AI content detection. Raids use automated repo tests → commit contribution analysis → peer contribution rating → oral code explanation. This is reflected in the `Quest.quest_category`, `Raid.raid_type`, and the family of `Audit` fields (`ai_review_result`, `behavioral_analytics_result`, `ai_rubric_score`, `peer_review_scores`, `ai_content_detection_result`, `commit_contribution_analysis`, `peer_contribution_ratings`, `notebook_structure_check`, `notebook_ai_output_review`, `current_tier`).
 
 17. **Multi-Track, Multi-Duration Programs**: The curriculum supports four distinct tracks: Track A (experienced engineers) × 3-month and 6-month, and Track B (zero experience) × 3-month and 6-month. Each is a separate `Program` entity identified by its `track` and `duration_months` fields. This allows subjects, courses, and quests to be authored once and linked to the appropriate programs, while assessment counts, XP targets, and progression gates are configured per-program.
+
