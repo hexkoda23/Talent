@@ -1,0 +1,42 @@
+# Pro LMS Middleware Gitignore
+
+# Dependencies
+node_modules/
+package-lock.json
+jspm_packages/
+
+# Build and Dist
+dist/
+build/
+*.tsbuildinfo
+.next/
+out/
+
+# Data Volumes (CRITICAL: DO NOT REMOVE)
+data/
+postgres_data/
+
+# Environment
+.env
+.env.local
+.env.*.local
+*.env
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Docker
+.dockerignore
+docker-compose.override.yml

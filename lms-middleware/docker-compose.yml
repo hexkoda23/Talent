@@ -1,0 +1,81 @@
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - DATABASE_URL=postgres://lms_user:lms_password@db:5432/lms_db
+      - GITEA_API_URL=http://gitea:3000/api/v1
+      - GITEA_WEB_URL=${GITEA_WEB_URL}
+      - GITEA_ADMIN_TOKEN=${GITEA_ADMIN_TOKEN}
+      - MIDDLEWARE_API_KEY=${MIDDLEWARE_API_KEY}
+    depends_on:
+      db:
+        condition: service_healthy
+      gitea:
+        condition: service_started
+
+  gitea:
+    image: gitea/gitea:1.21
+    container_name: lms-gitea
+    environment:
+      - USER_UID=1000
+      - USER_GID=1000
+      - GITEA__database__DB_TYPE=postgres
+      - GITEA__database__HOST=db:5432
+      - GITEA__database__NAME=gitea_db
+      - GITEA__database__USER=lms_user
+      - GITEA__database__PASSWD=lms_password
+      - GITEA__actions__ENABLED=true
+    restart: always
+    volumes:
+      - ./data/gitea:/data
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - "3001:3000"
+      - "222:22"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  runner:
+    image: gitea/act_runner:latest
+    container_name: lms-runner
+    restart: always
+    environment:
+      - GITEA_INSTANCE_URL=http://gitea:3000
+      - GITEA_RUNNER_REGISTRATION_TOKEN=${GITEA_RUNNER_TOKEN}
+    volumes:
+      - ./data/runner:/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - gitea
+
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: lms-tunnel
+    restart: always
+    command: tunnel --no-autoupdate --url http://app:3000
+    depends_on:
+      - app
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=lms_user
+      - POSTGRES_PASSWORD=lms_password
+      - POSTGRES_MULTIPLE_DATABASES=lms_db,gitea_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-multi-db.sh:/docker-entrypoint-initdb.d/init-multi-db.sh
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lms_user -d lms_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:

@@ -1,0 +1,41 @@
+{
+  "id": "quest-03",
+  "name": "Know your basics",
+  "language": "python",
+  "exercises": [
+    {
+      "id": "ex01",
+      "name": "ABC challenge",
+      "path": "exercises/ex01/solution.py",
+      "level": 1,
+      "xp": "1.00 kB",
+      "instructions": "print all the letters of the alphabets",
+      "filesToSubmit": [
+        "ex01/solution.py"
+      ],
+      "allowedFunctions": [
+        "return"
+      ],
+      "defaultCodeByLanguage": {
+        "python": "def solution():\n    pass\n",
+        "python3": "def solution():\n    pass\n"
+      },
+      "sampleTests": [
+        {
+          "name": "[]",
+          "functionName": "",
+          "args": [],
+          "expected": ""
+        }
+      ],
+      "hiddenTests": [],
+      "restrictions": [
+        {
+          "type": "forbiddenSource",
+          "value": "len()",
+          "message": "Do not use len()"
+        }
+      ]
+    }
+  ]
+}

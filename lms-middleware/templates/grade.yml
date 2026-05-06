@@ -1,0 +1,51 @@
+name: Official Quest Tests
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        run: git clone "http://gitea:3000/${{ github.repository }}.git" workspace
+
+      - name: Verify Python
+        run: cd workspace && python --version
+
+      - name: Run hidden tests
+        run: |
+          cd workspace
+          python tests/run_tests.py || echo "failed" > ../test_failed.txt
+          exit 0
+
+      - name: Report results to middleware
+        run: |
+          cd workspace
+          if [ ! -f .lms/latest-submission.json ]; then
+            echo "No LMS submission metadata found; skipping webhook report."
+            exit 0
+          fi
+          STUDENT_USERNAME=$(jq -r '.studentUsername' .lms/latest-submission.json)
+          QUEST_ID=$(jq -r '.questId' .lms/latest-submission.json)
+          EXERCISE_ID=$(jq -r '.exerciseId' .lms/latest-submission.json)
+          RESULTS=$(cat results.json)
+          COMMIT_ID=$(git rev-parse HEAD)
+          BODY=$(jq -n \
+            --arg studentUsername "$STUDENT_USERNAME" \
+            --arg questId "$QUEST_ID" \
+            --arg exerciseId "$EXERCISE_ID" \
+            --arg commit_id "$COMMIT_ID" \
+            --argjson results "$RESULTS" \
+            '{studentUsername: $studentUsername, questId: $questId, exerciseId: $exerciseId, commit_id: $commit_id, results: $results}')
+          curl -X POST "http://app:3000/api/v1/webhooks/gitea" \
+            -H "X-API-KEY: ${{ secrets.MIDDLEWARE_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d "$BODY"
+
+      - name: Fail workflow when tests fail
+        run: |
+          if [ -f test_failed.txt ]; then
+            exit 1
+          fi

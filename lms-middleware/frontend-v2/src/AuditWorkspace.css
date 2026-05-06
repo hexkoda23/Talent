@@ -1,0 +1,361 @@
+.audit-page {
+  min-height: 100vh;
+  background: #101113;
+  color: #f3f4f7;
+}
+
+.audit-workspace .split-view {
+  grid-template-columns: minmax(430px, 0.95fr) minmax(520px, 1.05fr);
+}
+
+.audit-session-pill {
+  min-height: 40px;
+  font-size: 15px;
+}
+
+.audit-script-content .pane-content h1,
+.audit-script-content h1 {
+  font-size: 48px;
+}
+
+.audit-header {
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 0 22px;
+  border-bottom: 1px solid #2b2d33;
+  background: #17191d;
+}
+
+.audit-header button,
+.audit-submit,
+.live-terminal button {
+  border: 0;
+  border-radius: 8px;
+  background: #2d7ff9;
+  color: white;
+  font-weight: 800;
+  padding: 10px 14px;
+  cursor: pointer;
+}
+
+.audit-header div {
+  display: grid;
+  gap: 4px;
+}
+
+.audit-header span,
+.audit-timer {
+  color: #9ba5b4;
+  font-size: 13px;
+}
+
+.audit-stepper {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: #2b2d33;
+}
+
+.audit-stepper span {
+  padding: 12px;
+  background: #191b20;
+  color: #8791a2;
+  text-align: center;
+  font-weight: 800;
+}
+
+.audit-stepper .done {
+  color: #26d76d;
+}
+
+.audit-stepper .active {
+  color: #8bc3ff;
+}
+
+.audit-split {
+  display: grid;
+  grid-template-columns: minmax(420px, 1.1fr) minmax(360px, 0.9fr);
+  min-height: calc(100vh - 119px);
+}
+
+.audit-code,
+.audit-script {
+  min-width: 0;
+  padding: 18px;
+  border-right: 1px solid #282b31;
+}
+
+.audit-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 14px;
+  color: #dbe7ff;
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.audit-code-layout {
+  display: grid;
+  grid-template-columns: 190px 1fr;
+  min-height: calc(100vh - 180px);
+  border: 1px solid #30343b;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.quest-audit-code {
+  flex: 1;
+  min-height: 0;
+  border: 0;
+  border-radius: 0;
+}
+
+.audit-tree {
+  display: flex;
+  flex-direction: column;
+  background: #17191d;
+  border-right: 1px solid #30343b;
+}
+
+.audit-tree button {
+  border: 0;
+  border-bottom: 1px solid #24272d;
+  background: transparent;
+  color: #c8cfdb;
+  padding: 11px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.audit-file {
+  margin: 0;
+  padding: 16px;
+  overflow: auto;
+  background: #0d0e10;
+  color: #e6edf7;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.check-row {
+  display: grid;
+  gap: 10px;
+  padding: 14px 0;
+  border-bottom: 1px solid #2b2f36;
+}
+
+.check-row > div {
+  display: flex;
+  gap: 8px;
+}
+
+.check-row button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid #3a3f49;
+  border-radius: 8px;
+  background: #1b1e24;
+  color: #cbd3df;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.check-row button.selected.pass {
+  border-color: #26d76d;
+  color: #26d76d;
+}
+
+.check-row button.selected.fail {
+  border-color: #ff7070;
+  color: #ff8a8a;
+}
+
+.feedback-box,
+.live-terminal input,
+.live-terminal textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #343944;
+  border-radius: 8px;
+  background: #111318;
+  color: #f2f4f8;
+  padding: 10px;
+}
+
+.feedback-box {
+  min-height: 96px;
+  margin: 16px 0;
+}
+
+.live-terminal {
+  display: grid;
+  gap: 9px;
+  margin-bottom: 16px;
+}
+
+.terminal-status {
+  color: #9ba5b4;
+  font-size: 12px;
+}
+
+.terminal-event {
+  border: 1px solid #2c3542;
+  border-radius: 8px;
+  padding: 10px;
+  background: #12161d;
+}
+
+.terminal-event span {
+  color: #8bc3ff;
+  font-size: 12px;
+}
+
+.terminal-event pre {
+  margin: 8px 0 0;
+  white-space: pre-wrap;
+}
+
+.audit-submit {
+  width: 100%;
+  min-height: 48px;
+  margin-top: 12px;
+}
+
+.audit-submit:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.audit-error {
+  margin: 40px;
+  border: 1px solid #713939;
+  border-radius: 8px;
+  padding: 20px;
+  background: #241617;
+  color: #ffb4b4;
+}
+
+.audit-console-pane {
+  height: 260px;
+}
+
+.audit-console-output {
+  height: 188px;
+}
+
+/* Stark audit-mode overrides */
+.audit-workspace .description-pane,
+.audit-workspace .editor-pane {
+  border-color: rgba(0, 230, 204, 0.22);
+}
+
+.audit-session-pill {
+  border-color: rgba(168, 117, 255, 0.42);
+  background: rgba(168, 117, 255, 0.10);
+  color: #dcc9ff;
+}
+
+.audit-code-layout {
+  border-color: var(--border-color);
+  background: rgba(8, 10, 12, 0.72);
+}
+
+.audit-tree {
+  border-right: 1px solid var(--border-color);
+  background: rgba(13, 15, 18, 0.92);
+}
+
+.audit-tree button {
+  border-bottom: 1px solid var(--border-muted);
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.audit-tree button:hover,
+.audit-tree button:focus {
+  background: rgba(0, 230, 204, 0.08);
+  color: var(--accent-primary);
+}
+
+.audit-file {
+  background: rgba(8, 10, 12, 0.78);
+  color: var(--text-main);
+  font-family: var(--font-family);
+}
+
+.check-row {
+  border-bottom: 1px solid var(--border-muted);
+}
+
+.check-row > span {
+  color: var(--text-main);
+}
+
+.check-row button {
+  border: 1px solid var(--border-color);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.check-row button.selected.pass {
+  border-color: var(--accent-primary);
+  background: rgba(0, 230, 204, 0.10);
+  color: var(--accent-primary);
+}
+
+.check-row button.selected.fail {
+  border-color: var(--error);
+  background: rgba(255, 95, 115, 0.10);
+  color: var(--error);
+}
+
+.feedback-box,
+.live-terminal input,
+.live-terminal textarea {
+  border-color: var(--border-color);
+  background: rgba(8, 10, 12, 0.74);
+  color: var(--text-main);
+}
+
+.feedback-box:focus,
+.live-terminal input:focus,
+.live-terminal textarea:focus {
+  border-color: var(--accent-primary);
+  outline: none;
+}
+
+.live-terminal button,
+.audit-submit {
+  border: 1px solid var(--accent-primary);
+  background: rgba(0, 230, 204, 0.12);
+  color: var(--accent-primary);
+  text-transform: uppercase;
+}
+
+.audit-submit:disabled {
+  border-color: var(--border-muted);
+  background: rgba(255, 255, 255, 0.035);
+  color: var(--text-muted);
+}
+
+.terminal-status,
+.terminal-event span {
+  color: var(--accent-warning);
+}
+
+.terminal-event {
+  border-color: rgba(168, 117, 255, 0.32);
+  background: rgba(168, 117, 255, 0.08);
+}
+
+.audit-error {
+  border-color: rgba(255, 95, 115, 0.35);
+  background: rgba(255, 95, 115, 0.10);
+  color: var(--error);
+}

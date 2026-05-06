@@ -1,0 +1,49 @@
+name: Official Quest Tests
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: windows
+    steps:
+      - name: Checkout repository
+        run: git clone "http://localhost:3001/${{ github.repository }}.git" workspace
+
+      - name: Verify Python
+        run: Set-Location workspace; python --version
+
+      - name: Run hidden tests
+        run: |
+          Set-Location workspace
+          python tests/run_tests.py
+          if ($LASTEXITCODE -ne 0) {
+            "failed" | Out-File ..\test_failed.txt
+          }
+          exit 0
+
+      - name: Report results to middleware
+        run: |
+          Set-Location workspace
+          if (!(Test-Path .lms/latest-submission.json)) {
+            Write-Host "No LMS submission metadata found; skipping webhook report."
+            exit 0
+          }
+          $submission = Get-Content .lms/latest-submission.json -Raw | ConvertFrom-Json
+          $results = Get-Content results.json -Raw | ConvertFrom-Json
+          $commitId = git rev-parse HEAD
+          $body = @{
+            studentUsername = $submission.studentUsername
+            questId = $submission.questId
+            exerciseId = $submission.exerciseId
+            commit_id = $commitId
+            results = $results
+          } | ConvertTo-Json -Depth 20
+          Invoke-RestMethod -Method Post -Uri "http://localhost:3002/api/v1/webhooks/gitea" -Headers @{ "X-API-KEY" = "${{ secrets.MIDDLEWARE_API_KEY }}" } -ContentType "application/json" -Body $body
+
+      - name: Fail workflow when tests fail
+        run: |
+          if (Test-Path test_failed.txt) {
+            exit 1
+          }

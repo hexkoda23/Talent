@@ -1,0 +1,260 @@
+{
+  "id": "quest-00",
+  "name": "Quest 01: The Basics11111",
+  "exercises": [
+    {
+      "id": "ex01",
+      "name": "Hello World",
+      "path": "exercises/ex01/README.md",
+      "level": 1,
+      "xp": "1.00 kB",
+      "filesToSubmit": [
+        "ex01/solution.py"
+      ],
+      "allowedFunctions": [
+        "return"
+      ],
+      "instructions": "Implement hello_world(). It must return exactly Hello World! followed by a newline. The goal is to confirm that your editor, Run flow, and official Submit flow are working.\n\nFunction signature:\n\ndef hello_world():\n    ...\n\nExpected result:\nHello World!\\n",
+      "defaultCode": "def hello_world():\n    # return exactly: Hello World! followed by a newline\n    pass\n",
+      "defaultCodeByLanguage": {
+        "python": "def hello_world():\n    # return exactly: Hello World! followed by a newline\n    pass\n",
+        "python3": "def hello_world():\n    # return exactly: Hello World! followed by a newline\n    pass\n"
+      },
+      "sampleTests": [
+        {
+          "name": "prints the required greeting",
+          "functionName": "hello_world",
+          "args": [],
+          "expected": "Hello World!\n"
+        }
+      ],
+      "hiddenTests": [
+        {
+          "name": "matches exact output including newline",
+          "functionName": "hello_world",
+          "args": [],
+          "expected": "Hello World!\n"
+        }
+      ],
+      "restrictions": []
+    },
+    {
+      "id": "ex02",
+      "name": "IsPositive",
+      "path": "exercises/ex02/README.md",
+      "level": 2,
+      "xp": "1.25 kB",
+      "filesToSubmit": [
+        "ex02/solution.py"
+      ],
+      "allowedFunctions": [
+        "if",
+        "else",
+        "return"
+      ],
+      "instructions": "Implement is_positive(n). Return P when n is positive or zero. Return N when n is negative.\n\nThe important edge case is 0: it must return P.",
+      "defaultCode": "def is_positive(n):\n    # return \"P\" for positive or zero, \"N\" for negative\n    pass\n",
+      "defaultCodeByLanguage": {
+        "python": "def is_positive(n):\n    # return \"P\" for positive or zero, \"N\" for negative\n    pass\n",
+        "python3": "def is_positive(n):\n    # return \"P\" for positive or zero, \"N\" for negative\n    pass\n"
+      },
+      "sampleTests": [
+        {
+          "name": "positive number",
+          "functionName": "is_positive",
+          "args": [
+            5
+          ],
+          "expected": "P"
+        },
+        {
+          "name": "negative number",
+          "functionName": "is_positive",
+          "args": [
+            -3
+          ],
+          "expected": "N"
+        }
+      ],
+      "hiddenTests": [
+        {
+          "name": "positive number",
+          "functionName": "is_positive",
+          "args": [
+            5
+          ],
+          "expected": "P"
+        },
+        {
+          "name": "negative number",
+          "functionName": "is_positive",
+          "args": [
+            -3
+          ],
+          "expected": "N"
+        },
+        {
+          "name": "zero is positive",
+          "functionName": "is_positive",
+          "args": [
+            0
+          ],
+          "expected": "P"
+        }
+      ],
+      "restrictions": []
+    },
+    {
+      "id": "ex04",
+      "name": "StrLen",
+      "path": "exercises/ex04/README.md",
+      "level": 4,
+      "xp": "1.75 kB",
+      "filesToSubmit": [
+        "ex04/solution.py"
+      ],
+      "allowedFunctions": [
+        "for",
+        "while",
+        "return"
+      ],
+      "instructions": "Implement str_len(value). Count and return the number of characters in value.\n\nRestriction: do not use Python's built-in len() function.",
+      "defaultCode": "def str_len(value):\n    # count characters manually\n    pass\n",
+      "defaultCodeByLanguage": {
+        "python": "def str_len(value):\n    # count characters manually\n    pass\n",
+        "python3": "def str_len(value):\n    # count characters manually\n    pass\n"
+      },
+      "sampleTests": [
+        {
+          "name": "short string",
+          "functionName": "str_len",
+          "args": [
+            "abc"
+          ],
+          "expected": 3
+        },
+        {
+          "name": "empty string",
+          "functionName": "str_len",
+          "args": [
+            ""
+          ],
+          "expected": 0
+        }
+      ],
+      "hiddenTests": [
+        {
+          "name": "short string",
+          "functionName": "str_len",
+          "args": [
+            "abc"
+          ],
+          "expected": 3
+        },
+        {
+          "name": "empty string",
+          "functionName": "str_len",
+          "args": [
+            ""
+          ],
+          "expected": 0
+        },
+        {
+          "name": "string with a space",
+          "functionName": "str_len",
+          "args": [
+            "Hello World"
+          ],
+          "expected": 11
+        }
+      ],
+      "restrictions": [
+        {
+          "type": "forbiddenSource",
+          "value": "len(",
+          "message": "Do not use len(). Count the characters yourself."
+        }
+      ]
+    },
+    {
+      "id": "ex05",
+      "name": "ReverseString",
+      "path": "exercises/ex05/README.md",
+      "level": 5,
+      "xp": "2.00 kB",
+      "filesToSubmit": [
+        "ex05/solution.py"
+      ],
+      "allowedFunctions": [
+        "for",
+        "while",
+        "return"
+      ],
+      "instructions": "Implement reverse_string(value). Return value reversed.\n\nIt must handle an empty string and a single-character string without crashing.\n\nRestriction: do not use slicing shorthand like [::-1].",
+      "defaultCode": "def reverse_string(value):\n    # return value reversed manually\n    pass\n",
+      "defaultCodeByLanguage": {
+        "python": "def reverse_string(value):\n    # return value reversed manually\n    pass\n",
+        "python3": "def reverse_string(value):\n    # return value reversed manually\n    pass\n"
+      },
+      "sampleTests": [
+        {
+          "name": "reverses hello",
+          "functionName": "reverse_string",
+          "args": [
+            "hello"
+          ],
+          "expected": "olleh"
+        },
+        {
+          "name": "single character",
+          "functionName": "reverse_string",
+          "args": [
+            "a"
+          ],
+          "expected": "a"
+        }
+      ],
+      "hiddenTests": [
+        {
+          "name": "reverses hello",
+          "functionName": "reverse_string",
+          "args": [
+            "hello"
+          ],
+          "expected": "olleh"
+        },
+        {
+          "name": "single character",
+          "functionName": "reverse_string",
+          "args": [
+            "a"
+          ],
+          "expected": "a"
+        },
+        {
+          "name": "numeric string",
+          "functionName": "reverse_string",
+          "args": [
+            "12345"
+          ],
+          "expected": "54321"
+        },
+        {
+          "name": "empty string",
+          "functionName": "reverse_string",
+          "args": [
+            ""
+          ],
+          "expected": ""
+        }
+      ],
+      "restrictions": [
+        {
+          "type": "forbiddenSource",
+          "value": "[::-1]",
+          "message": "Do not use [::-1]. Reverse the string manually."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "id": "quest-new",
+  "name": "New Quest",
+  "language": "python",
+  "exercises": [
+    {
+      "id": "ex01",
+      "name": "New Exercise",
+      "path": "exercises/ex01/README.md",
+      "level": 1,
+      "xp": "1.00 kB",
+      "instructions": "",
+      "filesToSubmit": [
+        "ex01/solution.py"
+      ],
+      "allowedFunctions": [
+        "return"
+      ],
+      "defaultCode": "def solution():\n    pass\n",
+      "defaultCodeByLanguage": {
+        "python": "def solution():\n    pass\n",
+        "python3": "def solution():\n    pass\n"
+      },
+      "sampleTests": [],
+      "hiddenTests": [],
+      "restrictions": [],
+      "auditChecklist": [
+        {
+          "id": "check-ex01-01",
+          "text": "Can the student explain the logic of ex01?"
+        }
+      ]
+    }
+  ]
+}
