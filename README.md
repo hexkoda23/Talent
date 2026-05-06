@@ -96,7 +96,7 @@ Frontend configuration is in `apps/user-app/vite.config.ts` and connects to `htt
 - `npm run dev` - Start dev server with hot reload
 - `npm run build` - Build for production
 - `npm run prisma:generate` - Generate Prisma client
-- `npm run prisma:migrate` - Run pending migrations
+- `npm run prisma:migrate` - Run pending migration
 - `npm run prisma:seed` - Seed database
 - `npm run db:up` - Start Docker containers
 - `npm run db:down` - Stop Docker containers
