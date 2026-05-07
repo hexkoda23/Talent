@@ -113,6 +113,18 @@ model User {
   userRoles            UserRole[]
   gameAttempts         GameAttempt[]
   SelectionGameAttempt SelectionGameAttempt[]
+  questProgress        QuestProgress[]
+  exerciseProgress     ExerciseProgress[]
+  giteaAccount         GiteaAccount?
+  giteaRepositories    GiteaRepository[]
+  submissions          Submission[]
+  auditQueue           AuditQueue[]
+  auditPoint           AuditPoint?
+  auditBlocksCreated   AuditBlock[]             @relation("AuditBlockUser")
+  auditBlocksReceived  AuditBlock[]             @relation("AuditBlockBlockedUser")
+  auditsAsAuditee      Audit[]                  @relation("AuditAuditee")
+  auditsAsAuditor      Audit[]                  @relation("AuditAuditor")
+  xpTransactions       XPTransaction[]
 }
 
 model StudentProfile {
@@ -282,4 +294,219 @@ model RefreshToken {
   user User @relation(fields: [userId], references: [id])
 
   @@index([userId, revokedAt])
+}
+
+model Quest {
+  id          String   @id
+  name        String
+  slug        String   @unique
+  description String?
+  language    String   @default("python")
+  xpReward    Int      @default(0)
+  level       Int?
+  manifest    Json?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+
+  exercises    QuestExercise[]
+  progress     QuestProgress[]
+  submissions  Submission[]
+  audits       Audit[]
+  repositories GiteaRepository[]
+  xpTransactions XPTransaction[]
+}
+
+model QuestExercise {
+  id                    String   @id @default(uuid())
+  questId               String
+  exerciseId            String
+  name                  String
+  path                  String
+  order                 Int      @default(0)
+  level                 Int?
+  xpReward              Int      @default(0)
+  instructions          String?
+  filesToSubmit         Json?
+  allowedFunctions      Json?
+  defaultCode           String?
+  defaultCodeByLanguage Json?
+  sampleTests           Json?
+  hiddenTests           Json?
+  restrictions          Json?
+  auditChecklist        Json?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @default(now()) @updatedAt
+
+  quest Quest @relation(fields: [questId], references: [id])
+
+  @@unique([questId, exerciseId])
+  @@index([questId, order])
+}
+
+model QuestProgress {
+  id                String    @id @default(uuid())
+  userId            String
+  questId           String
+  status            String    @default("IN_PROGRESS")
+  currentExerciseId String?
+  startedAt         DateTime  @default(now())
+  completedAt       DateTime?
+  updatedAt         DateTime  @default(now()) @updatedAt
+
+  user  User  @relation(fields: [userId], references: [id])
+  quest Quest @relation(fields: [questId], references: [id])
+
+  @@unique([userId, questId])
+  @@index([questId, status])
+}
+
+model ExerciseProgress {
+  id         String   @id @default(uuid())
+  userId     String
+  questId    String
+  exerciseId String
+  status     String   @default("PASSED")
+  results    Json?
+  passedAt   DateTime @default(now())
+  updatedAt  DateTime @default(now()) @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([userId, questId, exerciseId])
+  @@index([questId, exerciseId, status])
+}
+
+model GiteaAccount {
+  id            String   @id @default(uuid())
+  userId        String   @unique
+  giteaUserId   Int?
+  giteaUsername String   @unique
+  email         String?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @default(now()) @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model GiteaRepository {
+  id          String   @id @default(uuid())
+  userId      String?
+  questId     String?
+  repoFullName String  @unique
+  owner       String
+  name        String
+  repoUrl     String
+  giteaRepoId Int?
+  isTemplate  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+
+  user  User?  @relation(fields: [userId], references: [id])
+  quest Quest? @relation(fields: [questId], references: [id])
+  submissions Submission[]
+
+  @@unique([userId, questId])
+  @@index([questId])
+}
+
+model Submission {
+  id           String   @id @default(uuid())
+  userId       String
+  questId      String
+  exerciseId   String?
+  repositoryId String?
+  commitHash   String?
+  status       String   @default("submitted")
+  result       Json?
+  submittedAt  DateTime @default(now())
+  auditedAt    DateTime?
+
+  user       User             @relation(fields: [userId], references: [id])
+  quest      Quest            @relation(fields: [questId], references: [id])
+  repository GiteaRepository? @relation(fields: [repositoryId], references: [id])
+  audits     Audit[]
+
+  @@index([userId, submittedAt])
+  @@index([questId, exerciseId, status])
+}
+
+model Audit {
+  id               String    @id @default(uuid())
+  auditeeId        String
+  auditorId        String
+  questId          String
+  exerciseId       String
+  submissionId     String?
+  status           String    @default("AUDITING")
+  checklistResults Json?
+  feedback         String?
+  repoUrl          String?
+  expiresAt        DateTime
+  createdAt        DateTime  @default(now())
+  finishedAt       DateTime?
+
+  auditee    User        @relation("AuditAuditee", fields: [auditeeId], references: [id])
+  auditor    User        @relation("AuditAuditor", fields: [auditorId], references: [id])
+  quest      Quest       @relation(fields: [questId], references: [id])
+  submission Submission? @relation(fields: [submissionId], references: [id])
+
+  @@index([auditeeId, status])
+  @@index([auditorId, status])
+  @@index([questId, exerciseId, status])
+}
+
+model AuditQueue {
+  id         String   @id @default(uuid())
+  userId     String
+  questId    String
+  exerciseId String
+  status     String   @default("WAITING")
+  joinedAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([userId, questId, exerciseId])
+  @@index([questId, exerciseId, status])
+}
+
+model AuditPoint {
+  userId          String   @id
+  points          Int      @default(1)
+  auditsCompleted Int     @default(0)
+  updatedAt       DateTime @default(now()) @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model AuditBlock {
+  id            String   @id @default(uuid())
+  userId        String
+  blockedUserId String
+  reason        String   @default("recent_audit")
+  createdAt     DateTime @default(now())
+
+  user        User @relation("AuditBlockUser", fields: [userId], references: [id])
+  blockedUser User @relation("AuditBlockBlockedUser", fields: [blockedUserId], references: [id])
+
+  @@unique([userId, blockedUserId, reason])
+  @@index([userId, blockedUserId])
+}
+
+model XPTransaction {
+  id          String   @id @default(uuid())
+  userId      String
+  questId     String?
+  amount      Int
+  sourceType  String
+  sourceId    String
+  description String
+  createdAt   DateTime @default(now())
+
+  user  User   @relation(fields: [userId], references: [id])
+  quest Quest? @relation(fields: [questId], references: [id])
+
+  @@unique([userId, sourceType, sourceId])
+  @@index([userId, createdAt])
 }

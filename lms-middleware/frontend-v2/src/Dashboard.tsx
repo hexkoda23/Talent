@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from './AuthContext.tsx';
-import { BookOpen, ExternalLink, Trophy, Zap, ShieldCheck, CheckSquare, Clock } from 'lucide-react';
+import { BookOpen, ExternalLink, Trophy, ShieldCheck, CheckSquare, Clock } from 'lucide-react';
 
 interface Quest {
   id: string;
@@ -13,10 +13,6 @@ interface Quest {
 interface StudentProgress {
   quest_id: string;
   status: Quest['status'];
-}
-
-interface QuestAccess {
-  repoUrl?: string;
 }
 
 interface StartQuestResponse {
@@ -44,11 +40,12 @@ interface AuditQueueItem {
   username: string;
   quest_id: string;
   exercise_id: string;
+  joined_at: string;
   waiting_since: string;
 }
 
 export default function Dashboard() {
-  const { user, logout, token } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [quests, setQuests] = useState<Quest[]>(INITIAL_QUESTS);
   const [loading, setLoading] = useState<string | null>(null);
@@ -65,19 +62,19 @@ export default function Dashboard() {
   const [studentStats, setStudentStats] = useState({ level: 1, xp: 0 });
   const [isBooking, setIsBooking] = useState(false);
 
-  const applyQuestLocks = (questsToLock: Quest[]) => (
+  const applyQuestLocks = (questsToLock: Quest[]): Quest[] => (
     questsToLock.map((quest, index) => {
       if (index === 0) {
-        return quest.status === 'LOCKED' ? { ...quest, status: 'IN_PROGRESS' } : quest;
+        return quest.status === 'LOCKED' ? { ...quest, status: 'IN_PROGRESS' as Quest['status'] } : quest;
       }
 
       const previousQuest = questsToLock[index - 1];
       const isUnlocked = COMPLETED_STATUSES.includes(previousQuest.status);
       if (!isUnlocked) {
-        return { ...quest, status: 'LOCKED' };
+        return { ...quest, status: 'LOCKED' as Quest['status'] };
       }
 
-      return quest.status === 'LOCKED' ? { ...quest, status: 'IN_PROGRESS' } : quest;
+      return quest.status === 'LOCKED' ? { ...quest, status: 'IN_PROGRESS' as Quest['status'] } : quest;
     })
   );
 
@@ -87,9 +84,7 @@ export default function Dashboard() {
       const loadDashboard = async () => {
         try {
           // 1. Fetch Quest Catalog
-          const catalogRes = await fetch('/api/v1/quests', {
-            headers: { 'Authorization': `Bearer ${token}` }
-          });
+          const catalogRes = await fetch('/api/v1/quests', { credentials: 'include' });
           const catalogData = await catalogRes.json();
           const baseQuests: Quest[] = catalogData.map((q: any) => ({
             id: q.id,
@@ -102,9 +97,7 @@ export default function Dashboard() {
           }));
 
           // 2. Fetch Student Progress
-          const progressRes = await fetch(`/api/v1/students/progress/${user.username}`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-          });
+          const progressRes = await fetch('/api/v1/me/progress', { credentials: 'include' });
           const progressData = await progressRes.json();
           
           if (progressData.progress) {
@@ -121,9 +114,7 @@ export default function Dashboard() {
 
             const accessibleQuests = gatedQuests.filter(q => q.status !== 'LOCKED');
             const accessResults = await Promise.all(accessibleQuests.map(q =>
-              fetch(`/api/v1/quests/${q.id}/access/${user.username}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-              }).then(res => res.ok ? res.json() : null)
+              fetch(`/api/v1/quests/${q.id}/access`, { credentials: 'include' }).then(res => res.ok ? res.json() : null)
             ));
 
             const urls = accessResults.reduce((acc: Record<string, string>, access, index) => {
@@ -141,9 +132,7 @@ export default function Dashboard() {
 
       const loadProfile = async () => {
         try {
-          const profileRes = await fetch(`/api/v1/students/profile/${user.username}`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-          });
+          const profileRes = await fetch('/api/v1/me/profile', { credentials: 'include' });
           if (profileRes.ok) {
             const profileData = await profileRes.json();
             setStudentStats({ level: profileData.level, xp: profileData.xp });
@@ -166,18 +155,14 @@ export default function Dashboard() {
 
       return () => clearInterval(interval);
     }
-  }, [user, token]);
+  }, [user]);
 
   const loadAudits = async () => {
     if (!user) return;
     try {
       const [queueRes, sessionsRes] = await Promise.all([
-        fetch(`/api/v1/audits/queue?auditor=${user.username}`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        }),
-        fetch(`/api/v1/audit/my/${user.username}`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        })
+        fetch('/api/v1/audits/queue', { credentials: 'include' }),
+        fetch('/api/v1/audit/my', { credentials: 'include' })
       ]);
 
       if (queueRes.ok) {
@@ -202,12 +187,11 @@ export default function Dashboard() {
     try {
       const res = await fetch('/api/v1/audits/book', {
         method: 'POST',
+        credentials: 'include',
         headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          auditor: user.username,
           auditee: item.username,
           questId: item.quest_id,
           exerciseId: item.exercise_id
@@ -231,17 +215,13 @@ export default function Dashboard() {
     setLoading(questId);
     setNotice('');
     try {
-      const response = await fetch('/api/v1/quests/start', {
+      const response = await fetch(`/api/v1/quests/${questId}/start`, {
         method: 'POST',
+        credentials: 'include',
         headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          studentUsername: user.username,
-          email: user.email,
-          questId
-        })
+        body: JSON.stringify({ questId })
       });
 
       if (response.ok) {
@@ -249,8 +229,9 @@ export default function Dashboard() {
         setQuests(prev => prev.map(q => 
           q.id === questId ? { ...q, status: 'IN_PROGRESS' } : q
         ));
-        if (data.repoUrl) {
-          setQuestRepoUrls(prev => ({ ...prev, [questId]: data.repoUrl }));
+        const repoUrl = data.repoUrl;
+        if (repoUrl) {
+          setQuestRepoUrls(prev => ({ ...prev, [questId]: repoUrl }));
         }
         if (data.giteaWarning) {
           setNotice(`Workspace opened. Gitea provisioning needs attention: ${data.giteaWarning}`);
@@ -289,6 +270,9 @@ export default function Dashboard() {
           <div className="topbar-sub">middleware://online ▸ socket://live ▸ runner://multi-lang</div>
         </div>
         <div className="user-profile">
+          <a className="btn btn-small" href={import.meta.env.VITE_USER_APP_URL || 'http://localhost:5173/dashboard'}>
+            Back to TalentNation
+          </a>
           <div style={{ textAlign: 'right', marginRight: '1.5rem', display: 'flex', gap: '1rem', alignItems: 'center' }}>
             <div className="stat-pills-mini">
               <span className="stat-pill-mini"><Trophy size={10} /> {studentStats.xp} XP</span>
@@ -335,7 +319,7 @@ export default function Dashboard() {
                 <button 
                   className="btn btn-primary"
                   disabled={quest.status === 'LOCKED' || loading === quest.id}
-                  onClick={() => navigate(`/quest/${quest.id}`)}
+                  onClick={() => (questRepoUrls[quest.id] ? navigate(`/quest/${quest.id}`) : startQuest(quest.id))}
                 >
                   {loading === quest.id ? (
                     <div className="loading-spinner"></div>

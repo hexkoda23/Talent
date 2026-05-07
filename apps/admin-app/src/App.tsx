@@ -31,7 +31,7 @@ import {
   Users,
   XCircle
 } from "lucide-react";
-import { FormEvent, ReactNode, useMemo, useState } from "react";
+import { FormEvent, ReactNode, useEffect, useMemo, useState } from "react";
 import { Link, Navigate, NavLink, Outlet, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 
 type CandidateStatus =
@@ -304,6 +304,33 @@ function isAuthed() {
   } catch {
     return false;
   }
+}
+
+function getAdminSession() {
+  const stored = window.localStorage.getItem(authStorageKey);
+  if (!stored) return null;
+  try {
+    return JSON.parse(stored) as { token?: string; roles?: string[] };
+  } catch {
+    return null;
+  }
+}
+
+async function launchLms(next: string) {
+  const token = getAdminSession()?.token;
+  if (!token) throw new Error("Admin session expired");
+  const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL || "/api/v1").replace(/\/$/, "");
+  const response = await fetch(`${apiBaseUrl}/lms/launch`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({ next })
+  });
+  const payload = await response.json();
+  if (!response.ok) throw new Error(payload?.error?.message || payload?.message || "Unable to launch quests");
+  return payload.url as string;
 }
 
 function RequireAdmin({ children }: { children: ReactNode }) {
@@ -785,25 +812,36 @@ function ModulesPage({ modules, onChange }: { modules: ModuleItem[]; onChange: (
 }
 
 function QuestsPage() {
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+    launchLms("/admin")
+      .then((url) => {
+        if (!cancelled) window.location.assign(url);
+      })
+      .catch((err) => {
+        if (!cancelled) setError(err instanceof Error ? err.message : "Unable to launch quests");
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
     <>
       <PageHeader
         title="Quests"
-        subtitle="Quest code and repositories live in Gitea; this admin page links out and tracks platform metadata."
+        subtitle="Opening the Gitea-backed quest admin workspace."
         icon={<GitBranch />}
-        action={
-          <a className="primary-action" href="http://localhost:3000" target="_blank" rel="noreferrer">
-            <LinkIcon size={17} />
-            Open Gitea
-          </a>
-        }
+        action={<button className="primary-action" onClick={() => launchLms("/admin").then((url) => window.location.assign(url))}><LinkIcon size={17} /> Open now</button>}
       />
       <section className="split-grid">
-        <Panel title="Gitea Service" icon={<GitBranch />}>
+        <Panel title="Quest Service" icon={<GitBranch />}>
           <div className="callout">
-            <h2>Self-hosted Git backend</h2>
-            <p>Quest repositories, workflow files, submissions, and audit clone URLs should remain owned by the Gitea service.</p>
-            <a href="http://localhost:3000" target="_blank" rel="noreferrer">http://localhost:3000</a>
+            <h2>{error ? "Launch failed" : "Redirecting"}</h2>
+            <p>{error || "You will land in the middleware quest admin dashboard without another login."}</p>
           </div>
         </Panel>
         <Panel title="Platform Metadata" icon={<ListChecks />}>

@@ -272,3 +272,12 @@ export const dashboardApi = {
     return apiRequest<unknown>("/me/notifications/read-all", { method: "POST" });
   },
 };
+
+export const lmsApi = {
+  launch(next: string) {
+    return apiRequest<{ url: string }>("/lms/launch", {
+      method: "POST",
+      body: { next },
+    });
+  },
+};

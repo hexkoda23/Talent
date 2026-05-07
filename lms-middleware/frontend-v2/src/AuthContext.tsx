@@ -1,15 +1,17 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 
 interface User {
+  id: string;
   username: string;
   email: string;
+  roles: string[];
 }
 
 interface AuthContextType {
   user: User | null;
   token: string | null;
-  login: (token: string, user: User) => void;
-  logout: () => void;
+  login: (_token: string, user: User) => void;
+  logout: () => Promise<void>;
   loading: boolean;
 }
 
@@ -17,35 +19,40 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const savedToken = localStorage.getItem('lms_token');
-    const savedUser = localStorage.getItem('lms_user');
-    if (savedToken && savedUser) {
-      setToken(savedToken);
-      setUser(JSON.parse(savedUser));
-    }
-    setLoading(false);
+    const loadSession = async () => {
+      try {
+        const response = await fetch('/api/v1/auth/session', { credentials: 'include' });
+        if (!response.ok) throw new Error('No LMS session');
+        const payload = await response.json();
+        setUser(payload.user);
+      } catch {
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadSession();
   }, []);
 
-  const login = (newToken: string, newUser: User) => {
-    setToken(newToken);
-    setUser(newUser);
-    localStorage.setItem('lms_token', newToken);
-    localStorage.setItem('lms_user', JSON.stringify(newUser));
+  const login = (_token: string, nextUser: User) => {
+    setUser(nextUser);
   };
 
-  const logout = () => {
-    setToken(null);
-    setUser(null);
-    localStorage.removeItem('lms_token');
-    localStorage.removeItem('lms_user');
+  const logout = async () => {
+    try {
+      await fetch('/api/v1/auth/logout', { method: 'POST', credentials: 'include' });
+    } finally {
+      setUser(null);
+      window.location.href = import.meta.env.VITE_USER_APP_URL || 'http://localhost:5173/dashboard';
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, token: null, login, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );

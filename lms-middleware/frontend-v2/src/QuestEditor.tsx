@@ -15,6 +15,11 @@ interface ExerciseRestriction {
   message: string;
 }
 
+interface AuditChecklistItem {
+  id: string;
+  text: string;
+}
+
 interface Exercise {
   id: string;
   name: string;
@@ -29,6 +34,7 @@ interface Exercise {
   sampleTests: ExerciseTest[];
   hiddenTests: ExerciseTest[];
   restrictions: ExerciseRestriction[];
+  auditChecklist?: AuditChecklistItem[];
 }
 
 interface QuestManifest {
@@ -49,8 +55,6 @@ const QuestEditor: React.FC = () => {
   // Local state for JSON editing to allow invalid JSON while typing
   const [rawTestInputs, setRawTestInputs] = useState<Record<string, { args: string, expected: string }>>({});
 
-  const adminToken = 'admin-secret-key';
-
   useEffect(() => {
     if (id === 'new') {
       setManifest({
@@ -67,9 +71,7 @@ const QuestEditor: React.FC = () => {
 
   const fetchQuest = async () => {
     try {
-      const response = await fetch(`/api/v1/admin/quests/${id}`, {
-        headers: { 'X-ADMIN-TOKEN': adminToken }
-      });
+      const response = await fetch(`/api/v1/admin/quests/${id}`, { credentials: 'include' });
       if (!response.ok) throw new Error('Failed to fetch quest detail');
       const data = await response.json();
       setManifest(data);
@@ -87,9 +89,9 @@ const QuestEditor: React.FC = () => {
       setSaving(true);
       const response = await fetch(`/api/v1/admin/quests${id === 'new' ? '' : `/${id}`}`, {
         method: id === 'new' ? 'POST' : 'PUT',
+        credentials: 'include',
         headers: { 
-          'Content-Type': 'application/json',
-          'X-ADMIN-TOKEN': adminToken
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(manifest)
       });
@@ -139,7 +141,7 @@ const QuestEditor: React.FC = () => {
     if (!manifest || manifest.exercises.length <= 1) return;
     const updated = { ...manifest, exercises: manifest.exercises.filter((_, i) => i !== index) };
     setManifest(updated);
-    setActiveExerciseIndex(Math.max(0, activeExerciseIndex - 1));
+    setActiveExerciseIndex(typeof activeExerciseIndex === 'number' ? Math.max(0, activeExerciseIndex - 1) : 0);
   };
 
   const updateExercise = (updates: Partial<Exercise>) => {

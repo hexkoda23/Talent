@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import { dbService } from '../services/dbService';
-import { manifestService } from '../services/manifestService';
 import { auditMatchingService } from '../services/auditMatchingService';
 
 export const handleGiteaWebhook = async (req: Request, res: Response) => {
@@ -31,7 +30,11 @@ export const handleGiteaWebhook = async (req: Request, res: Response) => {
       await auditMatchingService.tryMatchExercise(studentUsername, questId, exerciseId);
 
       // 2. Determine next exercise
-      const nextExerciseId = manifestService.getNextExerciseId(questId, exerciseId);
+      const manifest = await dbService.getQuestManifest(questId);
+      const index = manifest?.exercises.findIndex((exercise) => exercise.id === exerciseId) ?? -1;
+      const nextExerciseId = !manifest || index === -1 || index === manifest.exercises.length - 1
+        ? 'DONE'
+        : manifest.exercises[index + 1].id;
 
       if (nextExerciseId === 'DONE') {
         console.log(`[Quest] Student ${studentUsername} finished bot tests for ${questId}. Waiting for exercise audits.`);

@@ -73,7 +73,7 @@ export default function AuditWorkspace() {
 
   const loadCode = async (path = '') => {
     if (!sessionId) return;
-    const res = await fetch(`/api/v1/audit/session/${sessionId}/code?path=${encodeURIComponent(path)}`);
+    const res = await fetch(`/api/v1/audit/session/${sessionId}/code?path=${encodeURIComponent(path)}`, { credentials: 'include' });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Code could not be loaded');
 
@@ -92,7 +92,7 @@ export default function AuditWorkspace() {
 
     const boot = async () => {
       try {
-        const res = await fetch(`/api/v1/audit/session/${sessionId}`);
+        const res = await fetch(`/api/v1/audit/session/${sessionId}`, { credentials: 'include' });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Audit session could not load');
         setSession(data.session);
@@ -126,8 +126,9 @@ export default function AuditWorkspace() {
     if (!allAnswered) return;
     const res = await fetch('/api/v1/audit/submit', {
       method: 'POST',
+      credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sessionId: Number(sessionId), checklist: answers, feedback }),
+      body: JSON.stringify({ sessionId, checklist: answers, feedback }),
     });
     const data = await res.json();
     if (!res.ok) {
@@ -174,6 +175,9 @@ export default function AuditWorkspace() {
         </div>
 
         <div className="header-right">
+          <a className="toolbar-button" href={import.meta.env.VITE_USER_APP_URL || 'http://localhost:5173/dashboard'}>
+            Back
+          </a>
           <div className="user-avatar">{user?.username?.[0]?.toUpperCase()}</div>
         </div>
       </header>

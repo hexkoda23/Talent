@@ -139,15 +139,6 @@ const getStarterCode = (exercise: Exercise | undefined, language: string) => (
 
 const isPythonLanguage = (language: string) => language === 'python' || language === 'python3';
 
-const getGiteaBaseUrl = (repoUrl: string) => {
-  if (!repoUrl) return 'http://localhost:3001';
-  try {
-    return new URL(repoUrl).origin;
-  } catch {
-    return 'http://localhost:3001';
-  }
-};
-
 export default function QuestWorkspace() {
   const { questId } = useParams();
   const { user } = useAuth();
@@ -176,7 +167,7 @@ export default function QuestWorkspace() {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const res = await fetch(`/api/v1/quests/${questId}/manifest`);
+        const res = await fetch(`/api/v1/quests/${questId}/manifest`, { credentials: 'include' });
         if (!res.ok) throw new Error('Manifest not found');
         const data = await res.json();
         const firstExerciseId = data.exercises?.[0]?.id || '';
@@ -187,8 +178,8 @@ export default function QuestWorkspace() {
 
         if (user?.username) {
           const [accessRes, progressRes] = await Promise.all([
-            fetch(`/api/v1/quests/${questId}/access/${user.username}`),
-            fetch(`/api/v1/quests/${questId}/progress/${user.username}`),
+            fetch(`/api/v1/quests/${questId}/access`, { credentials: 'include' }),
+            fetch(`/api/v1/quests/${questId}/progress`, { credentials: 'include' }),
           ]);
 
           if (accessRes.ok) {
@@ -224,7 +215,7 @@ export default function QuestWorkspace() {
 
     const interval = window.setInterval(async () => {
       try {
-        const progressRes = await fetch(`/api/v1/quests/${questId}/progress/${user.username}`);
+        const progressRes = await fetch(`/api/v1/quests/${questId}/progress`, { credentials: 'include' });
         if (!progressRes.ok) return;
         const progressData = await progressRes.json();
         setPassedExercises(progressData.passedExercises || []);
@@ -246,7 +237,6 @@ export default function QuestWorkspace() {
   const activeExerciseIndex = manifest?.exercises.findIndex((exercise) => exercise.id === activeExerciseId) ?? -1;
   const unlockedExerciseIndex = manifest?.exercises.findIndex((exercise) => exercise.id === currentUnlockedExerciseId) ?? 0;
   const selectedLanguage = LANGUAGES.find((item) => item.id === language) || LANGUAGES[3];
-  const templateRepoUrl = `${getGiteaBaseUrl(repoUrl)}/Dotunbey/quest-${questId}-template`;
   const currentAuditState = auditStates.find((state) => state.exercise_id === activeExerciseId);
   const currentAuditSession = activeAudits.find((session) => session.exercise_id === activeExerciseId)
     || (currentAuditState?.session_id ? { id: currentAuditState.session_id } : null);
@@ -306,8 +296,9 @@ export default function QuestWorkspace() {
     try {
       const response = await fetch(`/api/v1/quests/${questId}/exercises/${currentExercise.id}/${mode}`, {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code, language, studentUsername: user?.username }),
+        body: JSON.stringify({ code, language }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Tests could not run');
@@ -384,6 +375,9 @@ export default function QuestWorkspace() {
         </div>
 
         <div className="header-right">
+          <a className="toolbar-button" href={import.meta.env.VITE_USER_APP_URL || 'http://localhost:5173/dashboard'}>
+            Back
+          </a>
           <Globe size={18} />
           <Settings size={18} />
           <div className="user-avatar">{user?.username?.[0]?.toUpperCase()}</div>

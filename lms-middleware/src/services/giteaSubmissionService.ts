@@ -4,6 +4,7 @@ import path from 'path';
 import { execFile } from 'child_process';
 import { promisify } from 'util';
 import { config } from '../config/env';
+import { repoNameForQuest, toGiteaUsername } from './identity';
 
 const execFileAsync = promisify(execFile);
 
@@ -13,16 +14,6 @@ interface SubmitToRepoInput {
   exerciseId: string;
   code: string;
 }
-
-const toGiteaUsername = (username: string) => {
-  const normalized = username
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9._-]+/g, '-')
-    .replace(/^-+|-+$/g, '');
-
-  return normalized || username;
-};
 
 const getAuthenticatedRemote = (owner: string, repo: string) => {
   const internalWebUrl = config.gitea.url.replace(/\/api\/v1\/?$/, '');
@@ -45,8 +36,7 @@ const runGit = async (args: string[], cwd: string) => {
 export const giteaSubmissionService = {
   submitCode: async ({ studentUsername, questId, exerciseId, code }: SubmitToRepoInput) => {
     const owner = toGiteaUsername(studentUsername);
-    const normalizedQuestId = questId.replace(/^quest-/, '');
-    const repo = `quest-${normalizedQuestId}`;
+    const repo = repoNameForQuest(questId);
     const remote = getAuthenticatedRemote(owner, repo);
     const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'lms-submit-'));
     const worktree = path.join(tempRoot, repo);

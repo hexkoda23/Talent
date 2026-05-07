@@ -13,6 +13,7 @@ import { SelectionGameModule } from './selection-game/selection-game.module';
 import { OnboardingModule } from './onboarding/onboarding.module';
 import { UploadsModule } from './uploads/uploads.module';
 import { AdminModule } from './admin/admin.module';
+import { LmsModule } from './lms/lms.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { AdminModule } from './admin/admin.module';
     OnboardingModule,
     UploadsModule,
     AdminModule,
+    LmsModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService, RedisService],

@@ -5,10 +5,18 @@ services:
       - "3000:3000"
     environment:
       - PORT=3000
-      - DATABASE_URL=postgres://lms_user:lms_password@db:5432/lms_db
+      - DATABASE_URL=${LMS_DATABASE_URL:-postgresql://postgres:postgres@host.docker.internal:5432/talent_forge?schema=public}
+      - LMS_DATABASE_URL=${LMS_DATABASE_URL:-postgresql://postgres:postgres@host.docker.internal:5432/talent_forge?schema=public}
+      - MAIN_BACKEND_URL=${MAIN_BACKEND_URL:-http://host.docker.internal:4000}
+      - LMS_LAUNCH_SECRET=${LMS_LAUNCH_SECRET:-change-this-access-secret}
+      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET:-change-this-access-secret}
+      - OIDC_ISSUER=${OIDC_ISSUER:-http://app:3000}
+      - OIDC_CLIENT_ID=${OIDC_CLIENT_ID:-lms-middleware}
+      - OIDC_CLIENT_SECRET=${OIDC_CLIENT_SECRET:-lms-secret}
       - GITEA_API_URL=http://gitea:3000/api/v1
-      - GITEA_WEB_URL=${GITEA_WEB_URL}
+      - GITEA_WEB_URL=${GITEA_WEB_URL:-http://localhost:3001}
       - GITEA_ADMIN_TOKEN=${GITEA_ADMIN_TOKEN}
+      - GITEA_TEMPLATE_OWNER=${GITEA_TEMPLATE_OWNER}
       - MIDDLEWARE_API_KEY=${MIDDLEWARE_API_KEY}
     depends_on:
       db:
@@ -66,13 +74,13 @@ services:
     environment:
       - POSTGRES_USER=lms_user
       - POSTGRES_PASSWORD=lms_password
-      - POSTGRES_MULTIPLE_DATABASES=lms_db,gitea_db
+      - POSTGRES_MULTIPLE_DATABASES=gitea_db
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./scripts/init-multi-db.sh:/docker-entrypoint-initdb.d/init-multi-db.sh
       - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U lms_user -d lms_db"]
+      test: ["CMD-SHELL", "pg_isready -U lms_user -d gitea_db"]
       interval: 5s
       timeout: 5s
       retries: 5

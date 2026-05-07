@@ -1,16 +1,7 @@
 import { config } from '../config/env';
 import { dbService } from './dbService';
 import { giteaService } from './giteaService';
-
-const toGiteaUsername = (username: string) => {
-  const normalized = username
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9._-]+/g, '-')
-    .replace(/^-+|-+$/g, '');
-
-  return normalized || username;
-};
+import { repoNameForQuest, toGiteaUsername } from './identity';
 
 export const auditMatchingService = {
   tryMatchExercise: async (auditee: string, questId: string, exerciseId: string) => {
@@ -18,7 +9,7 @@ export const auditMatchingService = {
     if (!auditor) return null;
 
     const owner = toGiteaUsername(auditee);
-    const repoName = `quest-${questId}`;
+    const repoName = repoNameForQuest(questId);
     const repoUrl = `${config.gitea.webUrl}/${owner}/${repoName}`;
 
     await giteaService.addCollaborator(owner, repoName, toGiteaUsername(auditor), 'read');

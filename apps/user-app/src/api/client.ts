@@ -47,10 +47,13 @@ export const apiRequest = async <T>(path: string, options: RequestOptions = {}):
     headers.set("Authorization", `Bearer ${token}`);
   }
 
-  let body = options.body;
-  if (body && !(body instanceof FormData) && !(body instanceof Blob) && typeof body !== "string") {
+  let body: BodyInit | undefined;
+  const rawBody = options.body;
+  if (rawBody && !(rawBody instanceof FormData) && !(rawBody instanceof Blob) && typeof rawBody !== "string") {
     headers.set("Content-Type", "application/json");
-    body = JSON.stringify(body);
+    body = JSON.stringify(rawBody);
+  } else {
+    body = rawBody as BodyInit | undefined;
   }
 
   const response = await fetch(`${API_BASE_URL}${path}`, {

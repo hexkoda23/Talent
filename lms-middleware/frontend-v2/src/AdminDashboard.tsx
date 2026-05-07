@@ -13,8 +13,6 @@ const AdminDashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const adminToken = 'admin-secret-key'; // This should ideally come from a secure place
-
   useEffect(() => {
     fetchQuests();
   }, []);
@@ -22,9 +20,7 @@ const AdminDashboard: React.FC = () => {
   const fetchQuests = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/v1/admin/quests', {
-        headers: { 'X-ADMIN-TOKEN': adminToken }
-      });
+      const response = await fetch('/api/v1/admin/quests', { credentials: 'include' });
       if (!response.ok) {
         const errData = await response.json().catch(() => ({}));
         throw new Error(errData.error || `Error ${response.status}: Failed to fetch quests`);
@@ -43,7 +39,7 @@ const AdminDashboard: React.FC = () => {
     try {
       const response = await fetch(`/api/v1/admin/quests/${id}`, {
         method: 'DELETE',
-        headers: { 'X-ADMIN-TOKEN': adminToken }
+        credentials: 'include'
       });
       if (!response.ok) throw new Error('Failed to delete quest');
       fetchQuests();
@@ -62,6 +58,9 @@ const AdminDashboard: React.FC = () => {
         <Link to="/admin/quest/new" className="btn btn-primary btn-small">
           + Create New Quest
         </Link>
+        <a className="btn btn-secondary btn-small" href={import.meta.env.VITE_ADMIN_APP_URL || 'http://localhost:5174/admin/dashboard'}>
+          Back to Admin
+        </a>
       </header>
 
       {loading ? (
@@ -90,7 +89,7 @@ const AdminDashboard: React.FC = () => {
                   Edit Logic
                 </Link>
                 <a 
-                  href={`http://localhost:3001/Dotunbey/quest-${quest.id.replace('quest-', '')}-template`}
+                  href={`${import.meta.env.VITE_GITEA_WEB_URL || 'http://localhost:3001'}/${import.meta.env.VITE_GITEA_TEMPLATE_OWNER || 'curriculum-team'}/quest-${quest.id.replace('quest-', '')}-template`}
                   className="btn btn-secondary btn-small"
                   target="_blank"
                   rel="noopener noreferrer"

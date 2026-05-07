@@ -9,6 +9,7 @@ export const config = {
     cliPath: process.env.GITEA_CLI_PATH || '',
     cliWorkPath: process.env.GITEA_CLI_WORK_PATH || '',
     cliConfigPath: process.env.GITEA_CLI_CONFIG_PATH || '',
+    templateOwner: process.env.GITEA_TEMPLATE_OWNER || process.env.GITEA_ADMIN_USERNAME || 'curriculum-team',
     bootstrapEnabled: process.env.GITEA_BOOTSTRAP_ENABLED !== 'false',
     admin: {
       username: process.env.GITEA_ADMIN_USERNAME || 'Dotunbey',
@@ -18,7 +19,22 @@ export const config = {
     bootstrapUsers: process.env.GITEA_BOOTSTRAP_USERS || '',
   },
   db: {
-    url: process.env.DATABASE_URL || '',
+    url: process.env.LMS_DATABASE_URL || process.env.DATABASE_URL || '',
+  },
+  mainBackend: {
+    url: process.env.MAIN_BACKEND_URL || 'http://localhost:3000',
+    userAppUrl: process.env.MAIN_USER_APP_URL || 'http://localhost:5173/dashboard',
+    adminAppUrl: process.env.MAIN_ADMIN_APP_URL || 'http://localhost:5174/admin/dashboard',
+  },
+  auth: {
+    launchSecret: process.env.LMS_LAUNCH_SECRET || process.env.JWT_ACCESS_SECRET || 'change-this-access-secret',
+    sessionSecret: process.env.LMS_SESSION_SECRET || process.env.LMS_LAUNCH_SECRET || process.env.JWT_ACCESS_SECRET || 'change-this-access-secret',
+    cookieName: process.env.LMS_SESSION_COOKIE || 'tn_lms_session',
+  },
+  oidc: {
+    issuer: process.env.OIDC_ISSUER || process.env.LMS_PUBLIC_URL || process.env.MAIN_BACKEND_URL || 'http://app:3000',
+    clientId: process.env.OIDC_CLIENT_ID || 'lms-middleware',
+    clientSecret: process.env.OIDC_CLIENT_SECRET || 'lms-secret',
   },
   server: {
     port: parseInt(process.env.PORT || '3000', 10),
