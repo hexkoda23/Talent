@@ -13,7 +13,7 @@ env:
   REGISTRY_NAME: talentnationacr
   IMAGE_NAME: lms-middleware
   CONTAINER_APP_NAME: lms-middleware
-  RESOURCE_GROUP: talent-nation-rg
+  RESOURCE_GROUP: talent-nation-prod-rg
 
 jobs:
   build_and_deploy:

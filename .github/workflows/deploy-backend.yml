@@ -13,7 +13,7 @@ env:
   REGISTRY_NAME: talentnationacr
   IMAGE_NAME: backend
   CONTAINER_APP_NAME: backend
-  RESOURCE_GROUP: talent-nation-rg
+  RESOURCE_GROUP: talent-nation-prod-rg
 
 jobs:
   build_and_deploy:
