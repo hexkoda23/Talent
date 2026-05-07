@@ -23,10 +23,11 @@ async function bootstrap() {
   app.setGlobalPrefix(configService.get<string>('API_PREFIX', 'api/v1'));
   app.enableCors({
     origin: (requestOrigin, callback) => {
-      const allowedOrigin = configService.get<string>('FRONTEND_ORIGIN', 'http://localhost:5173').replace(/\/$/, '');
+      const allowedOriginsConfig = configService.get<string>('FRONTEND_ORIGIN', 'http://localhost:5173');
+      const allowedOrigins = allowedOriginsConfig.split(',').map(origin => origin.trim().replace(/\/$/, ''));
       const normalizedRequestOrigin = requestOrigin?.replace(/\/$/, '');
       
-      if (!normalizedRequestOrigin || normalizedRequestOrigin === allowedOrigin) {
+      if (!normalizedRequestOrigin || allowedOrigins.includes(normalizedRequestOrigin)) {
         callback(null, true);
       } else {
         callback(new Error('Not allowed by CORS'));
