@@ -2,6 +2,7 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
+  Optional,
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -28,7 +29,7 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
-    private readonly redisService: RedisService,
+    @Optional() private readonly redisService: RedisService,
     private readonly storageService: AzureBlobStorageService,
   ) {}
 
@@ -342,7 +343,7 @@ export class AuthService {
       data: { revokedAt: new Date() },
     });
 
-    if (accessToken) {
+    if (accessToken && this.redisService) {
       const decoded = this.jwtService.decode(accessToken) as { exp?: number } | null;
       if (decoded?.exp) {
         const ttl = decoded.exp - Math.floor(Date.now() / 1000);
