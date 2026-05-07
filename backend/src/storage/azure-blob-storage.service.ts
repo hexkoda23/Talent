@@ -36,7 +36,7 @@ export class AzureBlobStorageService {
     const filename = `${randomUUID()}${extension}`;
     const storagePath = posix.join('registration', applicationId, filename);
 
-    const blockBlobClient = this.containerClient.getBlockBlobClient(storagePath);
+    const blockBlobClient = this.containerClient!.getBlockBlobClient(storagePath);
     await blockBlobClient.uploadData(file.buffer, {
       blobHTTPHeaders: { blobContentType: file.mimetype }
     });
@@ -61,7 +61,7 @@ export class AzureBlobStorageService {
       throw new Error('Azure Blob Storage is not configured');
     }
 
-    const blockBlobClient = this.containerClient.getBlockBlobClient(storageKey);
+    const blockBlobClient = this.containerClient!.getBlockBlobClient(storageKey);
     await blockBlobClient.uploadData(buffer);
   }
 }

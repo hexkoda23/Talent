@@ -37,6 +37,7 @@ jobs:
         with:
           resourceGroup: ${{ env.RESOURCE_GROUP }}
           containerAppName: ${{ env.CONTAINER_APP_NAME }}
+          containerAppEnvironment: talent-nation-env
           imageToDeploy: ${{ env.REGISTRY_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
           registryUrl: ${{ env.REGISTRY_NAME }}.azurecr.io
           registryUsername: ${{ secrets.ACR_USERNAME }}
