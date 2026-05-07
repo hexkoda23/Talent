@@ -3,6 +3,10 @@ import type { ApiErrorEnvelope } from "./types";
 const TOKEN_KEY = "talentNationAuthToken";
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || "/api/v1").replace(/\/$/, "");
+const API_PREFIX = "/api/v1";
+const BASE_URL_WITH_PREFIX = API_BASE_URL.endsWith(API_PREFIX) 
+  ? API_BASE_URL 
+  : `${API_BASE_URL}${API_PREFIX}`;
 
 export class ApiError extends Error {
   code: string;
@@ -56,7 +60,7 @@ export const apiRequest = async <T>(path: string, options: RequestOptions = {}):
     body = rawBody as BodyInit | undefined;
   }
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
+  const response = await fetch(`${BASE_URL_WITH_PREFIX}${path}`, {
     ...options,
     headers,
     body,
