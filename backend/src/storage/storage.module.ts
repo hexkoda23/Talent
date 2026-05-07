@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
-import { LocalStorageService } from './local-storage.service';
+import { AzureBlobStorageService } from './azure-blob-storage.service';
 
 @Module({
-  providers: [LocalStorageService],
-  exports: [LocalStorageService],
+  providers: [AzureBlobStorageService],
+  exports: [AzureBlobStorageService],
 })
 export class StorageModule {}

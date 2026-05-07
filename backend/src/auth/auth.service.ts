@@ -14,7 +14,7 @@ import { RedisService } from '../prisma/redis.service';
 import { RegisterApplicantDto } from './dto/register-applicant.dto';
 import { LoginDto } from './dto/login.dto';
 import { AuthUser } from '../common/dto/auth-user.type';
-import { LocalStorageService } from '../storage/local-storage.service';
+import { AzureBlobStorageService } from '../storage/azure-blob-storage.service';
 
 type RegisterInputFiles = {
   schoolId: Express.Multer.File;
@@ -29,7 +29,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     private readonly redisService: RedisService,
-    private readonly storageService: LocalStorageService,
+    private readonly storageService: AzureBlobStorageService,
   ) {}
 
   async registerApplicant(currentUser: AuthUser, dto: RegisterApplicantDto, files: RegisterInputFiles) {

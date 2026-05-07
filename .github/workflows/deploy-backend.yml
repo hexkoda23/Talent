@@ -1,0 +1,61 @@
+name: Deploy Backend to Azure Container Apps
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'backend/**'
+      - '.github/workflows/deploy-backend.yml'
+  workflow_dispatch:
+
+env:
+  REGISTRY_NAME: talentnationacr
+  IMAGE_NAME: backend
+  CONTAINER_APP_NAME: backend
+  RESOURCE_GROUP: talent-nation-rg
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Build and Push to ACR
+        run: |
+          az acr login --name ${{ env.REGISTRY_NAME }}
+          docker build -t ${{ env.REGISTRY_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }} ./backend
+          docker push ${{ env.REGISTRY_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+      - name: Run Prisma Migrations via Container App Job
+        run: |
+          az containerapp job create \
+            --name backend-migration \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --environment talent-nation-env \
+            --image ${{ env.REGISTRY_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+            --trigger-type "Manual" \
+            --replica-timeout 600 \
+            --replica-retry-limit 1 \
+            --command "npx" "prisma" "migrate" "deploy" \
+            --env-vars "DATABASE_URL=secretref:database-url" \
+            --secrets "database-url=${{ secrets.AZURE_POSTGRES_URL }}" || true
+            
+          az containerapp job start \
+            --name backend-migration \
+            --resource-group ${{ env.RESOURCE_GROUP }}
+
+      - name: Deploy Container App
+        uses: azure/container-apps-deploy-action@v1
+        with:
+          resourceGroup: ${{ env.RESOURCE_GROUP }}
+          containerAppName: ${{ env.CONTAINER_APP_NAME }}
+          imageToDeploy: ${{ env.REGISTRY_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          registryUrl: ${{ env.REGISTRY_NAME }}.azurecr.io
+          registryUsername: ${{ secrets.ACR_USERNAME }}
+          registryPassword: ${{ secrets.ACR_PASSWORD }}

@@ -1,0 +1,43 @@
+name: Deploy LMS Middleware to Azure Container Apps
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'lms-middleware/**'
+      - '.github/workflows/deploy-lms-middleware.yml'
+  workflow_dispatch:
+
+env:
+  REGISTRY_NAME: talentnationacr
+  IMAGE_NAME: lms-middleware
+  CONTAINER_APP_NAME: lms-middleware
+  RESOURCE_GROUP: talent-nation-rg
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Build and Push to ACR
+        run: |
+          az acr login --name ${{ env.REGISTRY_NAME }}
+          docker build -t ${{ env.REGISTRY_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }} ./lms-middleware
+          docker push ${{ env.REGISTRY_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+      - name: Deploy Container App
+        uses: azure/container-apps-deploy-action@v1
+        with:
+          resourceGroup: ${{ env.RESOURCE_GROUP }}
+          containerAppName: ${{ env.CONTAINER_APP_NAME }}
+          imageToDeploy: ${{ env.REGISTRY_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          registryUrl: ${{ env.REGISTRY_NAME }}.azurecr.io
+          registryUsername: ${{ secrets.ACR_USERNAME }}
+          registryPassword: ${{ secrets.ACR_PASSWORD }}
