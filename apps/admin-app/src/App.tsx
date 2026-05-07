@@ -400,7 +400,8 @@ function LoginPage() {
     setLoading(true);
     const form = new FormData(event.currentTarget);
     try {
-      const response = await fetch("/api/v1/auth/login", {
+      const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL || "/api/v1").replace(/\/$/, "");
+      const response = await fetch(`${apiBaseUrl}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
