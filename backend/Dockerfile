@@ -17,5 +17,5 @@ COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/prisma ./prisma
 EXPOSE 4000
 
-# Run Prisma migrations and then start the server
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/src/main.js"]
+# Run Prisma migrations, seed public launch data, and then start the server
+CMD ["sh", "-c", "npx prisma migrate deploy && node prisma/seed-public.js && node dist/src/main.js"]

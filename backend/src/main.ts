@@ -26,8 +26,9 @@ async function bootstrap() {
       const allowedOriginsConfig = configService.get<string>('FRONTEND_ORIGIN', 'http://localhost:5173');
       const allowedOrigins = allowedOriginsConfig.split(',').map(origin => origin.trim().replace(/\/$/, ''));
       const normalizedRequestOrigin = requestOrigin?.replace(/\/$/, '');
+      const isVercelDeployment = normalizedRequestOrigin?.endsWith('.vercel.app');
       
-      if (!normalizedRequestOrigin || allowedOrigins.includes(normalizedRequestOrigin)) {
+      if (!normalizedRequestOrigin || allowedOrigins.includes(normalizedRequestOrigin) || isVercelDeployment) {
         callback(null, true);
       } else {
         callback(new Error('Not allowed by CORS'));

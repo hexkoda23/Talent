@@ -14,7 +14,8 @@
     "db:down": "docker compose down",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "prisma:seed": "tsx prisma/seed.ts"
+    "prisma:seed": "tsx prisma/seed.ts",
+    "prisma:seed:public": "node prisma/seed-public.js"
   },
   "dependencies": {
     "@azure/storage-blob": "^12.31.0",
