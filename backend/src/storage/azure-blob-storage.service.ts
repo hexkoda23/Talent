@@ -7,7 +7,7 @@ import { randomUUID } from 'crypto';
 @Injectable()
 export class AzureBlobStorageService {
   private readonly logger = new Logger(AzureBlobStorageService.name);
-  private containerClient: ContainerClient;
+  private containerClient: ContainerClient | undefined;
   private isConfigured = false;
 
   constructor(private readonly configService: ConfigService) {
