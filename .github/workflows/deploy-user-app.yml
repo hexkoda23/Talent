@@ -3,7 +3,7 @@ name: Deploy User App to Azure Static Web Apps
 on:
   push:
     branches:
-      - main
+      - prod
     paths:
       - 'apps/user-app/**'
       - '.github/workflows/deploy-user-app.yml'

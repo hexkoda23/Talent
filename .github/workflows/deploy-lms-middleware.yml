@@ -3,7 +3,7 @@ name: Deploy LMS Middleware to Azure Container Apps
 on:
   push:
     branches:
-      - main
+      - prod
     paths:
       - 'lms-middleware/**'
       - '.github/workflows/deploy-lms-middleware.yml'

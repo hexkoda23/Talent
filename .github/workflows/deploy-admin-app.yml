@@ -3,7 +3,7 @@ name: Deploy Admin App to Azure Static Web Apps
 on:
   push:
     branches:
-      - main
+      - prod
     paths:
       - 'apps/admin-app/**'
       - '.github/workflows/deploy-admin-app.yml'
