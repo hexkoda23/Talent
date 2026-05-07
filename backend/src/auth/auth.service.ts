@@ -16,6 +16,7 @@ import { RegisterApplicantDto } from './dto/register-applicant.dto';
 import { LoginDto } from './dto/login.dto';
 import { AuthUser } from '../common/dto/auth-user.type';
 import { AzureBlobStorageService } from '../storage/azure-blob-storage.service';
+import { LocalStorageService } from '../storage/local-storage.service';
 
 type RegisterInputFiles = {
   schoolId: Express.Multer.File;
@@ -30,7 +31,8 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     @Optional() private readonly redisService: RedisService,
-    private readonly storageService: AzureBlobStorageService,
+    private readonly azureStorageService: AzureBlobStorageService,
+    private readonly localStorageService: LocalStorageService,
   ) {}
 
   async registerApplicant(currentUser: AuthUser, dto: RegisterApplicantDto, files: RegisterInputFiles) {
@@ -140,9 +142,9 @@ export class AuthService {
       });
 
       const uploadedFiles = await Promise.all([
-        this.storageService.saveRegistrationDocument(application.id, files.schoolId),
-        this.storageService.saveRegistrationDocument(application.id, files.profilePicture),
-        this.storageService.saveRegistrationDocument(application.id, files.governmentId),
+        this.registrationStorageService().saveRegistrationDocument(application.id, files.schoolId),
+        this.registrationStorageService().saveRegistrationDocument(application.id, files.profilePicture),
+        this.registrationStorageService().saveRegistrationDocument(application.id, files.governmentId),
       ]);
 
       const docRows: Array<{ type: RegistrationDocumentType; upload: { fileUrl: string; originalFilename: string } }> = [
@@ -419,6 +421,11 @@ export class AuthService {
 
   private hashToken(token: string): string {
     return createHash('sha256').update(token).digest('hex');
+  }
+
+  private registrationStorageService() {
+    const driver = this.configService.get<string>('REGISTRATION_STORAGE_DRIVER', 'local');
+    return driver === 'azure' ? this.azureStorageService : this.localStorageService;
   }
 
   private generatePlaceholderNin(): string {
