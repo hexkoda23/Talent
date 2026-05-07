@@ -42,10 +42,13 @@ jobs:
             --trigger-type "Manual" \
             --replica-timeout 600 \
             --replica-retry-limit 1 \
+            --registry-server ${{ env.REGISTRY_NAME }}.azurecr.io \
+            --registry-username ${{ secrets.ACR_USERNAME }} \
+            --registry-password ${{ secrets.ACR_PASSWORD }} \
             --command "npx" "prisma" "migrate" "deploy" \
             --env-vars "DATABASE_URL=secretref:database-url" \
             --secrets "database-url=${{ secrets.AZURE_POSTGRES_URL }}" || true
-            
+
           az containerapp job start \
             --name backend-migration \
             --resource-group ${{ env.RESOURCE_GROUP }}
